@@ -122,6 +122,8 @@ function assertSchedule(s: RenewalSchedule): void {
 export function nthRenewal(s: RenewalSchedule, k: number): IsoDate {
   assertSchedule(s);
   if (!Number.isInteger(k) || k < 0) throw new Error(`k phải là số nguyên ≥ 0, nhận ${k}`);
+  // Kỳ đầu tiên luôn đúng là startDate; anchorDay chỉ áp dụng từ kỳ thứ hai trở đi
+  if (k === 0) return s.startDate;
   const anchor = s.anchorDay ?? parse(s.startDate).d;
   switch (s.intervalUnit) {
     case 'DAY':

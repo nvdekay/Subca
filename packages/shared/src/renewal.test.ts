@@ -62,6 +62,13 @@ describe('ngày 31 → tháng 2 → quay lại 31', () => {
     expect(nthRenewal(shifted, 1)).toBe('2026-03-31');
     expect(nthRenewal(shifted, 2)).toBe('2026-04-30');
   });
+  it('kỳ đầu luôn là startDate kể cả khi anchorDay khác ngày bắt đầu', () => {
+    const s = monthly('2024-07-15', 31);
+    expect(nthRenewal(s, 0)).toBe('2024-07-15');
+    expect(nthRenewal(s, 1)).toBe('2024-08-31');
+    expect(nextRenewalOnOrAfter(s, '2024-07-20')).toBe('2024-08-31');
+    expect(previousRenewalBefore(s, '2024-07-20')).toBe('2024-07-15');
+  });
   it('ngày 30 và 29 cũng đúng', () => {
     expect(nthRenewal(monthly('2026-01-30'), 1)).toBe('2026-02-28');
     expect(nthRenewal(monthly('2026-01-30'), 2)).toBe('2026-03-30');
