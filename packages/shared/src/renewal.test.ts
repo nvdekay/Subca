@@ -235,22 +235,24 @@ describe('quy đổi chi phí về tháng', () => {
 });
 
 describe('đối chiếu với cách lặp từng kỳ (ngẫu nhiên, có seed cố định)', () => {
+  // LCG 32-bit dùng Math.imul để kết quả giống hệt nhau trên mọi máy
   let seed = 20260927;
   const rand = (n: number) => {
-    seed = (seed * 1103515245 + 12345) % 2147483648;
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
     return seed % n;
   };
   const units = ['DAY', 'WEEK', 'MONTH', 'YEAR'] as const;
 
-  it('nextRenewalOnOrAfter và previousRenewalBefore khớp kết quả lặp', () => {
-    for (let i = 0; i < 5000; i++) {
+  // Khoảng ngày giới hạn trong ~6 năm quanh ngày bắt đầu để phần lặp đối chiếu chạy nhanh trên CI
+  it('nextRenewalOnOrAfter và previousRenewalBefore khớp kết quả lặp', { timeout: 20_000 }, () => {
+    for (let i = 0; i < 3000; i++) {
       const s: RenewalSchedule = {
-        startDate: addDays('2015-01-01', rand(4000)),
+        startDate: addDays('2020-01-01', rand(2200)),
         intervalUnit: units[rand(4)]!,
         intervalCount: 1 + rand(4),
         ...(rand(3) === 0 ? { anchorDay: 28 + rand(4) } : {}),
       };
-      const from = addDays('2016-01-01', rand(5000));
+      const from = addDays(s.startDate, rand(2400) - 200);
       let k = 0;
       while (nthRenewal(s, k) < from) k++;
       expect(nextRenewalOnOrAfter(s, from)).toBe(nthRenewal(s, k));

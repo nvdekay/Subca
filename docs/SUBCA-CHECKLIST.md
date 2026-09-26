@@ -146,7 +146,7 @@
   - [x] Chu kỳ tuần / quý / năm / N tháng
   - [x] Trial: ngày hết hạn và ngày tính phí đầu tiên
   - [x] Múi giờ người dùng (kể cả múi giờ có giờ mùa hè)
-  - [x] Test đối chiếu ngẫu nhiên 5.000 trường hợp với cách lặp từng kỳ
+  - [x] Test đối chiếu ngẫu nhiên 3.000 trường hợp với cách lặp từng kỳ
 - [x] Schema zod + kiểu dữ liệu dùng chung cho mobile, API và admin (`packages/shared`)
 
 ### Pháp lý
