@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { createRemoteJWKSet } from 'jose';
 import type { Env } from '../config/env.js';
+import { AccountStatusService } from './account-status.service.js';
 import { AuthGuard } from './auth.guard.js';
 import { SupabaseJwtVerifier } from './supabase-jwt.verifier.js';
 
@@ -26,8 +27,9 @@ import { SupabaseJwtVerifier } from './supabase-jwt.verifier.js';
         return new SupabaseJwtVerifier(jwks, `${base}/auth/v1`);
       },
     },
+    AccountStatusService,
     { provide: APP_GUARD, useClass: AuthGuard },
   ],
-  exports: [SupabaseJwtVerifier],
+  exports: [SupabaseJwtVerifier, AccountStatusService],
 })
 export class AuthModule {}

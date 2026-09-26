@@ -2,9 +2,11 @@ import {
   type CanActivate,
   type ExecutionContext,
   Injectable,
+  ForbiddenException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { AccountStatusService } from './account-status.service.js';
 import type { AuthErrorCode, AuthUser } from './auth.types.js';
 import { IS_PUBLIC_KEY } from './public.decorator.js';
 import {
@@ -26,6 +28,7 @@ export class AuthGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly verifier: SupabaseJwtVerifier,
+    private readonly accountStatus: AccountStatusService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -45,6 +48,14 @@ export class AuthGuard implements CanActivate {
       if (error instanceof AuthTokenError)
         throw unauthorized(error.code, error.message);
       throw error;
+    }
+
+    if (await this.accountStatus.isBanned(request.user.id)) {
+      throw new ForbiddenException({
+        statusCode: 403,
+        code: 'ACCOUNT_BANNED',
+        message: 'Tài khoản đã bị khóa',
+      });
     }
     return true;
   }

@@ -5,6 +5,7 @@ import {
   type NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import { Test } from '@nestjs/testing';
+import { AccountStatusService } from '../src/auth/account-status.service.js';
 import { AuthGuard } from '../src/auth/auth.guard.js';
 import type { AuthUser } from '../src/auth/auth.types.js';
 import { CurrentUser } from '../src/auth/current-user.decorator.js';
@@ -26,6 +27,7 @@ class WhoAmIController {
 describe('Xác thực (e2e, Fastify)', () => {
   let app: NestFastifyApplication;
   let sign: Awaited<ReturnType<typeof createTestAuth>>['sign'];
+  const accountStatus = { isBanned: vi.fn().mockResolvedValue(false) };
   const prisma = {
     $queryRaw: vi.fn().mockResolvedValue([]),
     profile: {
@@ -43,6 +45,7 @@ describe('Xác thực (e2e, Fastify)', () => {
         MeService,
         { provide: PrismaService, useValue: prisma },
         { provide: SupabaseJwtVerifier, useValue: auth.verifier },
+        { provide: AccountStatusService, useValue: accountStatus },
         { provide: APP_GUARD, useClass: AuthGuard },
       ],
     }).compile();
@@ -113,6 +116,14 @@ describe('Xác thực (e2e, Fastify)', () => {
       id: TEST_USER_ID,
       email: 'khanh@subca.app',
     });
+  });
+
+  it('tài khoản bị khóa → 403 ACCOUNT_BANNED ở mọi endpoint', async () => {
+    accountStatus.isBanned.mockResolvedValueOnce(true);
+    const res = await get('/whoami', await sign());
+    expect(res.statusCode).toBe(403);
+    expect(res.json()).toMatchObject({ code: 'ACCOUNT_BANNED' });
+    expect(accountStatus.isBanned).toHaveBeenCalledWith(TEST_USER_ID);
   });
 
   it('GET /me trả về hồ sơ và gói Free', async () => {
