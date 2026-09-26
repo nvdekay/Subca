@@ -2,6 +2,18 @@
 
 > Cập nhật: 27/09/2026 · Đánh dấu `[x]` khi xong.
 > File liên quan: `design/subca-mobile-mockup.html` (app), `design/subca-admin-dashboard.html` (admin).
+> Repo: https://github.com/nvdekay/Subca (nhánh `main`, CI xanh).
+
+### Hiện trạng (27/09/2026)
+
+- **Xong:** mockup app + admin; monorepo (Expo SDK 57, NestJS 12 + Fastify, Next.js 16, Prisma 7.10, TypeScript 6.0); schema Prisma v1 (26 bảng); migration + RLS + trigger auth **đã chạy trên Supabase dev**; API kết nối DB qua pooler (`/health` → `db: up`); CI GitHub Actions.
+- **Đang ở:** Giai đoạn 0 (chuẩn bị).
+- **Việc tiếp theo:**
+  1. **Đổi mật khẩu database Supabase** (đã lộ trong chat) và cập nhật `apps/api/.env`
+  2. Quyết định có chuyển project dev sang Singapore không (hiện ở Tokyo)
+  3. Bộ tính ngày gia hạn + unit test (`packages/shared`)
+  4. Seed danh mục + thư viện dịch vụ
+  5. Đăng ký Apple Developer / Google Play (khâu chờ lâu)
 
 ---
 
@@ -33,15 +45,15 @@
 > Đã so sánh Native (Swift + Kotlin), Flutter và React Native. **Chọn React Native + Expo** vì: 1 codebase cho iOS + Android, 1 dev mobile là đủ, cùng TypeScript với backend/admin (dùng chung kiểu dữ liệu, zod, logic), sửa lỗi không cần chờ store duyệt (EAS Update). Subca không có phần xử lý nặng nên không cần native. Phần bắt buộc native (widget, Live Activity, đọc SMS ngân hàng) viết bằng Swift/Kotlin qua Expo Modules khi cần.
 
 **Mobile**
-- [ ] **React Native + Expo** (SDK mới nhất, New Architecture), TypeScript chế độ strict
-- [ ] Điều hướng: **Expo Router** (điều hướng theo file, deep link sẵn)
+- [x] **React Native + Expo** (SDK 57, React Native 0.86, New Architecture), TypeScript chế độ strict
+- [x] Điều hướng: **Expo Router** (điều hướng theo file, deep link sẵn)
 - [ ] Gọi API + cache: **TanStack Query** (có lưu cache xuống máy)
 - [ ] State cục bộ: **Zustand**
 - [ ] Form: **react-hook-form + zod** (dùng chung schema với backend)
-- [ ] Giao diện: **NativeWind** (Tailwind cho React Native) + **Reanimated** + Gesture Handler
+- [ ] Giao diện: **NativeWind** (Tailwind cho React Native) + **Reanimated** + Gesture Handler _(Reanimated, Gesture Handler đã có sẵn từ template; NativeWind chưa cài)_
 - [ ] Danh sách dài: **FlashList**
 - [ ] Biểu đồ: **Victory Native** (vẽ bằng Skia)
-- [ ] Ảnh/logo: **expo-image** (có cache); logo dịch vụ dạng SVG (`react-native-svg`)
+- [ ] Ảnh/logo: **expo-image** (có cache); logo dịch vụ dạng SVG (`react-native-svg`) _(expo-image đã có; react-native-svg chưa cài)_
 - [ ] Lưu dữ liệu trên máy: **MMKV** (nhanh) cho cache/cài đặt, **expo-secure-store** cho token
 - [ ] Đăng nhập: `@supabase/supabase-js` + `expo-apple-authentication` + `@react-native-google-signin/google-signin`
 - [ ] Mua trong app: **RevenueCat** (`react-native-purchases`)
@@ -51,19 +63,20 @@
 
 **Backend & hạ tầng**
 - [ ] **Push:** Expo Push Service (gửi cho cả iOS và Android qua 1 API); sau có thể chuyển sang FCM/APNs trực tiếp
-- [ ] **Backend:** NestJS **chạy trên Fastify** (thay Express mặc định) + Prisma (kết nối tới Postgres của Supabase)
+- [x] **Backend:** NestJS 12 **chạy trên Fastify** (thay Express mặc định) + Prisma 7.10 với `@prisma/adapter-pg` (kết nối tới Postgres của Supabase)
   - Đã cân nhắc Go: không chọn, vì ở quy mô Subca phần xử lý của backend chỉ tốn vài ms trên tổng 50–100 ms người dùng chờ; giữ TypeScript để mobile, backend và admin dùng chung kiểu dữ liệu, zod và logic
   - Xem lại khi có phần xử lý nặng (ví dụ đọc hàng triệu email hóa đơn): có thể tách riêng service đó sang Go
 - [ ] **Tác vụ nền:** BullMQ + Redis
 - [ ] **Đăng nhập:** **Supabase Auth** (Apple, Google, email OTP); NestJS xác minh JWT của Supabase ở mọi request
-- [ ] **Database:** **Supabase** (PostgreSQL), khu vực Singapore (`ap-southeast-1`), gói Pro cho production (gói Free tự tạm dừng khi không hoạt động, không có backup hằng ngày)
-- [ ] **Admin:** Next.js + shadcn/ui (Vercel)
+- [x] **Database:** **Supabase** (PostgreSQL 17), gói Pro cho production (gói Free tự tạm dừng khi không hoạt động, không có backup hằng ngày)
+  - Project dev hiện ở **Tokyo (`ap-northeast-1`)**; project production phải chọn **Singapore (`ap-southeast-1`)**
+- [ ] **Admin:** Next.js + shadcn/ui (Vercel) _(Next.js 16 + Tailwind 4 đã khởi tạo; shadcn/ui và Vercel chưa làm)_
 - [ ] **Phân tích sản phẩm / feature flag / A/B:** PostHog
 - [ ] **Theo dõi lỗi:** Sentry (`@sentry/react-native` + API)
 - [ ] **Email:** Resend (kiêm SMTP riêng cho Supabase Auth) · **Lưu file:** Supabase Storage
 - [ ] **Hosting API:** Railway / Render / Fly.io, khu vực Singapore (cùng khu vực với Supabase)
-- [ ] **Repo:** Turborepo + pnpm (`apps/mobile`, `apps/api`, `apps/admin`, `packages/shared`)
-- [ ] **CI/CD:** GitHub Actions + EAS Build / Submit / Update
+- [x] **Repo:** Turborepo + pnpm 11 (`apps/mobile`, `apps/api`, `apps/admin`, `packages/shared`), GitHub `nvdekay/Subca`
+- [ ] **CI/CD:** GitHub Actions + EAS Build / Submit / Update _(CI GitHub Actions đã chạy: build, typecheck, test, lint, prisma validate; EAS chưa cấu hình)_
 
 ---
 
@@ -76,7 +89,7 @@
 - [ ] Logo dịch vụ đóng gói sẵn dạng SVG trong app; ảnh từ mạng qua `expo-image` (cache đĩa)
 - [ ] Giữ bundle JS gọn: lazy load màn ít dùng, bật Hermes (mặc định), theo dõi kích thước bundle mỗi bản build
 - [ ] Đo thời gian mở app (cold start) và FPS trên **máy Android tầm trung** (không chỉ test trên iPhone đời mới)
-- [ ] **API đặt cùng khu vực Singapore với Supabase** (lệch khu vực có thể tốn thêm khoảng 200 ms mỗi truy vấn)
+- [ ] **API đặt cùng khu vực với Supabase** (production: Singapore; lệch khu vực có thể tốn thêm khoảng 200 ms mỗi truy vấn)
 - [ ] **Index database** ngay trong migration đầu tiên:
   - [x] `subscriptions (user_id, status)`
   - [x] `subscriptions (next_renewal_date)`
@@ -99,7 +112,9 @@
 - [ ] **Apple Developer** (99 USD/năm), nếu đăng ký dưới tên công ty thì cần số D-U-N-S (1–2 tuần)
 - [ ] Google Play Console (25 USD)
 - [ ] RevenueCat
-- [ ] Supabase: tạo 2 project riêng (staging + production)
+- [ ] Supabase: tạo 2 project riêng (staging + production) _(đã có project dev/staging `lvnjhgmjmgxonbmsvtag` ở Tokyo; chưa có production)_
+- [ ] **Đổi mật khẩu database Supabase** (mật khẩu hiện tại đã bị gửi qua chat) và cập nhật `apps/api/.env`
+- [x] GitHub repo `nvdekay/Subca`
 - [ ] Sentry
 - [ ] PostHog
 - [ ] Tên miền `subca.app` + email tên miền
@@ -114,11 +129,15 @@
 - [ ] 3 môi trường: dev / staging / prod, quản lý biến môi trường và secrets
 
 ### Dữ liệu & logic lõi
+- [x] Kết nối Supabase dev: `apps/api/.env` (DATABASE_URL pooler 6543 + DIRECT_URL 5432), `prisma migrate deploy` đã chạy 2 migration
+- [x] Kiểm tra trên Supabase: 26/26 bảng bật RLS, 2 trigger trên `auth.users`, `anon`/`authenticated` không có quyền đọc, API `/health` → `db: up`
+- [ ] Test trigger đăng ký thật: tạo user ở Authentication → Users, kiểm tra profile + settings + 4 quy tắc nhắc mặc định, xóa user kiểm tra dọn dữ liệu
 - [x] Schema Prisma v1 (xem mục I)
 - [x] Cấu hình Prisma cho Supabase: `DATABASE_URL` dùng connection pooler (Supavisor, cổng 6543, `pgbouncer=true`) cho API; `DIRECT_URL` (cổng 5432) cho migration
 - [x] Bảng `profiles` liên kết `auth.users(id)`, tự tạo bằng trigger khi người dùng đăng ký
 - [x] **Bật Row Level Security (RLS) cho mọi bảng trong schema `public`**, mặc định không có policy → app dùng anon key không đọc/ghi thẳng được DB; mọi truy cập đi qua NestJS
-- [ ] Không bao giờ đưa `service_role` key vào app mobile hay admin phía trình duyệt, chỉ dùng ở backend
+- [ ] Không bao giờ đưa `service_role` key vào app mobile hay admin phía trình duyệt, chỉ dùng ở backend _(quy tắc áp dụng suốt dự án)_
+- [ ] Seed dữ liệu: danh mục hệ thống + thư viện dịch vụ phổ biến (logo, giá, hướng dẫn hủy)
 - [ ] Bộ tính ngày gia hạn trong `packages/shared` (server là nguồn chính; app dùng cùng hàm để xem trước khi nhập liệu), có unit test cho các trường hợp:
   - [ ] Ngày 31 → tháng 2 (28/29) → quay lại 31
   - [ ] Năm nhuận
@@ -257,6 +276,8 @@
 
 ## J. Rủi ro cần theo dõi
 
+- [ ] Mật khẩu database dev đã lộ qua chat → đổi mật khẩu (xem mục D)
+- [ ] `pnpm` trên máy dev đôi khi treo sau khi chạy xong (chờ mạng) → dùng `pnpm exec turbo …` hoặc `./node_modules/.bin/turbo`
 - [ ] Quên bật RLS ở bảng mới → thêm bước kiểm tra RLS vào CI / checklist review migration
 - [ ] Hết kết nối DB khi API scale → luôn dùng connection pooler của Supabase
 - [ ] Backup: bật backup hằng ngày (gói Pro), cân nhắc Point-in-Time Recovery khi có doanh thu
