@@ -6,14 +6,14 @@
 
 ### Hiện trạng (27/09/2026)
 
-- **Xong:** mockup app + admin; monorepo (Expo SDK 57, NestJS 12 + Fastify, Next.js 16, Prisma 7.10, TypeScript 6.0); schema Prisma v1 (26 bảng); migration + RLS + trigger auth **đã chạy trên Supabase dev**; API kết nối DB qua pooler (`/health` → `db: up`); CI GitHub Actions.
+- **Xong:** mockup app + admin; bộ tính ngày gia hạn (37 test); seed 53 dịch vụ lên Supabase dev; monorepo (Expo SDK 57, NestJS 12 + Fastify, Next.js 16, Prisma 7.10, TypeScript 6.0); schema Prisma v1 (26 bảng); migration + RLS + trigger auth **đã chạy trên Supabase dev**; API kết nối DB qua pooler (`/health` → `db: up`); CI GitHub Actions.
 - **Đang ở:** Giai đoạn 0 (chuẩn bị).
 - **Việc tiếp theo:**
   1. **Đổi mật khẩu database Supabase** (đã lộ trong chat) và cập nhật `apps/api/.env`
   2. Quyết định có chuyển project dev sang Singapore không (hiện ở Tokyo)
-  3. Bộ tính ngày gia hạn + unit test (`packages/shared`)
-  4. Seed danh mục + thư viện dịch vụ
-  5. Đăng ký Apple Developer / Google Play (khâu chờ lâu)
+  3. Đăng ký Apple Developer / Google Play (khâu chờ lâu)
+  4. Xác minh giá gói trong seed
+  5. Bắt đầu Giai đoạn 1: đăng nhập Supabase Auth (API guard + app)
 
 ---
 
@@ -137,13 +137,16 @@
 - [x] Bảng `profiles` liên kết `auth.users(id)`, tự tạo bằng trigger khi người dùng đăng ký
 - [x] **Bật Row Level Security (RLS) cho mọi bảng trong schema `public`**, mặc định không có policy → app dùng anon key không đọc/ghi thẳng được DB; mọi truy cập đi qua NestJS
 - [ ] Không bao giờ đưa `service_role` key vào app mobile hay admin phía trình duyệt, chỉ dùng ở backend _(quy tắc áp dụng suốt dự án)_
-- [ ] Seed dữ liệu: danh mục hệ thống + thư viện dịch vụ phổ biến (logo, giá, hướng dẫn hủy)
-- [ ] Bộ tính ngày gia hạn trong `packages/shared` (server là nguồn chính; app dùng cùng hàm để xem trước khi nhập liệu), có unit test cho các trường hợp:
-  - [ ] Ngày 31 → tháng 2 (28/29) → quay lại 31
-  - [ ] Năm nhuận
-  - [ ] Chu kỳ tuần / quý / năm / N tháng
-  - [ ] Trial: ngày hết hạn và ngày tính phí đầu tiên
-  - [ ] Múi giờ người dùng
+- [x] Seed dữ liệu đợt 1 (`pnpm --filter @subca/api prisma:seed`, chạy lại không tạo trùng): 11 danh mục hệ thống, 53 dịch vụ, 15 gói, 2 feature flag — đã chạy trên Supabase dev
+- [ ] **Xác minh giá các gói trong seed** với trang chính thức (hiện là giá tham khảo)
+- [ ] Mở rộng thư viện lên khoảng 200 dịch vụ + bổ sung link/hướng dẫn hủy
+- [x] Bộ tính ngày gia hạn trong `packages/shared/src/renewal.ts` (server là nguồn chính; app dùng cùng hàm để xem trước khi nhập liệu), có unit test cho các trường hợp:
+  - [x] Ngày 31 → tháng 2 (28/29) → quay lại 31
+  - [x] Năm nhuận
+  - [x] Chu kỳ tuần / quý / năm / N tháng
+  - [x] Trial: ngày hết hạn và ngày tính phí đầu tiên
+  - [x] Múi giờ người dùng (kể cả múi giờ có giờ mùa hè)
+  - [x] Test đối chiếu ngẫu nhiên 5.000 trường hợp với cách lặp từng kỳ
 - [x] Schema zod + kiểu dữ liệu dùng chung cho mobile, API và admin (`packages/shared`)
 
 ### Pháp lý
@@ -277,7 +280,7 @@
 ## J. Rủi ro cần theo dõi
 
 - [ ] Mật khẩu database dev đã lộ qua chat → đổi mật khẩu (xem mục D)
-- [ ] `pnpm` trên máy dev đôi khi treo sau khi chạy xong (chờ mạng) → dùng `pnpm exec turbo …` hoặc `./node_modules/.bin/turbo`
+- [x] `pnpm` bị treo khi turbo chạy song song: nguyên nhân là `pnpm run` tự chạy `pnpm install` cùng lúc → đã tắt bằng `verifyDepsBeforeRun: warn`; sau khi đổi dependency nhớ chạy `pnpm install` thủ công
 - [ ] Quên bật RLS ở bảng mới → thêm bước kiểm tra RLS vào CI / checklist review migration
 - [ ] Hết kết nối DB khi API scale → luôn dùng connection pooler của Supabase
 - [ ] Backup: bật backup hằng ngày (gói Pro), cân nhắc Point-in-Time Recovery khi có doanh thu
