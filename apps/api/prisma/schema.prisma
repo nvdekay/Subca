@@ -1,0 +1,744 @@
+// Subca — Prisma schema v1
+// Database: Supabase (PostgreSQL). Kết nối cấu hình trong prisma.config.ts.
+//
+// Quy ước:
+// - Tiền: BigInt theo đơn vị nhỏ nhất (VND: đồng, USD: cent) + mã tiền tệ 3 ký tự. Không dùng float.
+// - Chu kỳ: intervalUnit + intervalCount (VD: 3 tháng = MONTH x 3).
+// - anchorDay: ngày gốc trong tháng (1–31) để gói ngày 31 quay lại đúng ngày 31 sau tháng 2.
+// - Ngày không có giờ dùng @db.Date. Mốc thời gian dùng timestamptz.
+// - Bảng/cột đặt tên snake_case trong DB (@@map / @map) cho dễ truy vấn trên Supabase.
+// - Enum ở đây PHẢI khớp packages/shared/src/enums.ts.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIAL
+  REVIEW
+  CANCELLED
+  ARCHIVED
+}
+
+enum IntervalUnit {
+  DAY
+  WEEK
+  MONTH
+  YEAR
+}
+
+enum UsageFrequency {
+  NEVER
+  RARELY
+  SOMETIMES
+  WEEKLY
+  SEVERAL_PER_WEEK
+  DAILY
+}
+
+enum PaymentMethodType {
+  CARD
+  PAYPAL
+  APP_STORE
+  GOOGLE_PLAY
+  E_WALLET
+  BANK_TRANSFER
+  OTHER
+}
+
+enum Platform {
+  IOS
+  ANDROID
+  WEB
+}
+
+enum ReminderKind {
+  RENEWAL
+  TRIAL_END
+}
+
+enum ReminderStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+enum ReviewDecision {
+  KEEP
+  REVIEW
+  CANCEL
+}
+
+enum SplitMode {
+  EQUAL
+  CUSTOM
+}
+
+enum GroupRole {
+  OWNER
+  MEMBER
+}
+
+enum GroupMemberStatus {
+  INVITED
+  ACTIVE
+  LEFT
+}
+
+enum GroupPaymentStatus {
+  PENDING
+  CLAIMED_PAID // thành viên báo "Tôi đã chuyển", chờ chủ nhóm xác nhận
+  CONFIRMED
+  WAIVED
+}
+
+enum PlusProduct {
+  PLUS_MONTHLY
+  PLUS_YEARLY
+  PLUS_LIFETIME
+}
+
+enum Store {
+  APP_STORE
+  PLAY_STORE
+  WEB
+  PROMO
+}
+
+enum EntitlementStatus {
+  TRIAL
+  ACTIVE
+  GRACE_PERIOD
+  BILLING_ISSUE
+  EXPIRED
+}
+
+enum PriceReportStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PromoType {
+  PERCENT_OFF
+  AMOUNT_OFF
+  FREE_DAYS
+}
+
+enum AdminRole {
+  OWNER
+  ADMIN
+  SUPPORT
+  MARKETING
+  VIEWER
+}
+
+enum AuditActorType {
+  ADMIN
+  SYSTEM
+}
+
+enum AuditSeverity {
+  INFO
+  SENSITIVE
+  CRITICAL
+}
+
+// ─────────────────────────────────────────────
+// Người dùng
+// ─────────────────────────────────────────────
+
+/// Hồ sơ người dùng. id = auth.users.id của Supabase (tạo bằng trigger, xem migration rls_and_auth).
+model Profile {
+  id           String    @id @db.Uuid
+  email        String?
+  displayName  String?   @map("display_name")
+  avatarUrl    String?   @map("avatar_url")
+  referralCode String    @unique @default(dbgenerated("upper(substr(md5(random()::text), 1, 8))")) @map("referral_code")
+  referredById String?   @map("referred_by_id") @db.Uuid
+  bannedAt     DateTime? @map("banned_at") @db.Timestamptz(6)
+  banReason    String?   @map("ban_reason")
+  lastActiveAt DateTime? @map("last_active_at") @db.Timestamptz(6)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  referredBy Profile?  @relation("Referral", fields: [referredById], references: [id], onDelete: SetNull)
+  referrals  Profile[] @relation("Referral")
+
+  settings         UserSettings?
+  budget           Budget?
+  pushTokens       PushToken[]
+  paymentMethods   PaymentMethod[]
+  categories       Category[]
+  subscriptions    Subscription[]
+  renewalCharges   RenewalCharge[]
+  reminders        Reminder[]
+  reminderRules    ReminderRule[]
+  monthlyReviews   MonthlyReview[]
+  ownedGroups      Group[]           @relation("GroupOwner")
+  groupMemberships GroupMember[]
+  entitlements     Entitlement[]
+  billingEvents    BillingEvent[]
+  priceReports     PriceReport[]
+  promoRedemptions PromoRedemption[]
+
+  @@map("profiles")
+}
+
+model UserSettings {
+  userId               String   @id @map("user_id") @db.Uuid
+  currency             String   @default("VND") @db.Char(3)
+  timezone             String   @default("Asia/Ho_Chi_Minh")
+  locale               String   @default("vi-VN")
+  /// Giờ nhận nhắc nhở, tính bằng phút từ 00:00 theo múi giờ người dùng (510 = 08:30).
+  reminderMinuteOfDay  Int      @default(510) @map("reminder_minute_of_day") @db.SmallInt
+  notificationsEnabled Boolean  @default(true) @map("notifications_enabled")
+  marketingOptIn       Boolean  @default(false) @map("marketing_opt_in")
+  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
+
+model Budget {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  userId         String   @unique @map("user_id") @db.Uuid
+  amountMinor    BigInt   @map("amount_minor")
+  currency       String   @default("VND") @db.Char(3)
+  /// Cảnh báo khi chi tiêu vượt X% hạn mức.
+  alertAtPercent Int      @default(90) @map("alert_at_percent") @db.SmallInt
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("budgets")
+}
+
+model PushToken {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  /// Expo push token (ExponentPushToken[...]).
+  token      String   @unique
+  platform   Platform
+  deviceName String?  @map("device_name")
+  appVersion String?  @map("app_version")
+  lastSeenAt DateTime @default(now()) @map("last_seen_at") @db.Timestamptz(6)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_tokens")
+}
+
+/// Chỉ lưu thông tin nhận diện. KHÔNG BAO GIỜ lưu số thẻ đầy đủ hay CVV.
+model PaymentMethod {
+  id         String            @id @default(uuid(7)) @db.Uuid
+  userId     String            @map("user_id") @db.Uuid
+  type       PaymentMethodType
+  /// VD: VISA, MASTERCARD, MOMO, ZALOPAY.
+  brand      String?
+  label      String
+  last4      String?           @db.Char(4)
+  isDefault  Boolean           @default(false) @map("is_default")
+  archivedAt DateTime?         @map("archived_at") @db.Timestamptz(6)
+  createdAt  DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user          Profile        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscriptions Subscription[]
+
+  @@index([userId])
+  @@map("payment_methods")
+}
+
+/// userId = null là danh mục hệ thống; có userId là danh mục người dùng tự tạo.
+model Category {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+  slug      String
+  name      String
+  icon      String?
+  color     String?  @db.VarChar(9)
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user          Profile?       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  services      Service[]
+  subscriptions Subscription[]
+
+  @@unique([userId, slug])
+  @@map("categories")
+}
+
+// ─────────────────────────────────────────────
+// Thư viện dịch vụ (Netflix, Spotify, ...)
+// ─────────────────────────────────────────────
+
+model Service {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  slug        String   @unique
+  name        String
+  categoryId  String?  @map("category_id") @db.Uuid
+  /// Khóa logo (slug Simple Icons hoặc file trong Storage).
+  logoKey     String?  @map("logo_key")
+  brandColor  String?  @map("brand_color") @db.VarChar(9)
+  website     String?
+  cancelUrl   String?  @map("cancel_url")
+  /// Các bước hủy gói, dạng mảng chuỗi JSON.
+  cancelSteps Json?    @map("cancel_steps")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  category      Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  plans         ServicePlan[]
+  subscriptions Subscription[]
+  priceReports  PriceReport[]
+
+  @@index([name])
+  @@map("services")
+}
+
+model ServicePlan {
+  id            String       @id @default(uuid(7)) @db.Uuid
+  serviceId     String       @map("service_id") @db.Uuid
+  name          String
+  amountMinor   BigInt       @map("amount_minor")
+  currency      String       @default("VND") @db.Char(3)
+  intervalUnit  IntervalUnit @map("interval_unit")
+  intervalCount Int          @default(1) @map("interval_count") @db.SmallInt
+  region        String       @default("VN") @db.Char(2)
+  isFamily      Boolean      @default(false) @map("is_family")
+  maxMembers    Int?         @map("max_members") @db.SmallInt
+  isActive      Boolean      @default(true) @map("is_active")
+  updatedAt     DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  service       Service        @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  subscriptions Subscription[]
+  priceReports  PriceReport[]
+
+  @@unique([serviceId, name, region])
+  @@map("service_plans")
+}
+
+/// Người dùng báo giá dịch vụ thay đổi → admin duyệt ở trang Thư viện dịch vụ.
+model PriceReport {
+  id                  String            @id @default(uuid(7)) @db.Uuid
+  userId              String?           @map("user_id") @db.Uuid
+  serviceId           String            @map("service_id") @db.Uuid
+  servicePlanId       String?           @map("service_plan_id") @db.Uuid
+  reportedAmountMinor BigInt            @map("reported_amount_minor")
+  currency            String            @default("VND") @db.Char(3)
+  note                String?
+  status              PriceReportStatus @default(PENDING)
+  reviewedById        String?           @map("reviewed_by_id") @db.Uuid
+  reviewedAt          DateTime?         @map("reviewed_at") @db.Timestamptz(6)
+  createdAt           DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user        Profile?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  service     Service      @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  servicePlan ServicePlan? @relation(fields: [servicePlanId], references: [id], onDelete: SetNull)
+  reviewedBy  AdminUser?   @relation(fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@map("price_reports")
+}
+
+// ─────────────────────────────────────────────
+// Subscription & nhắc nhở
+// ─────────────────────────────────────────────
+
+model Subscription {
+  id              String             @id @default(uuid(7)) @db.Uuid
+  userId          String             @map("user_id") @db.Uuid
+  /// Dịch vụ trong thư viện; null nếu người dùng tự nhập tên.
+  serviceId       String?            @map("service_id") @db.Uuid
+  servicePlanId   String?            @map("service_plan_id") @db.Uuid
+  customName      String?            @map("custom_name")
+  planName        String?            @map("plan_name")
+  amountMinor     BigInt             @map("amount_minor")
+  currency        String             @default("VND") @db.Char(3)
+  intervalUnit    IntervalUnit       @default(MONTH) @map("interval_unit")
+  intervalCount   Int                @default(1) @map("interval_count") @db.SmallInt
+  /// Ngày gốc trong tháng (1–31), dùng khi tính kỳ tiếp theo cho gói theo tháng/năm.
+  anchorDay       Int?               @map("anchor_day") @db.SmallInt
+  startDate       DateTime           @map("start_date") @db.Date
+  nextRenewalDate DateTime?          @map("next_renewal_date") @db.Date
+  trialEndDate    DateTime?          @map("trial_end_date") @db.Date
+  status          SubscriptionStatus @default(ACTIVE)
+  autoRenew       Boolean            @default(true) @map("auto_renew")
+  paymentMethodId String?            @map("payment_method_id") @db.Uuid
+  categoryId      String?            @map("category_id") @db.Uuid
+  usageFrequency  UsageFrequency?    @map("usage_frequency")
+  /// Số ngày nhắc trước, ghi đè quy tắc chung của người dùng (VD [7, 1]). Rỗng = dùng quy tắc chung.
+  reminderOffsets Int[]              @default([]) @map("reminder_offsets")
+  notes           String?
+  cancelledAt     DateTime?          @map("cancelled_at") @db.Timestamptz(6)
+  archivedAt      DateTime?          @map("archived_at") @db.Timestamptz(6)
+  createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user           Profile         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  service        Service?        @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  servicePlan    ServicePlan?    @relation(fields: [servicePlanId], references: [id], onDelete: SetNull)
+  paymentMethod  PaymentMethod?  @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
+  category       Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  renewalCharges RenewalCharge[]
+  reminders      Reminder[]
+  monthlyReviews MonthlyReview[]
+  group          Group?
+
+  @@index([userId, status])
+  @@index([nextRenewalDate])
+  @@index([trialEndDate])
+  @@map("subscriptions")
+}
+
+/// Lịch sử các lần gia hạn / bị trừ tiền.
+model RenewalCharge {
+  id                      String   @id @default(uuid(7)) @db.Uuid
+  subscriptionId          String   @map("subscription_id") @db.Uuid
+  userId                  String   @map("user_id") @db.Uuid
+  chargedOn               DateTime @map("charged_on") @db.Date
+  amountMinor             BigInt   @map("amount_minor")
+  currency                String   @db.Char(3)
+  /// Số tiền quy đổi sang tiền tệ chính của người dùng tại thời điểm trừ (phục vụ phân tích).
+  amountUserCurrencyMinor BigInt?  @map("amount_user_currency_minor")
+  createdAt               DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  user         Profile      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([subscriptionId, chargedOn])
+  @@index([userId, chargedOn])
+  @@map("renewal_charges")
+}
+
+/// Quy tắc nhắc chung của người dùng (VD: nhắc trước 7 ngày và 1 ngày cho mọi gói).
+model ReminderRule {
+  id             String        @id @default(uuid(7)) @db.Uuid
+  userId         String        @map("user_id") @db.Uuid
+  kind           ReminderKind
+  offsetDays     Int           @map("offset_days") @db.SmallInt
+  /// Chỉ áp dụng cho gói có chu kỳ ≥ đơn vị này (VD: nhắc 30 ngày chỉ cho gói năm).
+  minInterval    IntervalUnit? @map("min_interval")
+  /// Chỉ áp dụng cho khoản ≥ số tiền này (theo tiền tệ chính của người dùng).
+  minAmountMinor BigInt?       @map("min_amount_minor")
+  enabled        Boolean       @default(true)
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, kind, offsetDays])
+  @@map("reminder_rules")
+}
+
+/// Từng lần nhắc đã được sinh ra. Khóa unique đảm bảo cron chạy lại không gửi trùng.
+model Reminder {
+  id             String         @id @default(uuid(7)) @db.Uuid
+  userId         String         @map("user_id") @db.Uuid
+  subscriptionId String         @map("subscription_id") @db.Uuid
+  kind           ReminderKind
+  offsetDays     Int            @map("offset_days") @db.SmallInt
+  /// Ngày gia hạn / hết trial mà lần nhắc này hướng tới.
+  dueDate        DateTime       @map("due_date") @db.Date
+  /// Thời điểm gửi (đã tính theo múi giờ + giờ nhắc của người dùng).
+  scheduledAt    DateTime       @map("scheduled_at") @db.Timestamptz(6)
+  status         ReminderStatus @default(PENDING)
+  pushTicketId   String?        @map("push_ticket_id")
+  error          String?
+  sentAt         DateTime?      @map("sent_at") @db.Timestamptz(6)
+  openedAt       DateTime?      @map("opened_at") @db.Timestamptz(6)
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user         Profile      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@unique([subscriptionId, kind, offsetDays, dueDate])
+  @@index([status, scheduledAt])
+  @@index([userId, scheduledAt])
+  @@map("reminders")
+}
+
+/// Quyết định trong "Đánh giá hằng tháng". period = ngày đầu tháng.
+model MonthlyReview {
+  id             String         @id @default(uuid(7)) @db.Uuid
+  userId         String         @map("user_id") @db.Uuid
+  subscriptionId String         @map("subscription_id") @db.Uuid
+  period         DateTime       @db.Date
+  decision       ReviewDecision
+  decidedAt      DateTime       @default(now()) @map("decided_at") @db.Timestamptz(6)
+
+  user         Profile      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@unique([subscriptionId, period])
+  @@index([userId, period])
+  @@map("monthly_reviews")
+}
+
+// ─────────────────────────────────────────────
+// Chia tiền nhóm
+// ─────────────────────────────────────────────
+
+model Group {
+  id                String    @id @default(uuid(7)) @db.Uuid
+  ownerId           String    @map("owner_id") @db.Uuid
+  /// Subscription của chủ nhóm mà nhóm đang chia (nếu có).
+  subscriptionId    String?   @unique @map("subscription_id") @db.Uuid
+  name              String
+  totalAmountMinor  BigInt    @map("total_amount_minor")
+  currency          String    @default("VND") @db.Char(3)
+  splitMode         SplitMode @default(EQUAL) @map("split_mode")
+  /// Hạn chuyển tiền mỗi kỳ (ngày trong tháng).
+  dueDay            Int       @map("due_day") @db.SmallInt
+  maxMembers        Int       @default(6) @map("max_members") @db.SmallInt
+  inviteCode        String    @unique @map("invite_code")
+  /// Thông tin nhận tiền để sinh mã VietQR. bankBin theo danh sách NAPAS.
+  payoutBankBin     String?   @map("payout_bank_bin")
+  payoutBankName    String?   @map("payout_bank_name")
+  payoutAccountNo   String?   @map("payout_account_no")
+  payoutAccountName String?   @map("payout_account_name")
+  archivedAt        DateTime? @map("archived_at") @db.Timestamptz(6)
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  owner        Profile        @relation("GroupOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  subscription Subscription?  @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  members      GroupMember[]
+  cycles       GroupCycle[]
+  payments     GroupPayment[]
+
+  @@index([ownerId])
+  @@map("groups")
+}
+
+model GroupMember {
+  id               String            @id @default(uuid(7)) @db.Uuid
+  groupId          String            @map("group_id") @db.Uuid
+  /// null khi đã mời nhưng người đó chưa tham gia / chưa có tài khoản.
+  userId           String?           @map("user_id") @db.Uuid
+  displayName      String            @map("display_name")
+  role             GroupRole         @default(MEMBER)
+  status           GroupMemberStatus @default(INVITED)
+  /// Số tiền riêng khi nhóm chia tùy chỉnh; null = chia đều.
+  customShareMinor BigInt?           @map("custom_share_minor")
+  invitedAt        DateTime          @default(now()) @map("invited_at") @db.Timestamptz(6)
+  joinedAt         DateTime?         @map("joined_at") @db.Timestamptz(6)
+  leftAt           DateTime?         @map("left_at") @db.Timestamptz(6)
+
+  group    Group          @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user     Profile?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  payments GroupPayment[]
+
+  @@unique([groupId, userId])
+  @@index([userId])
+  @@map("group_members")
+}
+
+/// Một kỳ thu tiền của nhóm (thường là 1 tháng). period = ngày đầu kỳ.
+model GroupCycle {
+  id               String   @id @default(uuid(7)) @db.Uuid
+  groupId          String   @map("group_id") @db.Uuid
+  period           DateTime @db.Date
+  dueDate          DateTime @map("due_date") @db.Date
+  totalAmountMinor BigInt   @map("total_amount_minor")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  group    Group          @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  payments GroupPayment[]
+
+  @@unique([groupId, period])
+  @@map("group_cycles")
+}
+
+model GroupPayment {
+  id             String             @id @default(uuid(7)) @db.Uuid
+  cycleId        String             @map("cycle_id") @db.Uuid
+  groupId        String             @map("group_id") @db.Uuid
+  memberId       String             @map("member_id") @db.Uuid
+  amountMinor    BigInt             @map("amount_minor")
+  status         GroupPaymentStatus @default(PENDING)
+  claimedAt      DateTime?          @map("claimed_at") @db.Timestamptz(6)
+  confirmedAt    DateTime?          @map("confirmed_at") @db.Timestamptz(6)
+  lastRemindedAt DateTime?          @map("last_reminded_at") @db.Timestamptz(6)
+  createdAt      DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  cycle  GroupCycle  @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  group  Group       @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  member GroupMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([cycleId, memberId])
+  @@index([groupId, status])
+  @@map("group_payments")
+}
+
+// ─────────────────────────────────────────────
+// Subca Plus & thanh toán
+// ─────────────────────────────────────────────
+
+/// Quyền Plus hiện tại của người dùng, đồng bộ từ webhook RevenueCat (hoặc cấp tay / mã khuyến mãi).
+model Entitlement {
+  id                    String            @id @default(uuid(7)) @db.Uuid
+  userId                String            @map("user_id") @db.Uuid
+  product               PlusProduct
+  store                 Store
+  status                EntitlementStatus
+  willRenew             Boolean           @default(true) @map("will_renew")
+  startedAt             DateTime          @map("started_at") @db.Timestamptz(6)
+  /// null với gói trọn đời.
+  expiresAt             DateTime?         @map("expires_at") @db.Timestamptz(6)
+  originalTransactionId String?           @map("original_transaction_id")
+  createdAt             DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([store, originalTransactionId])
+  @@index([userId, expiresAt])
+  @@map("entitlements")
+}
+
+/// Sự kiện thô từ webhook RevenueCat. eventId unique để xử lý webhook idempotent. Dùng cho trang Doanh thu.
+model BillingEvent {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  eventId     String    @unique @map("event_id")
+  userId      String?   @map("user_id") @db.Uuid
+  type        String
+  product     String?
+  store       Store?
+  priceMinor  BigInt?   @map("price_minor")
+  currency    String?   @db.Char(3)
+  raw         Json
+  occurredAt  DateTime  @map("occurred_at") @db.Timestamptz(6)
+  processedAt DateTime? @map("processed_at") @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user Profile? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([occurredAt])
+  @@index([userId])
+  @@map("billing_events")
+}
+
+model PromoCode {
+  id             String       @id @default(uuid(7)) @db.Uuid
+  code           String       @unique
+  type           PromoType
+  /// % giảm, số tiền giảm (đơn vị nhỏ nhất) hoặc số ngày tặng, tùy type.
+  value          Int
+  appliesTo      PlusProduct? @map("applies_to")
+  maxRedemptions Int?         @map("max_redemptions")
+  redeemedCount  Int          @default(0) @map("redeemed_count")
+  startsAt       DateTime?    @map("starts_at") @db.Timestamptz(6)
+  expiresAt      DateTime?    @map("expires_at") @db.Timestamptz(6)
+  isActive       Boolean      @default(true) @map("is_active")
+  createdById    String?      @map("created_by_id") @db.Uuid
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  createdBy   AdminUser?        @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  redemptions PromoRedemption[]
+
+  @@map("promo_codes")
+}
+
+model PromoRedemption {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  promoId    String   @map("promo_id") @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  redeemedAt DateTime @default(now()) @map("redeemed_at") @db.Timestamptz(6)
+
+  promo PromoCode @relation(fields: [promoId], references: [id], onDelete: Cascade)
+  user  Profile   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([promoId, userId])
+  @@map("promo_redemptions")
+}
+
+// ─────────────────────────────────────────────
+// Dữ liệu tham chiếu & cấu hình
+// ─────────────────────────────────────────────
+
+model ExchangeRate {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  base      String   @db.Char(3)
+  quote     String   @db.Char(3)
+  rate      Decimal  @db.Decimal(18, 8)
+  date      DateTime @db.Date
+  source    String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@unique([base, quote, date])
+  @@map("exchange_rates")
+}
+
+/// Cờ vận hành phía server (VD: chế độ bảo trì). Thử nghiệm A/B và rollout theo % dùng PostHog.
+model FeatureFlag {
+  key         String   @id
+  description String?
+  enabled     Boolean  @default(false)
+  payload     Json?
+  updatedById String?  @map("updated_by_id") @db.Uuid
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  updatedBy AdminUser? @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@map("feature_flags")
+}
+
+// ─────────────────────────────────────────────
+// Admin
+// ─────────────────────────────────────────────
+
+/// Thành viên Admin Console. id = auth.users.id (đăng nhập bằng Supabase Auth, bắt buộc MFA).
+model AdminUser {
+  id           String    @id @db.Uuid
+  email        String    @unique
+  name         String
+  role         AdminRole @default(VIEWER)
+  isActive     Boolean   @default(true) @map("is_active")
+  lastActiveAt DateTime? @map("last_active_at") @db.Timestamptz(6)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  auditLogs    AuditLog[]
+  priceReviews PriceReport[]
+  promoCodes   PromoCode[]
+  flagsUpdated FeatureFlag[]
+
+  @@map("admin_users")
+}
+
+model AuditLog {
+  id         String         @id @default(uuid(7)) @db.Uuid
+  actorType  AuditActorType @default(ADMIN) @map("actor_type")
+  actorId    String?        @map("actor_id") @db.Uuid
+  action     String
+  targetType String?        @map("target_type")
+  targetId   String?        @map("target_id")
+  metadata   Json?
+  ip         String?
+  severity   AuditSeverity  @default(INFO)
+  createdAt  DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  actor AdminUser? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([targetType, targetId])
+  @@map("audit_logs")
+}
