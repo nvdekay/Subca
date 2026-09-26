@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { FREE_LIMITS } from '@subca/shared';
 import type { AuthUser } from '../auth/auth.types.js';
+import { activeEntitlementWhere } from '../plan/plan.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 /** Chỉ ghi lại "hoạt động gần nhất" tối đa 1 lần/giờ để tránh ghi DB mỗi request. */
@@ -45,10 +46,7 @@ export class MeService {
       include: {
         settings: true,
         entitlements: {
-          where: {
-            status: { not: 'EXPIRED' },
-            OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
-          },
+          where: activeEntitlementWhere(now),
           orderBy: [{ expiresAt: { sort: 'desc', nulls: 'first' } }],
           take: 1,
         },
