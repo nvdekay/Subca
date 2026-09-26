@@ -7,7 +7,8 @@ const EnvSchema = z.object({
     .default('development'),
   PORT: z.coerce.number().int().positive().default(3000),
   DATABASE_URL: z.url(),
-  SUPABASE_URL: z.url().optional(),
+  // Dùng để xác minh token đăng nhập (JWKS + issuer)
+  SUPABASE_URL: z.url(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
 });
 
