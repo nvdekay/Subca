@@ -57,6 +57,25 @@ Migration hiện có:
 - Mọi endpoint mặc định **bắt buộc đăng nhập**; endpoint công khai gắn `@Public()` (VD `/health`). Lấy người dùng hiện tại bằng `@CurrentUser()`.
 - Lỗi 401 có `code` để app xử lý: `TOKEN_EXPIRED` → làm mới token rồi gọi lại; `UNAUTHENTICATED` / `INVALID_TOKEN` → đăng nhập lại.
 - `GET /me`: hồ sơ, cài đặt, gói hiện tại (FREE/PLUS) và giới hạn gói Free.
+- Tài khoản bị khóa: mọi endpoint trả `403 ACCOUNT_BANNED` (kiểm tra có cache 60 giây).
+
+## API hiện có
+
+| Method | Đường dẫn                          | Mô tả                                                                  |
+| ------ | ---------------------------------- | ---------------------------------------------------------------------- |
+| GET    | `/health`                          | Kiểm tra API + database (công khai)                                    |
+| GET    | `/me`                              | Hồ sơ, cài đặt, gói hiện tại                                           |
+| GET    | `/catalog/categories`              | Danh mục hệ thống + danh mục người dùng                                |
+| GET    | `/catalog/services?q=&categoryId=` | Thư viện dịch vụ kèm gói giá                                           |
+| GET    | `/subscriptions?status=&q=`        | Danh sách, sắp theo kỳ gia hạn gần nhất, kèm `trackedCount` và `limit` |
+| GET    | `/subscriptions/:id`               | Chi tiết                                                               |
+| POST   | `/subscriptions`                   | Thêm; server tự tính kỳ gia hạn tiếp theo theo múi giờ người dùng      |
+| PATCH  | `/subscriptions/:id`               | Sửa một phần, hủy (`status: CANCELLED`) hoặc mở lại                    |
+| DELETE | `/subscriptions/:id`               | Lưu trữ (xóa mềm)                                                      |
+
+Schema đầu vào dùng chung ở `packages/shared/src/api` (app dùng lại cho form). Lỗi dữ liệu trả `400 VALIDATION_ERROR` kèm `issues` theo từng trường; vượt giới hạn gói Free trả `403 PLAN_LIMIT_REACHED`.
+
+Test tích hợp trên database thật (Supabase dev, tự tạo và dọn dữ liệu tạm): `pnpm --filter @subca/api test:int`.
 
 ## Quy ước dữ liệu
 
