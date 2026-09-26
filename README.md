@@ -50,6 +50,14 @@ Migration hiện có:
 
 **Quy tắc bắt buộc:** mọi bảng mới phải bật RLS trong chính migration tạo ra nó. Khóa `service_role` của Supabase chỉ dùng ở backend.
 
+## Xác thực (API)
+
+- App đăng nhập bằng Supabase Auth, gửi access token qua header `Authorization: Bearer <token>`.
+- API xác minh token bằng khóa công khai từ JWKS của project (`<SUPABASE_URL>/auth/v1/.well-known/jwks.json`, ES256): đúng issuer, audience `authenticated`, còn hạn, role `authenticated`. Không cần lưu bí mật JWT.
+- Mọi endpoint mặc định **bắt buộc đăng nhập**; endpoint công khai gắn `@Public()` (VD `/health`). Lấy người dùng hiện tại bằng `@CurrentUser()`.
+- Lỗi 401 có `code` để app xử lý: `TOKEN_EXPIRED` → làm mới token rồi gọi lại; `UNAUTHENTICATED` / `INVALID_TOKEN` → đăng nhập lại.
+- `GET /me`: hồ sơ, cài đặt, gói hiện tại (FREE/PLUS) và giới hạn gói Free.
+
 ## Quy ước dữ liệu
 
 - Tiền: `BigInt` theo đơn vị nhỏ nhất + mã tiền tệ (`VND`, `USD`…). API trả BigInt dạng chuỗi trong JSON.

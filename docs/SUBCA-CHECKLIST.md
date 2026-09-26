@@ -6,14 +6,14 @@
 
 ### Hiện trạng (27/09/2026)
 
-- **Xong:** mockup app + admin; bộ tính ngày gia hạn (38 test + đối chiếu ngẫu nhiên); seed 53 dịch vụ lên Supabase dev; monorepo (Expo SDK 57, NestJS 12 + Fastify, Next.js 16, Prisma 7.10, TypeScript 6.0); schema Prisma v1 (26 bảng); migration + RLS + trigger auth **đã chạy trên Supabase dev**; API kết nối DB qua pooler (`/health` → `db: up`); CI GitHub Actions.
+- **Xong:** mockup app + admin; bộ tính ngày gia hạn (38 test + đối chiếu ngẫu nhiên); seed 53 dịch vụ lên Supabase dev; xác thực phía API (guard JWT + `/me`); monorepo (Expo SDK 57, NestJS 12 + Fastify, Next.js 16, Prisma 7.10, TypeScript 6.0); schema Prisma v1 (26 bảng); migration + RLS + trigger auth **đã chạy trên Supabase dev**; API kết nối DB qua pooler (`/health` → `db: up`); CI GitHub Actions.
 - **Đang ở:** Giai đoạn 0 (chuẩn bị).
 - **Việc tiếp theo:**
   1. **Đổi mật khẩu database Supabase** (đã lộ trong chat) và cập nhật `apps/api/.env`
   2. Quyết định có chuyển project dev sang Singapore không (hiện ở Tokyo)
   3. Đăng ký Apple Developer / Google Play (khâu chờ lâu)
   4. Xác minh giá gói trong seed
-  5. Bắt đầu Giai đoạn 1: đăng nhập Supabase Auth (API guard + app)
+  5. Giai đoạn 1: đăng nhập trong app (Apple / Google / email OTP) — phía API đã xong
 
 ---
 
@@ -166,7 +166,10 @@
   - [ ] Android: Sign in with Apple qua luồng OAuth web của Supabase (để người dùng đổi máy vẫn đăng nhập được)
   - [ ] Email OTP (SMTP riêng qua Resend; SMTP mặc định của Supabase bị giới hạn số email)
   - [ ] Lưu phiên bằng `expo-secure-store`, tự làm mới token
-  - [ ] NestJS: guard xác minh JWT Supabase (JWKS), lấy `user_id` từ `sub`
+  - [x] NestJS: guard toàn cục xác minh JWT Supabase (JWKS ES256, kiểm issuer/audience/role/hạn), `@Public()`, `@CurrentUser()`, lỗi 401 có `code` (`TOKEN_EXPIRED` / `INVALID_TOKEN` / `UNAUTHENTICATED`)
+  - [x] `GET /me`: hồ sơ + cài đặt + gói FREE/PLUS + giới hạn Free; chặn tài khoản bị khóa (403); ghi `last_active_at` tối đa 1 lần/giờ
+  - [ ] Test đầu-cuối với token Supabase thật (cần user thử + publishable key)
+  - [ ] Chặn tài khoản bị khóa ở mọi endpoint (hiện mới chặn ở `/me`), có cache để không truy vấn DB mỗi request
 - [ ] **Subscription:** thêm / sửa / xóa + thư viện khoảng 200 dịch vụ phổ biến ở Việt Nam
   - [ ] Màn Thêm (chọn nhanh, giá, tiền tệ, chu kỳ, ngày, danh mục, phương thức, mốc nhắc, tự gia hạn, ghi chú)
   - [ ] Màn Danh sách (tìm kiếm, 5 bộ lọc)
