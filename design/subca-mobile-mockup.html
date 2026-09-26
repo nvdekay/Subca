@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Subca Mobile Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Brand palette */
+  --sky:#99CDD8; --sky-soft:#E3F1F4; --sky-deep:#3F8797;
+  --mint:#DAEBE3; --peach:#FDE8D3; --coral:#F3C3B2; --coral-deep:#B5553A;
+  --sage:#CFD6C4; --ink-brand:#657166;
+  /* Text tokens (contrast >= 4.5 on white + tinted surfaces) */
+  --ink:#2F3A31; --ink-2:#4F5B51; --ink-3:#657166;
+  --bg:#F8F7F3; --surface:#FFFFFF; --line:#ECEBE4;
+  --shadow-sm:0 1px 2px rgba(47,58,49,.04),0 4px 14px rgba(47,58,49,.05);
+  --shadow-md:0 2px 6px rgba(47,58,49,.05),0 14px 34px rgba(47,58,49,.09);
+  --r-lg:26px; --r-md:20px; --r-sm:14px;
+  /* Chart series (validated categorical order) */
+  --c1:#1996B8; --c2:#E07A4A; --c3:#7B63C9; --c4:#C99A2E; --c5:#D0578C;
+  --ease:cubic-bezier(.2,.8,.2,1);
+  font-family:"Be Vietnam Pro",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:#EEF1EC;color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(circle at 12% 10%,#DAEBE3 0,transparent 38%),radial-gradient(circle at 88% 85%,#FDE8D3 0,transparent 40%);}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2.5px solid var(--sky-deep);outline-offset:2px;border-radius:10px}
+svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- Stage & device ---------- */
+.stage{min-height:100%;display:flex;align-items:center;justify-content:center;gap:48px;padding:32px 24px}
+.side{width:260px;align-self:center}
+.side h1{font-size:26px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+.side p{color:var(--ink-2);font-size:14px;margin:6px 0 20px}
+.side ol{list-style:none;display:grid;gap:4px;counter-reset:s}
+.side li button{width:100%;text-align:left;padding:9px 12px;border-radius:12px;font-size:14px;color:var(--ink-2);display:flex;gap:10px;align-items:center;transition:background .2s}
+.side li button::before{counter-increment:s;content:counter(s,decimal-leading-zero);font-size:11px;font-weight:700;color:var(--ink-3);width:18px}
+.side li button:hover{background:rgba(255,255,255,.7)}
+.side li button.on{background:#fff;color:var(--ink);font-weight:600;box-shadow:var(--shadow-sm)}
+.device{width:390px;height:844px;border-radius:56px;background:#1d211e;padding:12px;box-shadow:0 40px 80px rgba(47,58,49,.25),inset 0 0 0 2px #3a403b;flex:none;position:relative}
+.screen-wrap{position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg)}
+.island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:120px;height:34px;background:#0d0f0e;border-radius:20px;z-index:60}
+.statusbar{position:absolute;top:0;left:0;right:0;height:54px;background:linear-gradient(var(--bg) 70%,rgba(248,247,243,0));padding:16px 30px 0;display:flex;justify-content:space-between;font-size:15px;font-weight:600;z-index:55;pointer-events:none}
+.statusbar .icons{display:flex;gap:6px;align-items:center}
+.home-ind{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:#2F3A31;opacity:.85;z-index:70;pointer-events:none}
+
+@media (max-width:860px){.side{display:none}}
+@media (max-width:480px){
+  .stage{padding:0;display:block}
+  .device{width:100%;height:100dvh;border-radius:0;padding:0;box-shadow:none;background:var(--bg)}
+  .screen-wrap{border-radius:0}
+  .island,.home-ind{display:none}
+}
+
+/* ---------- Screens ---------- */
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:58px 20px 120px;background:var(--bg);scrollbar-width:none;
+  opacity:0;visibility:hidden;transform:translateX(24px);transition:opacity .32s var(--ease),transform .32s var(--ease),visibility 0s .32s}
+.screen::-webkit-scrollbar{display:none}
+.screen.active{opacity:1;visibility:visible;transform:none;transition:opacity .32s var(--ease),transform .32s var(--ease),visibility 0s}
+.screen.back-out{transform:translateX(-24px)}
+.screen.modal{transform:translateY(40px)}
+.screen.modal.active{transform:none}
+.screen.no-nav{padding-bottom:40px}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:6px 0 18px;min-height:44px}
+.topbar h2{font-size:18px;font-weight:700;flex:1;text-align:center}
+.icon-btn{width:44px;height:44px;border-radius:50%;background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow-sm);flex:none;transition:transform .15s}
+.icon-btn:active{transform:scale(.94)}
+.icon-btn.ghost{background:transparent;box-shadow:none}
+.dot-badge{position:relative}
+.dot-badge::after{content:"";position:absolute;top:10px;right:11px;width:8px;height:8px;border-radius:50%;background:var(--coral-deep);border:2px solid #fff}
+
+.h-title{font-size:26px;font-weight:800;letter-spacing:-.025em;line-height:1.2}
+.sub{color:var(--ink-2);font-size:14px}
+.muted{color:var(--ink-3);font-size:13px}
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;margin:26px 2px 12px}
+.sec-head h3{font-size:17px;font-weight:700;letter-spacing:-.01em}
+.link{color:var(--sky-deep);font-weight:600;font-size:14px;padding:6px 0}
+
+.card{background:var(--surface);border-radius:var(--r-lg);padding:18px;box-shadow:var(--shadow-sm)}
+.card+.card{margin-top:12px}
+.card.mint{background:var(--mint);box-shadow:none}
+.card.peach{background:var(--peach);box-shadow:none}
+.card.coral{background:var(--coral);box-shadow:none}
+.card.sky{background:var(--sky-soft);box-shadow:none}
+.card.tap{cursor:pointer;transition:transform .18s var(--ease)}
+.card.tap:active{transform:scale(.985)}
+
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;white-space:nowrap;line-height:1.4}
+.pill svg.i{width:13px;height:13px;stroke-width:2.2}
+.p-active{background:var(--mint);color:#2E5B45}
+.p-trial{background:var(--sky-soft);color:#2A6572}
+.p-review{background:var(--peach);color:#8A4B1E}
+.p-cancel{background:#EFEFEA;color:var(--ink-2)}
+.p-warn{background:var(--coral);color:#7A2E17}
+
+.btn{height:52px;border-radius:18px;padding:0 20px;font-weight:700;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .15s,filter .2s}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--ink);color:#fff}
+.btn-sky{background:var(--sky);color:#1F3F46}
+.btn-soft{background:var(--surface);box-shadow:var(--shadow-sm)}
+.btn-coral{background:var(--coral);color:#6A2A16}
+.btn-block{width:100%}
+.btn-sm{height:40px;border-radius:14px;font-size:13px;padding:0 14px}
+
+.logo{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;font-weight:800;font-size:17px;color:#fff;flex:none;letter-spacing:-.03em}
+.logo.lg{width:64px;height:64px;border-radius:20px;font-size:26px}
+.logo.sm{width:30px;height:30px;border-radius:10px;font-size:13px}
+/* Logo only, no tile */
+.logo.brand{background:transparent!important;box-shadow:none!important;border-radius:0}
+.logo.brand svg{width:86%;height:86%;display:block}
+.stack .logo.brand{background:#fff!important;border-radius:50%}
+.stack .logo.brand svg{width:60%;height:60%}
+.pm-chip{width:26px;height:18px;overflow:hidden;border-radius:5px;display:grid;place-items:center;flex:none}
+
+/* ---------- Onboarding ---------- */
+#s-onboarding{padding:0;background:linear-gradient(180deg,#E6F3F1 0%,#F8F7F3 58%)}
+.ob-art{position:relative;height:430px;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(2px)}
+.float-card{position:absolute;background:#fff;border-radius:22px;padding:12px 14px;display:flex;gap:10px;align-items:center;box-shadow:var(--shadow-md);font-size:13px;font-weight:600;animation:bob 6s ease-in-out infinite}
+.float-card small{display:block;font-weight:500;color:var(--ink-3);font-size:11.5px}
+@keyframes bob{50%{transform:translateY(-8px)}}
+.ob-body{padding:0 28px 48px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px;letter-spacing:-.03em}
+.brand-mark{width:38px;height:38px;border-radius:12px;background:var(--ink);display:grid;place-items:center}
+.ob-title{font-size:32px;font-weight:800;letter-spacing:-.035em;line-height:1.15;margin:22px 0 12px}
+.ob-title em{font-style:normal;background:linear-gradient(transparent 62%,var(--sky) 62%)}
+.ob-dots{display:flex;gap:6px;margin:22px 0}
+.ob-dots i{width:8px;height:8px;border-radius:4px;background:var(--sage)}
+.ob-dots i.on{width:24px;background:var(--ink)}
+
+/* ---------- Home ---------- */
+.hello{display:flex;align-items:center;gap:12px}
+.avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--coral),var(--peach));display:grid;place-items:center;font-weight:700;color:#7A2E17}
+.hero{position:relative;overflow:hidden;background:linear-gradient(145deg,#A9D6DF 0%,#C9E6E0 55%,#DAEBE3 100%);border-radius:30px;padding:22px;color:#1F3530}
+.hero::after{content:"";position:absolute;right:-50px;top:-60px;width:190px;height:190px;border-radius:50%;background:rgba(255,255,255,.28)}
+.hero .amount{font-size:38px;font-weight:800;letter-spacing:-.04em;line-height:1.1;margin:6px 0 4px}
+.hero .amount span{font-size:18px;font-weight:700;margin-left:2px}
+.hero-row{display:flex;gap:8px;margin-top:16px;position:relative;z-index:1}
+.hero-chip{flex:1;background:rgba(255,255,255,.58);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:16px;padding:10px 12px}
+.hero-chip b{display:block;font-size:17px}
+.hero-chip small{font-size:12px;color:#34504A}
+.trend-up{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;background:rgba(255,255,255,.6);padding:3px 9px;border-radius:999px}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{border-radius:var(--r-md);padding:16px;min-height:118px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:transform .18s var(--ease)}
+.stat:active{transform:scale(.97)}
+.stat .ic{width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,.7);display:grid;place-items:center}
+.stat b{font-size:22px;letter-spacing:-.03em;display:block;margin-top:10px}
+.stat small{font-size:12.5px;color:var(--ink-2);font-weight:500}
+
+.progress{height:10px;border-radius:6px;background:rgba(101,113,102,.14);overflow:hidden}
+.progress>i{display:block;height:100%;border-radius:6px;background:var(--ink-brand);transition:width .6s var(--ease)}
+.progress.over>i{background:linear-gradient(90deg,#E59C82,#C9694D)}
+
+.alert{display:flex;gap:12px;align-items:center;padding:14px;background:var(--surface);border-radius:var(--r-md);box-shadow:var(--shadow-sm);cursor:pointer}
+.alert+.alert{margin-top:10px}
+.alert .when{margin-left:auto;text-align:right;flex:none}
+.alert .when b{display:block;font-size:14px}
+
+.shortcuts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.shortcut{display:flex;flex-direction:column;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--ink-2);text-align:center}
+.shortcut .ic{width:56px;height:56px;border-radius:20px;display:grid;place-items:center;background:var(--surface);box-shadow:var(--shadow-sm);color:var(--ink)}
+
+/* ---------- List ---------- */
+.search{display:flex;align-items:center;gap:10px;background:var(--surface);border-radius:18px;padding:0 16px;height:50px;box-shadow:var(--shadow-sm);color:var(--ink-3)}
+.search input{border:0;outline:0;background:transparent;flex:1;height:100%;color:var(--ink);font-size:15px}
+.search input::placeholder{color:var(--ink-3)}
+.chips{display:flex;gap:8px;overflow-x:auto;margin:14px -20px 4px;padding:2px 20px 6px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{height:38px;padding:0 15px;border-radius:999px;background:var(--surface);font-size:13.5px;font-weight:600;color:var(--ink-2);white-space:nowrap;box-shadow:var(--shadow-sm);display:inline-flex;align-items:center;gap:6px;transition:background .2s,color .2s}
+.chip .n{font-size:11.5px;background:var(--bg);padding:1px 7px;border-radius:999px}
+.chip.on{background:var(--ink);color:#fff}
+.chip.on .n{background:rgba(255,255,255,.18)}
+.sub-item{display:flex;align-items:center;gap:12px;padding:14px;background:var(--surface);border-radius:var(--r-md);box-shadow:var(--shadow-sm);cursor:pointer;transition:transform .18s var(--ease)}
+.sub-item:active{transform:scale(.985)}
+.sub-item+.sub-item{margin-top:10px}
+.sub-item .meta{flex:1;min-width:0}
+.sub-item .meta b{font-size:15px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub-item .meta small{font-size:12.5px;color:var(--ink-3)}
+.sub-item .right{text-align:right;flex:none}
+.sub-item .right b{font-size:15px;display:block}
+.sub-item.cancelled{opacity:.62}
+.empty{text-align:center;padding:40px 10px;color:var(--ink-3)}
+.list-sum{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-2);margin:10px 4px 12px}
+
+/* ---------- Form ---------- */
+.field{margin-bottom:16px}
+.field label,.flabel{display:block;font-size:13px;font-weight:600;color:var(--ink-2);margin:0 0 7px 4px}
+.input{width:100%;height:52px;border-radius:16px;border:1.5px solid transparent;background:var(--surface);padding:0 16px;font-size:15px;box-shadow:var(--shadow-sm);outline:0;transition:border-color .2s}
+.input:focus{border-color:var(--sky)}
+textarea.input{height:88px;padding:14px 16px;resize:none}
+.row{display:flex;gap:10px}
+.row>*{flex:1}
+.seg{display:flex;background:#EDEEE7;border-radius:15px;padding:4px;gap:4px}
+.seg button{flex:1;height:40px;border-radius:12px;font-size:13.5px;font-weight:600;color:var(--ink-2);transition:all .2s}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(47,58,49,.08)}
+.quick-pick{display:flex;gap:10px;overflow-x:auto;margin:0 -20px 20px;padding:4px 20px 8px;scrollbar-width:none}
+.quick-pick::-webkit-scrollbar{display:none}
+.qp{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--ink-2);flex:none;width:62px}
+.qp .logo{transition:transform .2s}
+.qp .logo.brand{width:44px;height:44px}
+.qp.on .logo{transform:scale(1.12)}
+.qp.on{color:var(--ink)}
+.qp.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--sky-deep);margin-top:-2px}
+.cat-grid{display:flex;flex-wrap:wrap;gap:8px}
+.cat-grid .chip{box-shadow:none;background:var(--surface);border:1.5px solid var(--line)}
+.cat-grid .chip.on{border-color:var(--ink);background:var(--ink);color:#fff}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;background:var(--surface);border-radius:16px;box-shadow:var(--shadow-sm)}
+.toggle-row+.toggle-row{margin-top:10px}
+.toggle-row b{font-size:14.5px;display:block}
+.switch{width:52px;height:32px;border-radius:16px;background:#D9DBD2;position:relative;flex:none;transition:background .25s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.15);transition:transform .25s var(--ease)}
+.switch[aria-checked="true"]{background:#6FB3C2}
+.switch[aria-checked="true"]::after{transform:translateX(20px)}
+.sticky-cta{position:sticky;bottom:0;margin:22px -20px -40px;padding:14px 20px 30px;background:linear-gradient(transparent,var(--bg) 30%)}
+
+/* ---------- Detail ---------- */
+.d-hero{border-radius:30px;padding:22px;text-align:center;position:relative;overflow:hidden}
+.d-hero .logo{margin:0 auto 12px;box-shadow:0 8px 20px rgba(0,0,0,.12)}
+.d-hero h1{font-size:24px;font-weight:800;letter-spacing:-.03em}
+.d-price{font-size:34px;font-weight:800;letter-spacing:-.04em;margin-top:10px}
+.d-price small{font-size:14px;font-weight:600;color:var(--ink-2)}
+.info-list{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:4px 18px}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;gap:12px;font-size:14.5px}
+.info-row+.info-row{border-top:1px solid var(--line)}
+.info-row span:first-child{color:var(--ink-2);display:flex;align-items:center;gap:10px}
+.info-row b{font-weight:600;text-align:right}
+.usage{display:flex;gap:6px;margin:12px 0 8px}
+.usage i{flex:1;height:34px;border-radius:10px;background:#EFEFE9}
+.usage i.on{background:var(--sky)}
+.timeline{position:relative;padding-left:22px}
+.timeline::before{content:"";position:absolute;left:6px;top:8px;bottom:8px;width:2px;background:var(--line)}
+.tl{position:relative;display:flex;justify-content:space-between;padding:9px 0;font-size:14px}
+.tl::before{content:"";position:absolute;left:-21px;top:15px;width:12px;height:12px;border-radius:50%;background:var(--mint);border:2px solid #fff;box-shadow:0 0 0 1.5px var(--sage)}
+.tl.next::before{background:var(--sky);box-shadow:0 0 0 1.5px var(--sky-deep)}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.act{display:flex;flex-direction:column;gap:10px;align-items:flex-start;padding:16px;border-radius:var(--r-md);background:var(--surface);box-shadow:var(--shadow-sm);font-weight:600;font-size:14px;text-align:left;transition:transform .15s}
+.act:active{transform:scale(.97)}
+.act .ic{width:38px;height:38px;border-radius:12px;display:grid;place-items:center}
+
+/* ---------- Calendar ---------- */
+.cal{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:16px 12px 12px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;padding:0 4px 12px}
+.cal-head b{font-size:17px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.cal-grid .wd{font-size:11.5px;font-weight:600;color:var(--ink-3);padding:4px 0}
+.day{aspect-ratio:1/1.12;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:7px;font-size:14px;font-weight:500;position:relative;transition:background .2s}
+.day.other{color:#B8BDB3}
+.day.has{background:var(--mint);font-weight:700;cursor:pointer}
+.day.has.heavy{background:var(--peach)}
+.day.today{box-shadow:inset 0 0 0 2px var(--ink)}
+.day.sel{background:var(--ink)!important;color:#fff}
+.day .dots{display:flex;gap:2px;margin-top:4px}
+.day .dots i{width:5px;height:5px;border-radius:50%}
+.cal-legend{display:flex;gap:14px;font-size:12px;color:var(--ink-2);padding:12px 6px 2px}
+.cal-legend span{display:flex;align-items:center;gap:6px}
+.cal-legend i{width:12px;height:12px;border-radius:4px}
+.date-badge{width:48px;height:52px;border-radius:14px;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none;line-height:1.15}
+.date-badge b{font-size:18px}
+.date-badge small{font-size:10.5px;font-weight:600;color:var(--ink-3);text-transform:uppercase}
+
+/* ---------- Trials ---------- */
+.trial{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:18px;transition:opacity .35s,transform .35s var(--ease)}
+.trial+.trial{margin-top:14px}
+.trial.gone{opacity:0;transform:translateX(40px) scale(.96)}
+.trial-top{display:flex;gap:12px;align-items:center}
+.ring{--p:50;--c:var(--sky-deep);width:62px;height:62px;border-radius:50%;flex:none;display:grid;place-items:center;
+  background:conic-gradient(var(--c) calc(var(--p)*1%),#EEEFE8 0)}
+.ring>div{width:50px;height:50px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.ring b{font-size:18px}
+.ring small{font-size:9.5px;color:var(--ink-3);font-weight:600;margin-top:2px}
+.trial-info{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.trial-info div{background:var(--bg);border-radius:14px;padding:10px 12px}
+.trial-info small{font-size:11.5px;color:var(--ink-3);display:block}
+.trial-info b{font-size:14.5px}
+.trial-cta{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.trial-cta .btn{height:44px;font-size:13.5px;border-radius:14px}
+.trial-cta .full{grid-column:1/-1}
+
+/* ---------- Review ---------- */
+.savings{background:linear-gradient(140deg,#FDE8D3,#F7D3C3);border-radius:30px;padding:22px;position:relative;overflow:hidden}
+.savings .amount{font-size:34px;font-weight:800;letter-spacing:-.04em}
+.rv{background:var(--surface);border-radius:var(--r-md);box-shadow:var(--shadow-sm);padding:14px}
+.rv+.rv{margin-top:10px}
+.rv-top{display:flex;align-items:center;gap:12px}
+.rv-top .meta{flex:1;min-width:0}
+.rv-top .meta b{display:block;font-size:15px}
+.rv-top .meta small{font-size:12.5px;color:var(--ink-3)}
+.rv-act{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px}
+.rv-act button{height:40px;border-radius:12px;background:var(--bg);font-size:13px;font-weight:600;color:var(--ink-2);display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s}
+.rv-act button svg.i{width:15px;height:15px}
+.rv-act button.on.keep{background:var(--mint);color:#2E5B45}
+.rv-act button.on.review{background:var(--peach);color:#8A4B1E}
+.rv-act button.on.cancel{background:var(--coral);color:#7A2E17}
+.reco{display:flex;gap:12px;align-items:flex-start}
+.reco .ic{width:40px;height:40px;border-radius:14px;background:#fff;display:grid;place-items:center;flex:none}
+.step-progress{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-2);margin-top:14px}
+.step-progress .progress{flex:1;height:8px;background:rgba(255,255,255,.7)}
+.step-progress .progress i{background:#C9694D}
+
+/* ---------- Analytics ---------- */
+.chart-card h4{font-size:15px;font-weight:700}
+.donut-wrap{display:flex;align-items:center;gap:16px;margin-top:10px}
+.donut{position:relative;width:148px;height:148px;flex:none}
+.donut svg{width:100%;height:100%;transform:rotate(-90deg)}
+.donut .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.2;pointer-events:none}
+.donut .center b{font-size:17px}
+.donut .center small{font-size:11px;color:var(--ink-3)}
+.donut circle{transition:stroke-width .2s,opacity .2s;cursor:pointer}
+.legend{display:grid;gap:8px;flex:1;min-width:0}
+.legend button{display:flex;align-items:center;gap:8px;font-size:13px;text-align:left;padding:2px 0}
+.legend i{width:10px;height:10px;border-radius:3px;flex:none}
+.legend span{flex:1;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.legend b{font-size:12.5px}
+.bars{display:flex;align-items:flex-end;gap:10px;height:150px;margin-top:18px;padding-bottom:2px;border-bottom:1px solid var(--line);position:relative}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;cursor:pointer;position:relative}
+.bar i{width:100%;max-width:30px;border-radius:4px 4px 0 0;background:var(--sky);transition:background .2s}
+.bar.cur i{background:var(--sky-deep)}
+.bar:hover i,.bar:focus-visible i{background:#2D7282}
+.bar .val{font-size:11px;font-weight:600;color:var(--ink-2);margin-bottom:4px}
+.bar-x{display:flex;gap:10px;margin-top:6px}
+.bar-x span{flex:1;text-align:center;font-size:11.5px;color:var(--ink-3)}
+.tooltip{position:absolute;background:var(--ink);color:#fff;font-size:12px;padding:6px 10px;border-radius:10px;white-space:nowrap;pointer-events:none;opacity:0;transform:translate(-50%,-6px);transition:opacity .15s;z-index:5}
+.tooltip.show{opacity:1}
+.hbar{display:flex;align-items:center;gap:10px;font-size:13.5px}
+.hbar+.hbar{margin-top:12px}
+.hbar .lbl{width:112px;flex:none;display:flex;gap:8px;align-items:center;color:var(--ink-2)}
+.hbar .track{flex:1;height:10px;border-radius:5px;background:#F0F0EA;overflow:hidden}
+.hbar .track i{display:block;height:100%;border-radius:0 4px 4px 0;background:var(--sky-deep)}
+.hbar b{width:78px;text-align:right;font-size:13px;flex:none}
+.rank{display:flex;align-items:center;gap:12px;padding:10px 0}
+.rank+.rank{border-top:1px solid var(--line)}
+.rank .no{width:22px;font-weight:800;color:var(--ink-3);font-size:14px}
+.rank .meta{flex:1}
+.rank .meta b{font-size:14.5px;display:block}
+.cpu-tag{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px}
+
+/* ---------- Budget ---------- */
+.budget-hero{text-align:center;padding:26px 20px}
+.gauge{position:relative;width:220px;height:124px;margin:0 auto}
+.gauge svg{width:100%;height:100%}
+.gauge .val{position:absolute;left:0;right:0;bottom:0;text-align:center;line-height:1.2}
+.gauge .val b{font-size:24px;letter-spacing:-.03em;display:block}
+.warn-box{display:flex;gap:12px;align-items:flex-start;background:var(--coral);border-radius:var(--r-md);padding:14px 16px;color:#5E2513;font-size:14px}
+.warn-box.ok{background:var(--mint);color:#24503D}
+.sim-row{display:flex;align-items:center;gap:12px;padding:12px 0}
+.sim-row+.sim-row{border-top:1px solid var(--line)}
+.sim-row .meta{flex:1}
+.sim-row .meta b{display:block;font-size:14.5px}
+.check{width:26px;height:26px;border-radius:9px;border:2px solid var(--sage);display:grid;place-items:center;flex:none;transition:all .2s}
+.check svg.i{width:15px;height:15px;stroke-width:3;opacity:0;color:#fff}
+.check[aria-checked="true"]{background:var(--ink);border-color:var(--ink)}
+.check[aria-checked="true"] svg.i{opacity:1}
+.sim-result{display:flex;justify-content:space-between;align-items:center;background:var(--ink);color:#fff;border-radius:var(--r-md);padding:16px 18px;margin-top:14px}
+.sim-result b{font-size:22px;letter-spacing:-.02em}
+.range{width:100%;accent-color:var(--ink);height:28px}
+
+/* ---------- Payments ---------- */
+.pcard{border-radius:26px;padding:20px;color:#fff;position:relative;overflow:hidden;cursor:pointer;min-height:168px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow-md);transition:transform .2s var(--ease)}
+.pcard:active{transform:scale(.985)}
+.pcard::after{content:"";position:absolute;width:200px;height:200px;border-radius:50%;right:-60px;bottom:-90px;background:rgba(255,255,255,.12)}
+.pcard .top{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}
+.pcard .brandtxt{font-weight:800;font-size:20px;letter-spacing:-.02em;font-style:italic}
+.pcard .bot{display:flex;justify-content:space-between;align-items:flex-end;position:relative;z-index:1}
+.pcard .bot b{font-size:24px;letter-spacing:-.03em}
+.pcard .bot small{display:block;font-size:12px;opacity:.85}
+.stack{display:flex}
+.stack .logo{border:2px solid rgba(255,255,255,.9);margin-left:-8px}
+.stack .logo:first-child{margin-left:0}
+.pm-list{max-height:0;overflow:hidden;transition:max-height .4s var(--ease)}
+.pm-list.open{max-height:600px}
+.pm-inner{background:var(--surface);border-radius:0 0 22px 22px;margin:-18px 8px 0;padding:26px 16px 8px;box-shadow:var(--shadow-sm)}
+.pm-wrap+.pm-wrap{margin-top:16px}
+
+/* ---------- Notifications ---------- */
+.notif{display:flex;gap:12px;padding:14px;background:var(--surface);border-radius:var(--r-md);box-shadow:var(--shadow-sm);position:relative}
+.notif+.notif{margin-top:10px}
+.notif.unread::before{content:"";position:absolute;top:18px;right:14px;width:8px;height:8px;border-radius:50%;background:var(--sky-deep)}
+.notif .ic{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;flex:none}
+.notif .meta{flex:1;padding-right:12px}
+.notif .meta b{font-size:14.5px;display:block;line-height:1.35}
+.notif .meta p{font-size:13px;color:var(--ink-2);margin-top:2px}
+.notif .meta small{font-size:12px;color:var(--ink-3)}
+.group-label{font-size:12.5px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin:22px 4px 10px}
+
+/* ---------- Profile ---------- */
+.profile-card{display:flex;align-items:center;gap:14px}
+.profile-card .avatar{width:64px;height:64px;font-size:22px}
+.set-group{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:4px 6px}
+.set-row{width:100%;display:flex;align-items:center;gap:12px;padding:12px 10px;text-align:left;border-radius:16px;transition:background .2s}
+.set-row:hover{background:var(--bg)}
+.set-row+.set-row{border-top:1px solid var(--line);border-radius:0}
+.set-row .ic{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;flex:none}
+.set-row span.t{flex:1;font-size:15px;font-weight:500}
+.set-row .v{font-size:13.5px;color:var(--ink-3)}
+.set-row .chev{color:var(--ink-3)}
+
+/* ---------- Bottom nav ---------- */
+.nav{position:absolute;left:14px;right:14px;bottom:24px;height:72px;background:rgba(255,255,255,.86);backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);
+  border-radius:28px;box-shadow:0 10px 36px rgba(47,58,49,.14),0 0 0 1px rgba(255,255,255,.8) inset;display:flex;align-items:center;justify-content:space-around;padding:0 8px;z-index:40;transition:transform .35s var(--ease),opacity .3s}
+.nav.hide{transform:translateY(130%);opacity:0}
+.nav-item{flex:1;height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;font-weight:600;color:var(--ink-3);border-radius:18px;transition:color .2s}
+.nav-item .pip{width:44px;height:30px;border-radius:12px;display:grid;place-items:center;transition:background .25s}
+.nav-item.on{color:var(--ink)}
+.nav-item.on .pip{background:var(--mint)}
+.nav-add{width:62px;height:62px;border-radius:22px;background:var(--ink);color:#fff;display:grid;place-items:center;flex:none;margin:0 4px;transform:translateY(-16px);
+  box-shadow:0 12px 24px rgba(47,58,49,.32),0 0 0 6px var(--bg);transition:transform .2s var(--ease)}
+.nav-add:hover{transform:translateY(-18px)}
+.nav-add:active{transform:translateY(-14px) scale(.94)}
+.nav-add svg.i{width:26px;height:26px;stroke-width:2.4}
+@media (max-width:480px){.nav{bottom:calc(14px + env(safe-area-inset-bottom))}}
+
+/* ---------- Sheet & toast ---------- */
+.scrim{position:absolute;inset:0;background:rgba(31,40,33,.35);z-index:80;opacity:0;visibility:hidden;transition:opacity .3s,visibility 0s .3s}
+.scrim.show{opacity:1;visibility:visible;transition:opacity .3s}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--bg);border-radius:32px 32px 0 0;padding:10px 20px 36px;z-index:90;transform:translateY(105%);transition:transform .38s var(--ease);max-height:82%;overflow-y:auto}
+.sheet.show{transform:none}
+.sheet .grab{width:40px;height:5px;border-radius:3px;background:var(--sage);margin:0 auto 16px}
+.sheet h3{font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px}
+.steps{counter-reset:st;display:grid;gap:10px;margin:16px 0 20px}
+.steps li{list-style:none;display:flex;gap:12px;background:var(--surface);border-radius:16px;padding:12px 14px;font-size:14px;box-shadow:var(--shadow-sm)}
+.steps li::before{counter-increment:st;content:counter(st);width:26px;height:26px;border-radius:9px;background:var(--sky-soft);color:#2A6572;font-weight:700;font-size:13px;display:grid;place-items:center;flex:none}
+.toast{position:absolute;left:50%;top:58px;transform:translate(-50%,-20px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:16px;font-size:14px;font-weight:500;z-index:100;opacity:0;pointer-events:none;transition:all .3s var(--ease);display:flex;gap:8px;align-items:center;white-space:nowrap;box-shadow:var(--shadow-md)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+
+/* ---------- Family split ---------- */
+.sum2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sum2>div{border-radius:var(--r-md);padding:14px 16px}
+.sum2 small{font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px}
+.sum2 b{font-size:21px;letter-spacing:-.03em;display:block;margin-top:6px}
+.gcard{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:16px;cursor:pointer;transition:transform .18s var(--ease)}
+.gcard:active{transform:scale(.985)}
+.gcard+.gcard{margin-top:12px}
+.gcard .row1{display:flex;align-items:center;gap:12px}
+.gcard .row1 .meta{flex:1;min-width:0}
+.gcard .row1 .meta b{font-size:15.5px;display:block}
+.gcard .row2{display:flex;align-items:center;justify-content:space-between;margin-top:14px;gap:10px}
+.mav{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none;position:relative;color:#3E4A40}
+.mav.lg{width:42px;height:42px;font-size:14px}
+.mav .st{position:absolute;right:-2px;bottom:-2px;width:14px;height:14px;border-radius:50%;border:2px solid #fff;display:grid;place-items:center}
+.mav .st svg.i{width:8px;height:8px;stroke-width:4;color:#fff}
+.mav .st.ok{background:#3E8E6A}.mav .st.no{background:#D9785C}.mav .st.wait{background:#B8BDB3}
+.mstack{display:flex}
+.mstack .mav{border:2px solid #fff;margin-left:-8px}
+.mstack .mav:first-child{margin-left:0}
+.g-new{width:100%;border:2px dashed var(--sage);border-radius:var(--r-lg);padding:18px;display:flex;align-items:center;gap:12px;color:var(--ink-2);font-weight:600;margin-top:12px;background:transparent}
+.g-new .ic{width:40px;height:40px;border-radius:14px;background:var(--mint);display:grid;place-items:center;color:var(--ink)}
+.member{display:flex;align-items:center;gap:12px;padding:12px 0;flex-wrap:wrap}
+.member+.member{border-top:1px solid var(--line)}
+.member .meta{flex:1;min-width:0}
+.member .meta b{font-size:14.5px;display:block}
+.member .meta small{font-size:12px;color:var(--ink-3)}
+.member .amt{text-align:right;flex:none}
+.member .amt b{font-size:14.5px;display:block}
+.member .acts{display:flex;gap:6px;width:100%;padding-left:54px;margin-top:-2px}
+.member .acts .mini-btn{flex:1;justify-content:center}
+.mini-btn{height:32px;padding:0 11px;border-radius:10px;font-size:12.5px;font-weight:600;background:var(--bg);display:inline-flex;align-items:center;gap:5px}
+.mini-btn svg.i{width:14px;height:14px}
+.mini-btn.dark{background:var(--ink);color:#fff}
+.amt-input{width:92px;height:36px;border-radius:10px;border:1.5px solid var(--line);text-align:right;padding:0 10px;font-weight:700;font-size:14px;outline:0;background:#fff}
+.amt-input:focus{border-color:var(--sky)}
+.split-check{display:flex;align-items:center;gap:8px;font-size:13px;padding:10px 12px;border-radius:12px;margin-top:10px}
+.qr-card{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:18px;text-align:center}
+.qr-card svg.qr{width:176px;height:176px;margin:6px auto 10px;display:block;border-radius:12px;background:#fff;padding:10px;box-shadow:inset 0 0 0 1px var(--line)}
+.bank-row{display:flex;justify-content:space-between;font-size:13.5px;padding:8px 0;text-align:left}
+.bank-row+.bank-row{border-top:1px solid var(--line)}
+.bank-row span{color:var(--ink-2)}
+.invite{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:14px;padding:10px 10px 10px 14px;font-size:13.5px;margin-top:10px}
+.invite code{flex:1;font-family:inherit;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stepper{display:flex;align-items:center;gap:14px}
+.stepper button{width:44px;height:44px;border-radius:14px;background:var(--surface);box-shadow:var(--shadow-sm);display:grid;place-items:center}
+.stepper b{font-size:24px;min-width:32px;text-align:center}
+.pick-sub{display:flex;gap:10px;overflow-x:auto;margin:0 -20px;padding:4px 20px 8px;scrollbar-width:none}
+.pick-sub::-webkit-scrollbar{display:none}
+.pick-sub button{flex:none;display:flex;flex-direction:column;align-items:center;gap:6px;width:78px;padding:10px 4px;border-radius:16px;background:var(--surface);box-shadow:var(--shadow-sm);font-size:11.5px;font-weight:600;color:var(--ink-2);border:2px solid transparent}
+.pick-sub button.on{border-color:var(--ink);color:var(--ink)}
+.group-link{display:flex;align-items:center;gap:12px;background:var(--mint);border-radius:var(--r-md);padding:14px;margin-top:12px;cursor:pointer}
+.group-link .meta{flex:1}
+.group-link b{display:block;font-size:14.5px}
+
+
+/* ---------- Subca Plus ---------- */
+#s-plus{background:linear-gradient(180deg,#CFE8EC 0%,#E6F2EC 260px,var(--bg) 520px)}
+.plus-hero{text-align:center;padding:4px 6px 0}
+.plus-mark{width:72px;height:72px;border-radius:24px;margin:0 auto 14px;background:var(--ink);display:grid;place-items:center;color:var(--sky);box-shadow:0 14px 30px rgba(47,58,49,.25);position:relative}
+.plus-mark svg.i{width:34px;height:34px}
+.plus-mark::after{content:"PLUS";position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);background:var(--peach);color:#7A3F17;font-size:10px;font-weight:800;letter-spacing:.08em;padding:2px 8px;border-radius:999px}
+.plus-hero h1{font-size:27px;font-weight:800;letter-spacing:-.035em;line-height:1.18}
+.plus-hero p{color:var(--ink-2);font-size:14.5px;margin-top:8px}
+.value-card{display:flex;gap:12px;align-items:center;background:rgba(255,255,255,.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:var(--r-md);padding:14px;margin-top:18px;text-align:left}
+.value-card .ic{width:42px;height:42px;border-radius:14px;background:var(--mint);display:grid;place-items:center;flex:none}
+.value-card b{font-size:15px}
+.cmp{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:6px 16px 10px}
+.cmp-row{display:grid;grid-template-columns:1fr 60px 64px;align-items:center;gap:8px;padding:11px 0;font-size:13.5px}
+.cmp-row+.cmp-row{border-top:1px solid var(--line)}
+.cmp-row.head{font-size:12px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em;padding:10px 0 6px}
+.cmp-row>span:nth-child(2),.cmp-row>span:nth-child(3){text-align:center}
+.cmp-row>span:nth-child(3){font-weight:700;color:var(--ink)}
+.cmp-row .no{color:#B8BDB3}
+.cmp-row .yes{color:#2E7D5B}
+.cmp-row .feat{display:flex;gap:10px;align-items:center;color:var(--ink)}
+.cmp-row .feat svg.i{width:17px;height:17px;color:var(--ink-3)}
+.plan{width:100%;display:flex;align-items:center;gap:14px;text-align:left;background:var(--surface);border-radius:20px;padding:16px;border:2px solid transparent;box-shadow:var(--shadow-sm);position:relative;transition:border-color .2s,transform .15s}
+.plan+.plan{margin-top:10px}
+.plan:active{transform:scale(.985)}
+.plan.on{border-color:var(--ink)}
+.plan .radio{width:24px;height:24px;border-radius:50%;border:2px solid var(--sage);flex:none;display:grid;place-items:center;transition:all .2s}
+.plan.on .radio{border-color:var(--ink);background:var(--ink)}
+.plan.on .radio::after{content:"";width:8px;height:8px;border-radius:50%;background:#fff}
+.plan .meta{flex:1}
+.plan .meta b{font-size:16px;display:block}
+.plan .price{text-align:right}
+.plan .price b{font-size:17px;display:block;letter-spacing:-.02em}
+.plan .badge{position:absolute;top:-10px;right:14px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px}
+.trial-steps{display:grid;gap:0;background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:16px 16px 6px}
+.tstep{display:flex;gap:12px;position:relative;padding-bottom:14px}
+.tstep:not(:last-child)::before{content:"";position:absolute;left:17px;top:36px;bottom:0;width:2px;background:var(--line)}
+.tstep .ic{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;flex:none}
+.tstep b{display:block;font-size:14.5px}
+.tstep span{font-size:13px;color:var(--ink-2)}
+.quote{background:var(--surface);border-radius:var(--r-md);box-shadow:var(--shadow-sm);padding:14px;flex:none;width:260px}
+.quote p{font-size:13.5px;margin:6px 0 10px}
+.stars{display:flex;gap:2px;color:#D9A13B}
+.stars svg{width:14px;height:14px}
+.quotes{display:flex;gap:10px;overflow-x:auto;margin:0 -20px;padding:4px 20px 8px;scrollbar-width:none}
+.quotes::-webkit-scrollbar{display:none}
+.faq{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:2px 16px}
+.faq details+details{border-top:1px solid var(--line)}
+.faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 0;font-weight:600;font-size:14.5px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary svg.i{transition:transform .2s;color:var(--ink-3)}
+.faq details[open] summary svg.i{transform:rotate(90deg)}
+.faq details p{font-size:13.5px;color:var(--ink-2);padding:0 0 14px}
+.plus-cta-note{text-align:center;font-size:12px;color:var(--ink-3);margin-top:8px}
+.legal{display:flex;justify-content:center;gap:14px;font-size:12px;color:var(--ink-3);margin-top:16px}
+.legal button{font-size:12px;color:var(--ink-3);text-decoration:underline}
+.plus-tag{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:800;letter-spacing:.05em;background:var(--ink);color:#fff;padding:2px 7px;border-radius:999px;vertical-align:2px;margin-left:6px;cursor:pointer}
+.plus-tag svg.i{width:10px;height:10px;stroke-width:2.6;color:var(--sky)}
+body.is-plus .plus-tag{display:none}
+.plus-banner{display:flex;align-items:center;gap:14px;background:linear-gradient(120deg,#2F3A31,#4F6655);color:#fff;border-radius:var(--r-lg);padding:16px;cursor:pointer;position:relative;overflow:hidden}
+.plus-banner::after{content:"";position:absolute;right:-40px;top:-40px;width:140px;height:140px;border-radius:50%;background:rgba(153,205,216,.22)}
+.plus-banner .ic{width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.12);display:grid;place-items:center;color:var(--sky);flex:none}
+.plus-banner b{font-size:15.5px;display:block}
+.plus-banner span{font-size:12.5px;opacity:.85}
+.spin{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.success-mark{width:88px;height:88px;border-radius:50%;background:var(--mint);display:grid;place-items:center;margin:24px auto 16px;box-shadow:0 0 0 12px rgba(218,235,227,.5)}
+.success-mark svg.i{width:40px;height:40px;stroke-width:2.4;color:#2E7D5B}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition-duration:.01ms!important}
+}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt20{margin-top:20px}
+.flex{display:flex;align-items:center;gap:10px}.between{justify-content:space-between}
+</style>
+</head>
+<body>
+
+<!-- Icon sprite (Lucide-style strokes) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="17" rx="4"/><path d="M8 2.5v4M16 2.5v4M3 10h18"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15v2M11.5 11v6M16 7v10"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8.5 3 8.5H3S6 15 6 8"/><path d="M10.3 20a2 2 0 0 0 3.4 0"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-hourglass" viewBox="0 0 24 24"><path d="M6 2h12M6 22h12M7 2v4a5 5 0 0 0 10 0V2M7 22v-4a5 5 0 0 1 10 0v4"/></symbol>
+    <symbol id="i-piggy" viewBox="0 0 24 24"><path d="M19 10c1 .5 2 1.3 2 3h-2c-.4 1.3-1.2 2.4-2.3 3.2V19h-3v-1.5h-4V19h-3v-2.8A6.5 6.5 0 0 1 5 11c0-3.6 3.1-6 7-6 1.4 0 2.7.3 3.8.9L18 4v3.6c.4.7.8 1.5 1 2.4Z"/><circle cx="15" cy="10" r=".5" fill="currentColor"/></symbol>
+    <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5"/><path d="M17 14h.01"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="3"/><path d="M2.5 10h19M6.5 15h3"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></symbol>
+    <symbol id="i-archive" viewBox="0 0 24 24"><rect x="2.5" y="3.5" width="19" height="5" rx="1.5"/><path d="M4 8.5V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8.5M10 12.5h4"/></symbol>
+    <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9Z"/><path d="M19 17v4M17 19h4"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M14.8 9.2A2.5 2.5 0 0 0 12.5 8h-1a2 2 0 0 0 0 4h1a2 2 0 0 1 0 4h-1a2.5 2.5 0 0 1-2.3-1.2M12 6.5V8M12 16v1.5"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+    <symbol id="i-tag" viewBox="0 0 24 24"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24"><path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></symbol>
+    <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V16h8v-1.3A7 7 0 0 0 12 2Z"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 10 5-10 5L2 7z"/><path d="m2 17 10 5 10-5M2 12l10 5 10-5"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M16 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/></symbol>
+    <symbol id="i-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-arrow-in" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></symbol>
+    <symbol id="i-arrow-out" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+    <symbol id="i-infinity" viewBox="0 0 24 24"><path d="M6 16c-2.2 0-4-1.8-4-4s1.8-4 4-4c4 0 8 8 12 8 2.2 0 4-1.8 4-4s-1.8-4-4-4c-4 0-8 8-12 8Z"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="m12 2.5 2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"/></symbol>
+    <symbol id="i-lockopen" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></symbol>
+    <symbol id="i-widget" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2.5"/><rect x="13" y="3" width="8" height="8" rx="2.5"/><rect x="3" y="13" width="18" height="8" rx="2.5"/></symbol>
+    <symbol id="i-devices" viewBox="0 0 24 24"><rect x="2" y="4" width="14" height="11" rx="2"/><rect x="15" y="9" width="7" height="12" rx="2"/><path d="M6 19h6"/></symbol>
+  </defs>
+</svg>
+
+<div class="stage">
+  <aside class="side" aria-label="Danh sách màn hình">
+    <h1><span class="brand-mark" style="width:34px;height:34px"><svg class="i" style="color:#99CDD8"><use href="#i-repeat"/></svg></span>Subca</h1>
+    <p>Prototype UI mobile. Bấm vào màn hình bên dưới hoặc tương tác trực tiếp trong khung điện thoại.</p>
+    <ol id="sideNav"></ol>
+  </aside>
+
+  <div class="device">
+    <div class="screen-wrap" id="app">
+      <div class="island" aria-hidden="true"></div>
+      <div class="statusbar" aria-hidden="true">
+        <span class="num">9:41</span>
+        <span class="icons">
+          <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1 4.2a10 10 0 0 1 14 0M3.6 7a6.3 6.3 0 0 1 8.8 0"/><circle cx="8" cy="10" r="1.2" fill="currentColor"/></svg>
+          <svg width="26" height="12" viewBox="0 0 26 12"><rect x=".5" y=".5" width="22" height="11" rx="3.5" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="17" height="8" rx="2" fill="currentColor"/><rect x="23.5" y="4" width="1.8" height="4" rx=".9" fill="currentColor" opacity=".4"/></svg>
+        </span>
+      </div>
+
+      <!-- 1. Onboarding -->
+      <section class="screen no-nav" id="s-onboarding" data-title="Onboarding">
+        <div class="ob-art" aria-hidden="true">
+          <div class="blob" style="width:260px;height:260px;background:#C4E3E9;left:-60px;top:70px"></div>
+          <div class="blob" style="width:220px;height:220px;background:#FDE8D3;right:-50px;top:170px"></div>
+          <div class="blob" style="width:120px;height:120px;background:#F3C3B2;left:150px;top:40px;opacity:.7"></div>
+          <div class="float-card" style="left:28px;top:96px"><span class="logo sm" data-logo="netflix"></span><div>Netflix<small>Gia hạn sau 3 ngày</small></div></div>
+          <div class="float-card" style="right:22px;top:176px;animation-delay:-2s"><span class="logo sm" data-logo="spotify"></span><div>Spotify Family<small>Chia 4 · 22.250đ / người</small></div></div>
+          <div class="float-card" style="left:46px;top:262px;animation-delay:-4s"><span class="ring" style="--p:80;--c:#C9694D;width:34px;height:34px"><div style="width:26px;height:26px"><b style="font-size:11px">2</b></div></span><div>Trial Notion AI<small>Còn 2 ngày — hủy kịp nhé</small></div></div>
+          <div class="float-card" style="right:36px;top:350px;animation-delay:-1s"><span class="logo sm" style="background:#657166"><svg class="i" style="width:15px;height:15px"><use href="#i-piggy"/></svg></span><div>Tiết kiệm<small>374.000đ / tháng</small></div></div>
+        </div>
+        <div class="ob-body">
+          <div class="brand"><span class="brand-mark"><svg class="i" style="color:#99CDD8"><use href="#i-repeat"/></svg></span>Subca</div>
+          <h1 class="ob-title">Mọi subscription,<br><em>gọn trong một nơi.</em></h1>
+          <p class="sub">Biết mình trả bao nhiêu mỗi tháng, được nhắc trước khi bị trừ tiền và cắt bớt những gói không còn dùng.</p>
+          <div class="ob-dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+          <button class="btn btn-primary btn-block" data-go="home">Bắt đầu ngay <svg class="i"><use href="#i-chev"/></svg></button>
+          <button class="btn btn-block mt8" style="color:var(--ink-2);font-weight:600" data-go="home">Tôi đã có tài khoản</button>
+        </div>
+      </section>
+
+      <!-- 2. Home -->
+      <section class="screen" id="s-home" data-title="Trang chủ">
+        <div class="topbar" style="margin-bottom:20px">
+          <button class="hello" data-go="profile" aria-label="Mở hồ sơ">
+            <span class="avatar">K</span>
+            <span style="text-align:left"><span class="muted" style="display:block">Chào buổi sáng,</span><b style="font-size:17px">Khánh</b></span>
+          </button>
+          <button class="icon-btn dot-badge" data-go="notifications" aria-label="Thông báo"><svg class="i"><use href="#i-bell"/></svg></button>
+        </div>
+
+        <div class="hero">
+          <div class="flex between" style="position:relative;z-index:1">
+            <span style="font-size:14px;font-weight:600">Chi phí tháng 9</span>
+            <span class="trend-up"><svg class="i" style="width:13px;height:13px"><use href="#i-trend"/></svg>+6% so với T8</span>
+          </div>
+          <div class="amount num" style="position:relative;z-index:1" id="homeTotal">2.184.000<span>đ</span></div>
+          <div style="font-size:13px;position:relative;z-index:1;color:#34504A" id="homeYear">—</div>
+          <div class="hero-row">
+            <div class="hero-chip"><b class="num" id="homeActive">11</b><small>Đang hoạt động</small></div>
+            <div class="hero-chip"><b class="num" id="homeWeek">—</b><small>Gia hạn trong 7 ngày</small></div>
+          </div>
+        </div>
+
+        <div class="grid2 mt12">
+          <div class="stat" style="background:var(--sky-soft)" data-go="calendar" role="button" tabindex="0">
+            <span class="ic"><svg class="i"><use href="#i-clock"/></svg></span>
+            <div><b class="num" id="homeWeek2">—</b><small>Sắp gia hạn (7 ngày)</small></div>
+          </div>
+          <div class="stat" style="background:var(--peach)" data-go="trials" role="button" tabindex="0">
+            <span class="ic"><svg class="i"><use href="#i-hourglass"/></svg></span>
+            <div><b class="num" id="homeTrials">—</b><small>Trial đang chạy</small></div>
+          </div>
+          <div class="stat" style="background:var(--mint)" data-go="review" role="button" tabindex="0">
+            <span class="ic"><svg class="i"><use href="#i-piggy"/></svg></span>
+            <div><b class="num" id="homeSave">—</b><small>Có thể tiết kiệm / tháng</small></div>
+          </div>
+          <div class="stat" style="background:#EEF0E8" data-go="payments" role="button" tabindex="0">
+            <span class="ic"><svg class="i"><use href="#i-card"/></svg></span>
+            <div><b class="num">4</b><small>Phương thức thanh toán</small></div>
+          </div>
+        </div>
+
+        <div class="card tap mt12" data-go="budget" role="button" tabindex="0">
+          <div class="flex between">
+            <div class="flex"><span class="logo sm" style="background:var(--coral);color:#7A2E17"><svg class="i" style="width:16px;height:16px"><use href="#i-target"/></svg></span><b>Ngân sách subscription</b></div>
+            <span class="pill p-warn" id="homeBudgetPill"></span>
+          </div>
+          <div class="progress over mt16" id="homeBudgetWrap"><i id="homeBudgetBar" style="width:100%"></i></div>
+          <div class="flex between mt8" style="font-size:13px"><span class="num"><b id="homeBudgetSpend"></b> <span class="muted">đã chi</span></span><span class="muted num" id="homeBudgetLimit"></span></div>
+        </div>
+
+        <div class="sec-head"><h3>Sắp gia hạn</h3><button class="link" data-go="calendar">Xem lịch</button></div>
+        <div id="homeUpcoming"></div>
+
+        <div class="sec-head"><h3>Chia tiền nhóm</h3><button class="link" data-go="groups">Tất cả</button></div>
+        <div class="card tap" data-go="groups" role="button" tabindex="0" id="homeGroups"></div>
+
+        <div class="sec-head"><h3>Lối tắt</h3></div>
+        <div class="shortcuts">
+          <button class="shortcut" data-go="list"><span class="ic"><svg class="i"><use href="#i-list"/></svg></span>Tất cả</button>
+          <button class="shortcut" data-go="trials"><span class="ic"><svg class="i"><use href="#i-hourglass"/></svg></span>Trial</button>
+          <button class="shortcut" data-go="budget"><span class="ic"><svg class="i"><use href="#i-target"/></svg></span>Ngân sách</button>
+          <button class="shortcut" data-go="groups"><span class="ic"><svg class="i"><use href="#i-users"/></svg></span>Chia tiền</button>
+        </div>
+        <div class="plus-banner mt20" data-go="plus" role="button" tabindex="0" id="homePlus"></div>
+      </section>
+
+      <!-- 3. List -->
+      <section class="screen" id="s-list" data-title="Danh sách subscription">
+        <div class="topbar">
+          <button class="icon-btn" data-back aria-label="Quay lại"><svg class="i"><use href="#i-back"/></svg></button>
+          <h2>Subscription của tôi</h2>
+          <button class="icon-btn" data-go="add" aria-label="Thêm subscription"><svg class="i"><use href="#i-plus"/></svg></button>
+        </div>
+        <label class="search"><svg class="i"><use href="#i-search"/></svg><span class="sr">Tìm kiếm</span><input id="searchInput" type="search" placeholder="Tìm Netflix, Spotify, gym…"></label>
+        <div class="chips" id="filterChips" role="tablist"></div>
+        <div class="list-sum" id="listSum"></div>
+        <div id="subList"></div>
+      </section>
+
+      <!-- 4. Add -->
+      <section class="screen no-nav modal" id="s-add" data-title="Thêm subscription">
+        <div class="topbar">
+          <button class="icon-btn" data-back aria-label="Đóng"><svg class="i"><use href="#i-x"/></svg></button>
+          <h2>Thêm subscription</h2>
+          <span style="width:44px"></span>
+        </div>
+        <div class="flabel">Chọn nhanh</div>
+        <div class="quick-pick" id="quickPick"></div>
+        <div class="field"><label for="fName">Tên dịch vụ</label><input class="input" id="fName" placeholder="VD: Netflix Premium"></div>
+        <div class="row">
+          <div class="field" style="flex:1.6"><label for="fPrice">Giá</label><input class="input num" id="fPrice" inputmode="numeric" placeholder="0"></div>
+          <div class="field"><label for="fCur">Tiền tệ</label><select class="input" id="fCur"><option>VND</option><option>USD</option><option>EUR</option></select></div>
+        </div>
+        <div class="field"><span class="flabel">Chu kỳ thanh toán</span>
+          <div class="seg" data-seg><button class="">Tuần</button><button class="on">Tháng</button><button>Quý</button><button>Năm</button></div></div>
+        <div class="row">
+          <div class="field"><label for="fDate">Ngày gia hạn</label><input class="input" id="fDate" type="date" value="2026-10-15"></div>
+          <div class="field"><label for="fPay">Thanh toán</label><select class="input" id="fPay"><option>Visa •• 4821</option><option>Mastercard •• 7703</option><option>PayPal</option><option>Apple Billing</option></select></div>
+        </div>
+        <div class="field"><span class="flabel">Danh mục</span>
+          <div class="cat-grid" data-single>
+            <button class="chip on">Giải trí</button><button class="chip">Âm nhạc</button><button class="chip">AI & Công việc</button><button class="chip">Lưu trữ</button><button class="chip">Sức khỏe</button><button class="chip">Web & Hosting</button><button class="chip">Học tập</button>
+          </div></div>
+        <div class="field"><span class="flabel">Nhắc tôi trước</span>
+          <div class="seg" data-seg><button>1 ngày</button><button class="on">3 ngày</button><button>7 ngày</button><button>30 ngày</button></div></div>
+        <div class="toggle-row"><div><b>Tự động gia hạn</b><span class="muted">Dịch vụ tự trừ tiền mỗi kỳ</span></div><button class="switch" role="switch" aria-checked="true" aria-label="Tự động gia hạn"></button></div>
+        <div class="toggle-row"><div><b>Đây là gói dùng thử</b><span class="muted">Theo dõi ngày hết trial</span></div><button class="switch" role="switch" aria-checked="false" aria-label="Gói dùng thử"></button></div>
+        <div class="field mt16"><label for="fNote">Ghi chú</label><textarea class="input" id="fNote" placeholder="VD: dùng chung với gia đình, chia 4 người"></textarea></div>
+        <div class="sticky-cta"><button class="btn btn-primary btn-block" id="saveBtn"><svg class="i"><use href="#i-check"/></svg>Lưu subscription</button></div>
+      </section>
+
+      <!-- 5. Detail -->
+      <section class="screen no-nav" id="s-detail" data-title="Chi tiết subscription">
+        <div class="topbar">
+          <button class="icon-btn" data-back aria-label="Quay lại"><svg class="i"><use href="#i-back"/></svg></button>
+          <h2>Chi tiết</h2>
+          <button class="icon-btn" aria-label="Thêm tùy chọn" data-toast="Menu tùy chọn (mockup)"><svg class="i"><use href="#i-more"/></svg></button>
+        </div>
+        <div id="detailBody"></div>
+      </section>
+
+      <!-- 6. Calendar -->
+      <section class="screen" id="s-calendar" data-title="Lịch gia hạn">
+        <div class="topbar">
+          <div><div class="muted">Lịch gia hạn</div><div class="h-title" style="font-size:24px" id="calTitleBig">Tháng 10</div></div>
+          <button class="icon-btn" data-go="notifications" aria-label="Nhắc nhở"><svg class="i"><use href="#i-bell"/></svg></button>
+        </div>
+        <div class="cal">
+          <div class="cal-head">
+            <button class="icon-btn ghost" id="calPrev" aria-label="Tháng trước"><svg class="i"><use href="#i-back"/></svg></button>
+            <b id="calTitle">Tháng 10, 2026</b>
+            <button class="icon-btn ghost" id="calNext" aria-label="Tháng sau"><svg class="i"><use href="#i-chev"/></svg></button>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+          <div class="cal-legend"><span><i style="background:var(--mint)"></i>Có gia hạn</span><span><i style="background:var(--peach)"></i>Trên 500K</span><span><i style="box-shadow:inset 0 0 0 2px var(--ink)"></i>Hôm nay</span></div>
+        </div>
+        <div class="card mint mt12 flex between">
+          <div><div class="muted" style="color:#3A5A4C">Tổng cần trả trong tháng</div><b class="num" style="font-size:22px" id="calMonthTotal">—</b></div>
+          <span class="pill" style="background:#fff" id="calMonthCount">—</span>
+        </div>
+        <div class="sec-head"><h3 id="calListTitle">Sắp tới</h3><button class="link" id="calClear" hidden>Xem tất cả</button></div>
+        <div id="calList"></div>
+      </section>
+
+      <!-- 7. Trials -->
+      <section class="screen" id="s-trials" data-title="Quản lý Trial">
+        <div class="topbar">
+          <button class="icon-btn" data-back aria-label="Quay lại"><svg class="i"><use href="#i-back"/></svg></button>
+          <h2>Quản lý Trial</h2>
+          <button class="icon-btn" data-go="add" aria-label="Thêm trial"><svg class="i"><use href="#i-plus"/></svg></button>
+        </div>
+        <div class="card peach flex" style="gap:14px">
+          <span class="logo" style="background:#fff;color:#B5553A"><svg class="i"><use href="#i-hourglass"/></svg></span>
+          <div><b>Bạn có <span id="trialCount">3</span> trial đang chạy</b><div class="sub" style="color:#6B4A33">Nếu không hủy, bạn sẽ bị trừ <b class="num" id="trialSum">—</b> / tháng.</div></div>
+        </div>
+        <div class="sec-head"><h3>Đang dùng thử</h3></div>
+        <div id="trialList"></div>
+      </section>
+
+      <!-- 8. Review -->
+      <section class="screen" id="s-review" data-title="Đánh giá hàng tháng">
+        <div class="topbar">
+          <div><div class="muted">Đánh giá tháng 9</div><div class="h-title" style="font-size:24px">Giữ, xem lại hay hủy?</div></div>
+        </div>
+        <div class="savings">
+          <div class="flex between"><span style="font-weight:600;color:#6B3A22">Có thể tiết kiệm</span><span class="pill" style="background:rgba(255,255,255,.7);color:#6B3A22" id="rvYear">—</span></div>
+          <div class="amount num" id="rvSave">0đ</div>
+          <div style="font-size:13px;color:#6B3A22">mỗi tháng nếu hủy các mục đã đánh dấu</div>
+          <div class="step-progress"><div class="progress"><i id="rvProg" style="width:0"></i></div><span class="num" id="rvCount">0/0</span></div>
+        </div>
+        <div class="card sky mt12 reco">
+          <span class="ic"><svg class="i" style="color:var(--sky-deep)"><use href="#i-bulb"/></svg></span>
+          <div><b>Gợi ý từ Subca</b><span class="plus-tag" data-go="plus" role="button" tabindex="0" aria-label="Tính năng Subca Plus"><svg class="i"><use href="#i-sparkle"/></svg>PLUS</span><p class="sub mt8" style="margin-top:4px">Bạn đang trả cho cả <b>iCloud+</b> và <b>Google One</b> — hai dịch vụ lưu trữ trùng chức năng. Gộp về một nơi giúp tiết kiệm <b>45.000đ/tháng</b>.</p>
+          <button class="btn btn-sky btn-sm mt12" data-reco>Đánh dấu hủy Google One</button></div>
+        </div>
+        <div class="card mt12 reco">
+          <span class="ic" style="background:var(--peach)"><svg class="i" style="color:#8A4B1E"><use href="#i-clock"/></svg></span>
+          <div><b>Ít dùng gần đây</b><p class="sub" style="margin-top:4px">Adobe Lightroom chỉ được mở 2 lần trong 30 ngày — chi phí mỗi lần dùng ~125.000đ.</p></div>
+        </div>
+        <div class="chips" id="rvTabs" style="margin-top:18px"></div>
+        <div id="rvList"></div>
+      </section>
+
+      <!-- 9. Analytics -->
+      <section class="screen" id="s-analytics" data-title="Phân tích">
+        <div class="topbar">
+          <div><div class="muted">Phân tích chi tiêu</div><div class="h-title" style="font-size:24px">Tiền đi đâu?</div></div>
+        </div>
+        <div class="seg" id="anSeg"><button class="on" data-p="m">Tháng này</button><button data-p="y">Cả năm</button></div>
+
+        <div class="grid2 mt12">
+          <div class="card" style="padding:16px"><div class="muted">Dự tính cả năm</div><b class="num" style="font-size:22px;letter-spacing:-.03em" id="anYear">—</b><div class="muted" style="color:#8A4B1E">+1,4tr so với 2025</div></div>
+          <div class="card" style="padding:16px"><div class="muted">Trung bình / ngày</div><b class="num" style="font-size:22px;letter-spacing:-.03em" id="anDay">—</b><div class="muted">≈ 1 ly cà phê</div></div>
+        </div>
+
+        <div class="card chart-card mt12">
+          <div class="flex between"><h4>Theo danh mục</h4><button class="link" id="catTableBtn" style="font-size:13px">Xem bảng</button></div>
+          <div class="donut-wrap">
+            <div class="donut"><svg viewBox="0 0 120 120" id="donutSvg" role="img" aria-label="Biểu đồ chi tiêu theo danh mục"></svg>
+              <div class="center"><b class="num" id="donutVal">2,18tr</b><small id="donutLbl">Tổng / tháng</small></div></div>
+            <div class="legend" id="donutLegend"></div>
+          </div>
+          <div id="catTable" hidden class="mt12"></div>
+        </div>
+
+        <div class="card chart-card mt12" style="position:relative">
+          <div class="flex between"><h4>Xu hướng 6 tháng</h4><span class="muted">nghìn đồng</span></div>
+          <div class="bars" id="trendBars"></div>
+          <div class="bar-x" id="trendX"></div>
+          <div class="tooltip" id="trendTip"></div>
+        </div>
+
+        <div class="card chart-card mt12">
+          <h4>Chi phí mỗi lần dùng<span class="plus-tag" data-go="plus" role="button" tabindex="0" aria-label="Tính năng Subca Plus"><svg class="i"><use href="#i-sparkle"/></svg>PLUS</span></h4><p class="muted" style="margin-bottom:6px">Giá tháng ÷ số lần dùng trong 30 ngày</p>
+          <div id="cpuList"></div>
+        </div>
+
+        <div class="card chart-card mt12">
+          <h4>Top đắt nhất</h4>
+          <div id="topList" class="mt8"></div>
+        </div>
+
+        <div class="card chart-card mt12">
+          <div class="flex between"><h4>Theo phương thức thanh toán</h4><button class="link" data-go="payments" style="font-size:13px">Chi tiết</button></div>
+          <div id="pmBars" class="mt16"></div>
+        </div>
+      </section>
+
+      <!-- 10. Budget -->
+      <section class="screen" id="s-budget" data-title="Ngân sách">
+        <div class="topbar">
+          <button class="icon-btn" data-back aria-label="Quay lại"><svg class="i"><use href="#i-back"/></svg></button>
+          <h2>Ngân sách</h2>
+          <button class="icon-btn" id="editBudget" aria-label="Sửa hạn mức"><svg class="i"><use href="#i-edit"/></svg></button>
+        </div>
+        <div class="card budget-hero">
+          <div class="gauge"><svg viewBox="0 0 220 124" aria-hidden="true">
+            <path d="M20 112a90 90 0 0 1 180 0" fill="none" stroke="#EFEFE9" stroke-width="18" stroke-linecap="round"/>
+            <path id="gaugeArc" d="M20 112a90 90 0 0 1 180 0" fill="none" stroke="#C9694D" stroke-width="18" stroke-linecap="round" pathLength="100" stroke-dasharray="100 100" style="transition:stroke-dasharray .6s var(--ease),stroke .3s"/>
+          </svg>
+          <div class="val"><b class="num" id="bSpend">2.184.000đ</b><span class="muted num" id="bLimit">trên 2.000.000đ</span></div></div>
+          <div class="progress over mt20" id="bProgWrap"><i id="bProg" style="width:100%"></i></div>
+          <div class="flex between mt8" style="font-size:13px"><span class="muted">Tháng 9/2026</span><span class="num" id="bPct" style="font-weight:700">109%</span></div>
+        </div>
+        <div class="warn-box mt12" id="bWarn"><svg class="i" style="margin-top:1px"><use href="#i-alert"/></svg><div id="bWarnTxt"></div></div>
+
+        <div class="sec-head"><h3>Nếu hủy những subscription này thì tiết kiệm bao nhiêu?</h3></div>
+        <div class="card" style="padding:6px 18px">
+          <div id="simList"></div>
+        </div>
+        <div class="sim-result"><div><div style="font-size:13px;opacity:.8">Tiết kiệm mỗi tháng</div><b class="num" id="simSave">0đ</b></div><div style="text-align:right"><div style="font-size:13px;opacity:.8">Mỗi năm</div><b class="num" style="font-size:17px" id="simYear">0đ</b></div></div>
+      </section>
+
+      <!-- 11. Payments -->
+      <section class="screen" id="s-payments" data-title="Phương thức thanh toán">
+        <div class="topbar">
+          <button class="icon-btn" data-back aria-label="Quay lại"><svg class="i"><use href="#i-back"/></svg></button>
+          <h2>Thanh toán</h2>
+          <button class="icon-btn" aria-label="Thêm phương thức" data-toast="Thêm phương thức (mockup)"><svg class="i"><use href="#i-plus"/></svg></button>
+        </div>
+        <p class="sub" style="margin:-6px 4px 16px">Chạm vào thẻ để xem subscription đang dùng.</p>
+        <div id="pmList"></div>
+      </section>
+
+      <!-- 12. Notifications -->
+      <section class="screen" id="s-notifications" data-title="Thông báo & Nhắc nhở">
+        <div class="topbar">
+          <button class="icon-btn" data-back aria-label="Quay lại"><svg class="i"><use href="#i-back"/></svg></button>
+          <h2>Nhắc nhở</h2>
+          <button class="icon-btn" aria-label="Đánh dấu đã đọc" id="markRead"><svg class="i"><use href="#i-check"/></svg></button>
+        </div>
+        <div class="seg" id="ntSeg"><button class="on" data-t="feed">Thông báo</button><button data-t="rules">Cài đặt nhắc</button></div>
+        <div id="ntFeed"></div>
+        <div id="ntRules" hidden>
+          <p class="sub" style="margin:18px 4px 12px">Chọn thời điểm Subca nhắc bạn trước khi bị trừ tiền.</p>
+          <div id="ruleList"></div>
+          <div class="card mint mt16 flex" style="gap:12px"><svg class="i"><use href="#i-clock"/></svg><div style="flex:1"><b>Giờ nhận thông báo</b><div class="muted" style="color:#3A5A4C">Mỗi ngày lúc 08:30</div></div><svg class="i"><use href="#i-chev"/></svg></div>
+        </div>
+      </section>
+
+      <!-- 14. Groups list -->
+      <section class="screen" id="s-groups" data-title="Chia tiền nhóm">
+        <div class="topbar">
+          <button class="icon-btn" data-back aria-label="Quay lại"><svg class="i"><use href="#i-back"/></svg></button>
+          <h2>Chia tiền nhóm</h2>
+          <button class="icon-btn" id="newGroupBtn" aria-label="Tạo nhóm mới"><svg class="i"><use href="#i-plus"/></svg></button>
+        </div>
+        <div class="sum2">
+          <div style="background:var(--mint)"><small style="color:#2E5B45"><svg class="i" style="width:14px;height:14px"><use href="#i-arrow-in"/></svg>Bạn sẽ nhận</small><b class="num" id="gIn">—</b><span class="muted" style="color:#3A5A4C" id="gInSub"></span></div>
+          <div style="background:var(--peach)"><small style="color:#8A4B1E"><svg class="i" style="width:14px;height:14px"><use href="#i-arrow-out"/></svg>Bạn cần trả</small><b class="num" id="gOut">—</b><span class="muted" style="color:#7A5236" id="gOutSub"></span></div>
+        </div>
+        <div class="sec-head"><h3>Bạn là chủ nhóm</h3><span class="muted" id="gOwnCount"></span></div>
+        <div id="gOwn"></div>
+        <button class="g-new" id="newGroupBtn2"><span class="ic"><svg class="i"><use href="#i-plus"/></svg></span><span style="text-align:left">Tạo nhóm mới<br><span class="muted" style="font-weight:500">Chia gói gia đình với bạn bè, người thân</span></span></button>
+        <div class="sec-head"><h3>Bạn là thành viên</h3></div>
+        <div id="gMember"></div>
+      </section>
+
+      <!-- 15. Group detail -->
+      <section class="screen no-nav" id="s-group" data-title="Chi tiết nhóm">
+        <div class="topbar">
+          <button class="icon-btn" data-back aria-label="Quay lại"><svg class="i"><use href="#i-back"/></svg></button>
+          <h2>Chi tiết nhóm</h2>
+          <button class="icon-btn" aria-label="Tùy chọn nhóm" data-toast="Tùy chọn nhóm (mockup)"><svg class="i"><use href="#i-more"/></svg></button>
+        </div>
+        <div id="groupBody"></div>
+      </section>
+
+      <!-- 16. Subca Plus paywall -->
+      <section class="screen no-nav modal" id="s-plus" data-title="Nâng cấp Subca Plus">
+        <div class="topbar">
+          <button class="icon-btn" data-back aria-label="Đóng"><svg class="i"><use href="#i-x"/></svg></button>
+          <span></span>
+          <button class="link" data-toast="Không tìm thấy giao dịch cũ để khôi phục" style="padding:10px 4px">Khôi phục</button>
+        </div>
+        <div id="plusBody"></div>
+      </section>
+
+      <!-- 13. Profile -->
+      <section class="screen" id="s-profile" data-title="Hồ sơ & Cài đặt">
+        <div class="topbar">
+          <button class="icon-btn" data-back aria-label="Quay lại"><svg class="i"><use href="#i-back"/></svg></button>
+          <h2>Cài đặt</h2>
+          <span style="width:44px"></span>
+        </div>
+        <div class="card profile-card">
+          <span class="avatar">K</span>
+          <div style="flex:1"><b style="font-size:18px">Khánh Nguyễn</b><div class="muted">khanh@subca.app</div><span class="pill p-cancel mt8" id="planPill">Gói Free</span></div>
+          <button class="icon-btn ghost" aria-label="Sửa hồ sơ" data-toast="Sửa hồ sơ (mockup)"><svg class="i"><use href="#i-edit"/></svg></button>
+        </div>
+        <div class="plus-banner mt12" data-go="plus" role="button" tabindex="0" id="profilePlus"></div>
+        <div class="group-label">Tài khoản</div>
+        <div class="set-group">
+          <button class="set-row" data-toast="Hồ sơ cá nhân (mockup)"><span class="ic" style="background:var(--sky-soft)"><svg class="i"><use href="#i-user"/></svg></span><span class="t">Hồ sơ</span><svg class="i chev"><use href="#i-chev"/></svg></button>
+          <button class="set-row" data-sheet="currency"><span class="ic" style="background:var(--mint)"><svg class="i"><use href="#i-coin"/></svg></span><span class="t">Tiền tệ</span><span class="v" id="curVal">VND (đ)</span><svg class="i chev"><use href="#i-chev"/></svg></button>
+          <button class="set-row" data-toast="Ngôn ngữ & khu vực (mockup)"><span class="ic" style="background:var(--peach)"><svg class="i"><use href="#i-globe"/></svg></span><span class="t">Ngôn ngữ & khu vực</span><span class="v">Tiếng Việt</span><svg class="i chev"><use href="#i-chev"/></svg></button>
+        </div>
+        <div class="group-label">Quản lý</div>
+        <div class="set-group">
+          <button class="set-row" data-go="notifications"><span class="ic" style="background:var(--coral)"><svg class="i"><use href="#i-bell"/></svg></span><span class="t">Thông báo</span><span class="v">Đang bật</span><svg class="i chev"><use href="#i-chev"/></svg></button>
+          <button class="set-row" data-toast="Quản lý danh mục (mockup)"><span class="ic" style="background:#EEF0E8"><svg class="i"><use href="#i-tag"/></svg></span><span class="t">Danh mục</span><span class="v">7</span><svg class="i chev"><use href="#i-chev"/></svg></button>
+          <button class="set-row" data-go="payments"><span class="ic" style="background:var(--sky-soft)"><svg class="i"><use href="#i-card"/></svg></span><span class="t">Phương thức thanh toán</span><span class="v">4</span><svg class="i chev"><use href="#i-chev"/></svg></button>
+          <button class="set-row" data-go="budget"><span class="ic" style="background:var(--mint)"><svg class="i"><use href="#i-target"/></svg></span><span class="t">Ngân sách</span><span class="v">2.000.000đ</span><svg class="i chev"><use href="#i-chev"/></svg></button>
+          <button class="set-row" data-sheet="export"><span class="ic" style="background:var(--peach)"><svg class="i"><use href="#i-download"/></svg></span><span class="t">Xuất dữ liệu<span class="plus-tag" data-go="plus" role="button" tabindex="0" aria-label="Tính năng Subca Plus"><svg class="i"><use href="#i-sparkle"/></svg>PLUS</span></span><svg class="i chev"><use href="#i-chev"/></svg></button>
+        </div>
+        <div class="group-label">Khác</div>
+        <div class="set-group">
+          <button class="set-row" data-toast="Quyền riêng tư (mockup)"><span class="ic" style="background:#EEF0E8"><svg class="i"><use href="#i-shield"/></svg></span><span class="t">Quyền riêng tư</span><svg class="i chev"><use href="#i-chev"/></svg></button>
+          <button class="set-row" data-toast="Trung tâm trợ giúp (mockup)"><span class="ic" style="background:var(--sky-soft)"><svg class="i"><use href="#i-help"/></svg></span><span class="t">Trợ giúp</span><svg class="i chev"><use href="#i-chev"/></svg></button>
+          <button class="set-row" data-go="onboarding"><span class="ic" style="background:var(--coral)"><svg class="i"><use href="#i-logout"/></svg></span><span class="t" style="color:#9A3F25">Đăng xuất</span></button>
+        </div>
+        <p class="muted" style="text-align:center;margin-top:20px">Subca v0.1 · Prototype</p>
+      </section>
+
+      <!-- Bottom nav -->
+      <nav class="nav" id="nav" aria-label="Điều hướng chính">
+        <button class="nav-item" data-tab="home"><span class="pip"><svg class="i"><use href="#i-home"/></svg></span>Trang chủ</button>
+        <button class="nav-item" data-tab="calendar"><span class="pip"><svg class="i"><use href="#i-cal"/></svg></span>Lịch</button>
+        <button class="nav-add" data-go="add" aria-label="Thêm subscription"><svg class="i"><use href="#i-plus"/></svg></button>
+        <button class="nav-item" data-tab="review"><span class="pip"><svg class="i"><use href="#i-check-circle"/></svg></span>Đánh giá</button>
+        <button class="nav-item" data-tab="analytics"><span class="pip"><svg class="i"><use href="#i-chart"/></svg></span>Phân tích</button>
+      </nav>
+
+      <div class="scrim" id="scrim"></div>
+      <div class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="grab"></div><div id="sheetBody"></div></div>
+      <div class="toast" id="toast" role="status"><svg class="i" style="color:var(--sky)"><use href="#i-check-circle"/></svg><span id="toastTxt"></span></div>
+      <div class="home-ind"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= Sample data ================= */
+const TODAY = new Date(2026, 8, 27); // 27/09/2026
+let budget = 2000000;
+const CATS = {
+  ent:{name:'Giải trí', color:'var(--c1)'},
+  work:{name:'AI & Công việc', color:'var(--c2)'},
+  cloud:{name:'Lưu trữ', color:'var(--c3)'},
+  health:{name:'Sức khỏe', color:'var(--c4)'},
+  web:{name:'Web & Hosting', color:'var(--c5)'},
+};
+const PM = {
+  visa:{name:'Visa', last:'4821', solid:'#1A1F71', bg:'linear-gradient(135deg,#1A1F71,#3A62B8)'},
+  master:{name:'Mastercard', last:'7703', solid:'#252525', bg:'linear-gradient(135deg,#2B2B2B,#5A4A42)'},
+  paypal:{name:'PayPal', last:'khanh@…', solid:'#003087', bg:'linear-gradient(135deg,#003087,#0070E0)'},
+  apple:{name:'Apple Billing', last:'Apple ID', solid:'#000000', bg:'linear-gradient(135deg,#1C1C1E,#4A4A4F)'},
+};
+// monthly = VND per month; cycle: 'Tháng' | 'Năm'; day = renewal day-of-month; month (0-based) for yearly
+const SUBS = [
+  {id:'netflix', name:'Netflix', plan:'Premium 4K', price:260000, cycle:'Tháng', day:30, cat:'ent', pm:'visa', status:'active', color:'#E50914', l:'N', uses:22, start:'12/03/2023', freq:4},
+  {id:'spotify', name:'Spotify', plan:'Premium Family', price:89000, cycle:'Tháng', day:2, cat:'ent', pm:'master', status:'active', color:'#1DB954', l:'S', uses:48, start:'05/01/2022', freq:5},
+  {id:'youtube', name:'YouTube Premium', plan:'Cá nhân', price:79000, cycle:'Tháng', day:8, cat:'ent', pm:'apple', status:'review', color:'#FF3B30', l:'Y', uses:9, start:'20/06/2024', freq:2},
+  {id:'chatgpt', name:'ChatGPT Plus', plan:'Plus', price:520000, cycle:'Tháng', day:3, cat:'work', pm:'visa', status:'active', color:'#10A37F', l:'G', uses:57, start:'14/02/2024', freq:5, usd:'20 USD'},
+  {id:'canva', name:'Canva Pro', plan:'Pro cá nhân', price:130000, cycle:'Tháng', day:14, cat:'work', pm:'paypal', status:'active', color:'#7D2AE8', l:'C', uses:11, start:'01/09/2024', freq:3},
+  {id:'adobe', name:'Adobe Lightroom', plan:'Photography 20GB', price:250000, cycle:'Tháng', day:18, cat:'work', pm:'master', status:'review', color:'#2C6FDB', l:'Lr', uses:2, start:'10/11/2023', freq:1},
+  {id:'icloud', name:'iCloud+', plan:'200GB', price:59000, cycle:'Tháng', day:5, cat:'cloud', pm:'apple', status:'active', color:'#3D8BFD', l:'iC', uses:30, start:'02/08/2021', freq:5},
+  {id:'gone', name:'Google One', plan:'100GB', price:45000, cycle:'Tháng', day:21, cat:'cloud', pm:'visa', status:'review', color:'#4285F4', l:'G1', uses:3, start:'17/04/2023', freq:1},
+  {id:'gym', name:'CitiGym', plan:'Thẻ tháng', price:550000, cycle:'Tháng', day:1, cat:'health', pm:'master', status:'active', color:'#F08A24', l:'CG', uses:14, start:'01/06/2025', freq:3},
+  {id:'hosting', name:'Hostinger', plan:'Business Hosting', price:1800000, cycle:'Năm', day:12, month:10, cat:'web', pm:'paypal', status:'active', color:'#673DE6', l:'H', uses:30, start:'12/11/2024', freq:4},
+  {id:'domain', name:'Tên miền subca.app', plan:'.app · 1 năm', price:420000, cycle:'Năm', day:9, month:9, cat:'web', pm:'visa', status:'active', color:'#657166', l:'.a', uses:30, start:'09/10/2025', freq:4},
+  {id:'notion', name:'Notion AI', plan:'Plus + AI', price:250000, cycle:'Tháng', day:29, cat:'work', pm:'visa', status:'trial', color:'#2F2F2F', l:'N', uses:6, start:'15/09/2026', freq:2, trialDays:14},
+  {id:'duolingo', name:'Duolingo Max', plan:'Super', price:189000, cycle:'Tháng', day:4, cat:'ent', pm:'apple', status:'trial', color:'#58CC02', l:'D', uses:10, start:'27/09/2026', freq:3, trialDays:7},
+  {id:'appletv', name:'Apple TV+', plan:'Hằng tháng', price:99000, cycle:'Tháng', day:11, cat:'ent', pm:'apple', status:'trial', color:'#1C1C1E', l:'tv', uses:1, start:'11/09/2026', freq:1, trialDays:30},
+  {id:'figma', name:'Figma Pro', plan:'Professional', price:390000, cycle:'Tháng', day:20, cat:'work', pm:'visa', status:'cancelled', color:'#A259FF', l:'F', uses:0, start:'03/01/2025', freq:0},
+];
+const STATUS = {
+  active:{t:'Đang hoạt động', c:'p-active'}, trial:{t:'Dùng thử', c:'p-trial'},
+  review:{t:'Cần xem lại', c:'p-review'}, cancelled:{t:'Đã hủy', c:'p-cancel'}
+};
+
+/* ================= Helpers ================= */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const vnd = n => Math.round(n).toLocaleString('vi-VN') + 'đ';
+const short = n => n >= 1e6 ? (n/1e6).toFixed(n%1e6===0?0:2).replace('.',',').replace(/,?0+$/,'') + 'tr' : Math.round(n/1000) + 'K';
+const monthly = s => s.cycle === 'Năm' ? s.price/12 : s.price;
+const byId = id => SUBS.find(s => s.id === id);
+/* Brand marks: Simple Icons (CC0) paths, inlined so the file works offline */
+const BRAND = {
+  netflix:{bg:'#000000', fg:'#E50914', d:'m5.398 0 8.348 23.602c2.346.059 4.856.398 4.856.398L10.113 0H5.398zm8.489 0v9.172l4.715 13.33V0h-4.715zM5.398 1.5V24c1.873-.225 2.81-.312 4.715-.398V14.83L5.398 1.5z'},
+  spotify:{bg:'#121212', fg:'#1ED760', d:'M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z'},
+  youtube:{bg:'#FFFFFF', fg:'#FF0000', d:'M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z'},
+  chatgpt:{bg:'#000000', fg:'#000000', d:'M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z'},
+  canva:{bg:'linear-gradient(135deg,#00C4CC,#7D2AE8)', fg:'#00C4CC', d:'M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zM6.962 7.68c.754 0 1.337.549 1.405 1.2.069.583-.171 1.097-.822 1.406-.343.171-.48.172-.549.069-.034-.069 0-.137.069-.206.617-.514.617-.926.548-1.508-.034-.378-.308-.618-.583-.618-1.2 0-2.914 2.674-2.674 4.629.103.754.549 1.646 1.509 1.646.308 0 .65-.103.96-.24.5-.264.799-.47 1.097-.8-.073-.885.704-2.046 1.851-2.046.515 0 .926.205.96.583.068.514-.377.582-.514.582s-.378-.034-.378-.17c-.034-.138.309-.07.275-.378-.035-.206-.24-.274-.446-.274-.72 0-1.131.994-1.029 1.611.035.275.172.549.447.549.205 0 .514-.31.617-.755.068-.308.343-.514.583-.514.102 0 .17.034.205.171v.138c-.034.137-.137.548-.102.651 0 .069.034.171.17.171.092 0 .436-.18.777-.459.117-.59.253-1.298.253-1.357.034-.24.137-.48.617-.48.103 0 .171.034.205.171v.138l-.136.617c.445-.583 1.097-.994 1.508-.994.172 0 .309.102.309.274 0 .103 0 .274-.069.446-.137.377-.309.96-.412 1.474 0 .137.035.274.207.274.171 0 .685-.206 1.096-.754l.007-.004c-.002-.068-.007-.134-.007-.202 0-.411.035-.754.104-.994.068-.274.411-.514.617-.514.103 0 .205.069.205.171 0 .035 0 .103-.034.137-.137.446-.24.857-.24 1.269 0 .24.034.582.102.788 0 .034.035.069.07.069.068 0 .548-.445.89-1.028-.308-.206-.48-.549-.48-.96 0-.72.446-1.097.858-1.097.343 0 .617.24.617.72 0 .308-.103.65-.274.96h.102a.77.77 0 0 0 .584-.24.293.293 0 0 1 .134-.117c.335-.425.83-.74 1.41-.74.48 0 .924.205.959.582.068.515-.378.618-.515.618l-.002-.002c-.138 0-.377-.035-.377-.172 0-.137.309-.068.274-.376-.034-.206-.24-.275-.446-.275-.686 0-1.13.891-1.028 1.611.034.275.171.583.445.583.206 0 .515-.308.652-.754.068-.274.343-.514.583-.514.103 0 .17.034.205.171 0 .069 0 .206-.137.652-.17.308-.171.48-.137.617.034.274.171.48.309.583.034.034.068.102.068.102 0 .069-.034.138-.137.138-.034 0-.068 0-.103-.035-.514-.205-.72-.548-.789-.891-.205.24-.445.377-.72.377-.445 0-.89-.411-.96-.926a1.609 1.609 0 0 1 .075-.649c-.203.13-.422.203-.623.203h-.17c-.447.652-.927 1.098-1.27 1.303a.896.896 0 0 1-.377.104c-.068 0-.171-.035-.205-.104-.095-.152-.156-.392-.193-.667-.481.527-1.145.805-1.453.805-.343 0-.548-.206-.582-.55v-.376c.102-.754.377-1.2.377-1.337a.074.074 0 0 0-.069-.07c-.24 0-1.028.824-1.166 1.373l-.103.445c-.068.309-.377.515-.582.515-.103 0-.172-.035-.206-.172v-.137l.046-.233c-.435.31-.87.508-1.075.508-.308 0-.48-.172-.514-.412-.206.274-.445.412-.754.412-.352 0-.696-.24-.862-.593-.244.275-.523.553-.852.764-.48.309-1.028.549-1.68.549-.582 0-1.097-.309-1.371-.583-.412-.377-.651-.96-.686-1.509-.205-1.68.823-3.84 2.4-4.8.378-.205.755-.343 1.132-.343zm9.77 3.291c-.104 0-.172.172-.172.343 0 .274.137.583.309.755a1.74 1.74 0 0 0 .102-.583c0-.343-.137-.515-.24-.515z'},
+  adobe:{bg:'#001E36', fg:'#001E36', d:'M19.75.3H4.25C1.9.3 0 2.2 0 4.55v14.9c0 2.35 1.9 4.25 4.25 4.25h15.5c2.35 0 4.25-1.9 4.25-4.25V4.55C24 2.2 22.1.3 19.75.3zm-6.99 16.389c0 .051-.029.09-.06.121-.03.02-.06.029-.101.029H6.26c-.11 0-.16-.061-.16-.18V6.44c-.01-.07.04-.13.11-.14h2c.05-.01.11.03.11.08v8.43h4.62c.101 0 .131.049.11.14l-.29 1.739zm6.25-7.859v1.95c0 .08-.05.11-.16.11-.649-.04-1.3.08-1.89.34-.2.09-.39.21-.54.37v5.1c0 .1-.04.14-.13.14h-1.95c-.08.01-.15-.04-.16-.119V11.14c0-.24 0-.49-.01-.75s-.01-.52-.02-.78c-.01-.22-.03-.44-.061-.66-.01-.05.02-.1.07-.11.01-.01.02-.01.04 0h1.75c.1 0 .18.07.21.16.04.07.07.15.08.23.02.1.039.21.05.31.01.11.021.23.021.36.299-.35.66-.64 1.069-.86.46-.25.97-.37 1.49-.36.069-.01.13.04.14.11.001.01.001.02.001.04z'},
+  icloud:{bg:'#FFFFFF', fg:'#3693F3', d:'M13.762 4.29a6.51 6.51 0 0 0-5.669 3.332 3.571 3.571 0 0 0-1.558-.36 3.571 3.571 0 0 0-3.516 3A4.918 4.918 0 0 0 0 14.796a4.918 4.918 0 0 0 4.92 4.914 4.93 4.93 0 0 0 .617-.045h14.42c2.305-.272 4.041-2.258 4.043-4.589v-.009a4.594 4.594 0 0 0-3.727-4.508 6.51 6.51 0 0 0-6.511-6.27z'},
+  hosting:{bg:'#673DE6', fg:'#673DE6', d:'M16.415 0v7.16l5.785 3.384V2.949L16.415 0ZM1.8 0v11.237h18.815L14.89 8.09l-7.457-.003V3.024L1.8 0Zm14.615 20.894v-5.019l-7.514-.005c.007.033-5.82-3.197-5.82-3.197l19.119.091V24l-5.785-3.106ZM1.8 13.551v7.343l5.633 2.949v-6.988L1.8 13.551Z'},
+  notion:{bg:'#FFFFFF', fg:'#000000', d:'M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L17.86 1.968c-.42-.326-.981-.7-2.055-.607L3.01 2.295c-.466.046-.56.28-.374.466zm.793 3.08v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.167V6.354c0-.606-.233-.933-.748-.887l-15.177.887c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952L12.21 19s0 .84-1.168.84l-3.222.186c-.093-.186 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.139c-.093-.514.28-.887.747-.933zM1.936 1.035l13.31-.98c1.634-.14 2.055-.047 3.082.7l4.249 2.986c.7.513.934.653.934 1.213v16.378c0 1.026-.373 1.634-1.68 1.726l-15.458.934c-.98.047-1.448-.093-1.962-.747l-3.129-4.06c-.56-.747-.793-1.306-.793-1.96V2.667c0-.839.374-1.54 1.447-1.632z'},
+  duolingo:{bg:'#58CC02', fg:'#58CC02', d:'M14.484 18.213c1.142 1.033 2.657 1.662 4.316 1.662l.294-.001c1.985-.038 3.749-.976 4.905-2.422v1.98c0 2.522-2.043 4.568-4.567 4.568H4.569C2.045 23.998.002 21.954.002 19.43v-1.92c1.181 1.443 2.976 2.365 4.985 2.365l.35-.001c1.61-.027 3.076-.646 4.191-1.648.555.764 1.456 1.26 2.473 1.26 1.023 0 1.928-.502 2.483-1.273zm-5.349-.996c-.989 1.022-2.375 1.658-3.909 1.658h-.239c-2.229 0-4.146-1.343-4.987-3.262v-7.16c.281-.64.68-1.216 1.169-1.699-.035-.731.132-1.469.511-2.128.256-.44.867-.504 1.21-.124l.766.851c.007-.003.014-.003.021-.005-.098-.78.037-1.587.419-2.308.24-.45.757-.53 1.114-.164 0 0 3.939 3.979 4.035 4.084 1.542 1.348 4.066 1.287 5.686-.18.002-.003.007-.005.009-.007.042-.042 3.855-3.9 3.855-3.9.3361-.3451.8619-.3101 1.113.164.385.724.518 1.535.417 2.32.002.001.003.001.004.002l.007.002c.001 0 .002 0 .003.001l.776-.86c.342-.38.954-.316 1.207.124.387.673.553 1.427.509 2.173.496.501.897 1.099 1.169 1.762v6.941c-.816 1.978-2.761 3.373-5.032 3.373H18.8c-1.547 0-2.945-.648-3.936-1.686a.8386.8386 0 0 0-.009-.067c.313-.017.528-.162.688-.33.152-.16.299-.397.299-.776 0 0-.022-.312-.024-.324.693.767 1.696 1.249 2.811 1.249 2.092 0 3.787-1.696 3.787-3.787v-2.243c0-2.092-1.697-3.787-3.787-3.787-2.093 0-3.787 1.695-3.787 3.787v2.243c0 .266.027.526.079.776-.712-.784-1.744-1.278-2.842-1.278-1.239 0-2.339.523-3.064 1.355.063-.274.097-.56.097-.853v-2.243c0-2.092-1.697-3.787-3.788-3.787-2.09 0-3.787 1.695-3.787 3.787v2.243c0 2.093 1.697 3.787 3.787 3.787 1.151 0 2.182-.513 2.876-1.322-.008.035-.039.395-.039.395 0 .378.147.616.298.775.16.168.374.312.688.331a.7783.7783 0 0 0-.012.097zm.997.073c.729.131 1.733.305 1.792.305h.157c.059 0 1.789-.303 1.789-.303-.327.705-1.041 1.194-1.869 1.194-.829 0-1.543-.49-1.869-1.196zm-.971-1.379c.246-1.313 1.462-2.259 2.918-2.259 1.324 0 2.521.97 2.763 2.259v.105c0 .082-.029.115-.103.106l-2.658.473h-.157l-2.66-.476c-.075.01-.103-.023-.103-.105Zm8.023-6.392c.255-.14.549-.22.861-.22.992 0 1.798.804 1.798 1.798v1.919c0 .991-.804 1.797-1.798 1.797-.991 0-1.797-.803-1.797-1.797v-1.542c.034.003.068.005.103.005.64 0 1.16-.518 1.16-1.156 0-.312-.125-.596-.327-.804zM5.162 9.461c.227-.104.48-.162.746-.162.991 0 1.798.804 1.798 1.798v1.919c0 .991-.804 1.797-1.798 1.797-.991 0-1.797-.803-1.797-1.797v-1.571c.089.022.182.034.278.034.641 0 1.16-.518 1.16-1.156 0-.342-.149-.65-.387-.862ZM.002 6.554V4.568C.002 2.044 2.045 0 4.569 0h14.865c2.522 0 4.565 2.044 4.565 4.568v2.041a5.1847 5.1847 0 0 0-.164-.197 4.8592 4.8592 0 0 0-.646-2.284c-.433-.754-1.315-1.037-2.07-.786a4.785 4.785 0 0 0-.327-.774h-.001c-.287-.54-.758-.835-1.248-.908-.493-.073-1.033.072-1.464.515l-3.82 3.864c-1.226 1.11-3.127 1.199-4.313.205-.103-.109-4.025-4.071-4.025-4.071-.427-.438-.966-.584-1.46-.51-.489.073-.961.367-1.248.907v.002c-.133.25-.241.508-.327.771-.753-.252-1.635.029-2.071.782 0 0-.001.001-.001.002-.4.694-.613 1.459-.645 2.23-.057.065-.113.13-.167.197z'},
+  appletv:{bg:'#000000', fg:'#000000', d:'M20.57 17.735h-1.815l-3.34-9.203h1.633l2.02 5.987c.075.231.273.9.586 2.012l.297-.997.33-1.006 2.094-6.004H24zm-5.344-.066a5.76 5.76 0 0 1-1.55.207c-1.23 0-1.84-.693-1.84-2.087V9.646h-1.063V8.532h1.121V7.081l1.476-.602v2.062h1.707v1.113H13.38v5.805c0 .446.074.75.214.932.14.182.396.264.75.264.207 0 .495-.041.883-.115zm-7.29-5.343c.017 1.764 1.55 2.358 1.567 2.366-.017.042-.248.842-.808 1.658-.487.71-.99 1.418-1.79 1.435-.783.016-1.03-.462-1.93-.462-.89 0-1.17.445-1.913.478-.758.025-1.344-.775-1.838-1.484-.998-1.451-1.765-4.098-.734-5.88.51-.89 1.426-1.451 2.416-1.46.75-.016 1.468.512 1.93.512.461 0 1.327-.627 2.234-.536.38.016 1.452.157 2.136 1.154-.058.033-1.278.743-1.27 2.219M6.468 7.988c.404-.495.685-1.18.61-1.864-.585.025-1.294.388-1.723.883-.38.437-.71 1.138-.619 1.806.652.05 1.328-.338 1.732-.825Z'},
+  figma:{bg:'#1E1E1E', fg:'#F24E1E', d:'M15.852 8.981h-4.588V0h4.588c2.476 0 4.49 2.014 4.49 4.49s-2.014 4.491-4.49 4.491zM12.735 7.51h3.117c1.665 0 3.019-1.355 3.019-3.019s-1.355-3.019-3.019-3.019h-3.117V7.51zm0 1.471H8.148c-2.476 0-4.49-2.014-4.49-4.49S5.672 0 8.148 0h4.588v8.981zm-4.587-7.51c-1.665 0-3.019 1.355-3.019 3.019s1.354 3.02 3.019 3.02h3.117V1.471H8.148zm4.587 15.019H8.148c-2.476 0-4.49-2.014-4.49-4.49s2.014-4.49 4.49-4.49h4.588v8.98zM8.148 8.981c-1.665 0-3.019 1.355-3.019 3.019s1.355 3.019 3.019 3.019h3.117V8.981H8.148zM8.172 24c-2.489 0-4.515-2.014-4.515-4.49s2.014-4.49 4.49-4.49h4.588v4.441c0 2.503-2.047 4.539-4.563 4.539zm-.024-7.51a3.023 3.023 0 0 0-3.019 3.019c0 1.665 1.365 3.019 3.044 3.019 1.705 0 3.093-1.376 3.093-3.068v-2.97H8.148zm7.704 0h-.098c-2.476 0-4.49-2.014-4.49-4.49s2.014-4.49 4.49-4.49h.098c2.476 0 4.49 2.014 4.49 4.49s-2.014 4.49-4.49 4.49zm-.097-7.509c-1.665 0-3.019 1.355-3.019 3.019s1.355 3.019 3.019 3.019h.098c1.665 0 3.019-1.355 3.019-3.019s-1.355-3.019-3.019-3.019h-.098z'},
+  visa:{bg:'#1A1F71', fg:'#FFFFFF', d:'M9.112 8.262L5.97 15.758H3.92L2.374 9.775c-.094-.368-.175-.503-.461-.658C1.447 8.864.677 8.627 0 8.479l.046-.217h3.3a.904.904 0 01.894.764l.817 4.338 2.018-5.102zm8.033 5.049c.008-1.979-2.736-2.088-2.717-2.972.006-.269.262-.555.822-.628a3.66 3.66 0 011.913.336l.34-1.59a5.207 5.207 0 00-1.814-.333c-1.917 0-3.266 1.02-3.278 2.479-.012 1.079.963 1.68 1.698 2.04.756.367 1.01.603 1.006.931-.005.504-.602.725-1.16.734-.975.015-1.54-.263-1.992-.473l-.351 1.642c.453.208 1.289.39 2.156.398 2.037 0 3.37-1.006 3.377-2.564m5.061 2.447H24l-1.565-7.496h-1.656a.883.883 0 00-.826.55l-2.909 6.946h2.036l.405-1.12h2.488zm-2.163-2.656l1.02-2.815.588 2.815zm-8.16-4.84l-1.603 7.496H8.34l1.605-7.496z'},
+  paypal:{bg:'#FFFFFF', fg:'#003087', d:'M15.607 4.653H8.941L6.645 19.251H1.82L4.862 0h7.995c3.754 0 6.375 2.294 6.473 5.513-.648-.478-2.105-.86-3.722-.86m6.57 5.546c0 3.41-3.01 6.853-6.958 6.853h-2.493L11.595 24H6.74l1.845-11.538h3.592c4.208 0 7.346-3.634 7.153-6.949a5.24 5.24 0 0 1 2.848 4.686M9.653 5.546h6.408c.907 0 1.942.222 2.363.541-.195 2.741-2.655 5.483-6.441 5.483H8.714Z'},
+  apple:{bg:'#000000', fg:'#FFFFFF', d:'M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701'}
+};
+const GOOGLE_G = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>';
+const MC_MARK = '<svg viewBox="0 0 38 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#EB001B"/><circle cx="26" cy="12" r="11" fill="#F79E1B"/><path d="M19 3.5a11 11 0 0 1 0 17 11 11 0 0 1 0-17z" fill="#FF5F00"/></svg>';
+const glyph = (k, fill) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="${fill || BRAND[k].fg}" d="${BRAND[k].d}"/></svg>`;
+const logo = (s, cls='') => {
+  const k = s.brand || s.id;
+  if (k === 'gone') return `<span class="logo brand light ${cls}" aria-hidden="true">${GOOGLE_G}</span>`;
+  if (k === 'domain') return `<span class="logo brand ${cls}" aria-hidden="true"><svg class="i" style="color:#657166;stroke-width:1.6"><use href="#i-globe"/></svg></span>`;
+  if (BRAND[k]) { const b = BRAND[k]; return `<span class="logo brand ${b.bg === '#FFFFFF' ? 'light' : ''} ${cls}" style="background:${b.bg}" aria-hidden="true">${glyph(k)}</span>`; }
+  return `<span class="logo ${cls}" style="background:${s.color}" aria-hidden="true">${s.l}</span>`;
+};
+const pmMark = (k, h = 22) => (k === 'master' ? MC_MARK : glyph(k, '#fff')).replace('<svg', `<svg style="height:${h}px;width:auto"`);
+const icon = (id, st='') => `<svg class="i" ${st?`style="${st}"`:''}><use href="#i-${id}"/></svg>`;
+const MONTHS = ['Th1','Th2','Th3','Th4','Th5','Th6','Th7','Th8','Th9','Th10','Th11','Th12'];
+
+function nextRenewal(s, from = TODAY){
+  if (s.status === 'trial') { const d = new Date(TODAY); const st = s.start.split('/'); const sd = new Date(+st[2], +st[1]-1, +st[0]); sd.setDate(sd.getDate() + s.trialDays); return sd; }
+  if (s.cycle === 'Năm'){ let d = new Date(from.getFullYear(), s.month, s.day); if (d < from) d = new Date(from.getFullYear()+1, s.month, s.day); return d; }
+  let d = new Date(from.getFullYear(), from.getMonth(), s.day); if (d < from) d = new Date(from.getFullYear(), from.getMonth()+1, s.day); return d;
+}
+const daysUntil = d => Math.round((d - TODAY) / 864e5);
+const fmtDate = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+const relDay = n => n === 0 ? 'Hôm nay' : n === 1 ? 'Ngày mai' : `${n} ngày nữa`;
+const live = () => SUBS.filter(s => s.status !== 'cancelled');
+const paying = () => SUBS.filter(s => s.status === 'active' || s.status === 'review');
+
+/* ================= Router ================= */
+const TABS = ['home','calendar','review','analytics'];
+const SCREENS = ['onboarding','home','list','add','detail','calendar','trials','review','analytics','budget','payments','groups','group','plus','notifications','profile'];
+const NO_NAV = ['onboarding','add','detail','group','plus'];
+let current = 'onboarding', stack = [];
+
+function go(name, opts = {}){
+  if (name === current && !opts.force) return;
+  const from = $('#s-' + current), to = $('#s-' + name);
+  if (!to) return;
+  if (opts.back) { from.classList.remove('active'); }
+  else { from.classList.add('back-out'); from.classList.remove('active'); if (!opts.replace && !TABS.includes(name)) stack.push(current); }
+  setTimeout(() => from.classList.remove('back-out'), 340);
+  if (TABS.includes(name)) stack = [];
+  to.scrollTop = 0;
+  to.classList.add('active');
+  current = name;
+  $('#nav').classList.toggle('hide', NO_NAV.includes(name));
+  $$('.nav-item').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
+  $$('#sideNav button').forEach(b => b.classList.toggle('on', b.dataset.s === name));
+  if (name === 'detail' && !opts.id && !$('#detailBody').innerHTML) renderDetail('netflix');
+}
+function back(){ go(stack.pop() || 'home', {back:true}); }
+
+document.addEventListener('click', e => {
+  const g = e.target.closest('[data-go]'); if (g) { go(g.dataset.go); return; }
+  const t = e.target.closest('[data-tab]'); if (t) { go(t.dataset.tab); return; }
+  const b = e.target.closest('[data-back]'); if (b) { back(); return; }
+  const o = e.target.closest('[data-open]'); if (o) { renderDetail(o.dataset.open); go('detail', {id:true}); return; }
+  const tt = e.target.closest('[data-toast]'); if (tt) { toast(tt.dataset.toast); return; }
+  const sh = e.target.closest('[data-sheet]'); if (sh) { openSheet(sh.dataset.sheet); return; }
+});
+document.addEventListener('keydown', e => {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role=button]')) { e.preventDefault(); e.target.click(); }
+  if (e.key === 'Escape') closeSheet();
+});
+
+/* Side nav */
+$('#sideNav').innerHTML = SCREENS.map(s => `<li><button data-s="${s}">${$('#s-'+s).dataset.title}</button></li>`).join('');
+$('#sideNav').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; if (b.dataset.s === 'detail') renderDetail('netflix'); if (b.dataset.s === 'group') renderGroup(curGroup || 'g-netflix'); go(b.dataset.s, {replace:true}); });
+
+/* Toast & sheet */
+let tTimer;
+function toast(msg){ $('#toastTxt').textContent = msg; $('#toast').classList.add('show'); clearTimeout(tTimer); tTimer = setTimeout(() => $('#toast').classList.remove('show'), 2000); }
+function openSheet(kind, data){
+  const body = $('#sheetBody');
+  if (kind === 'cancel'){
+    const s = byId(data);
+    body.innerHTML = `<div class="flex">${logo(s)}<div><h3 style="margin:0">Hủy ${s.name}</h3><div class="muted">Làm theo 4 bước, mất khoảng 2 phút</div></div></div>
+      <ol class="steps"><li><span>Mở ứng dụng hoặc website ${s.name} và đăng nhập.</span></li><li><span>Vào <b>Tài khoản → Gói đăng ký</b>.</span></li><li><span>Chọn <b>Hủy gói</b> và xác nhận.</span></li><li><span>Quay lại Subca và đánh dấu "Đã hủy" để ngừng nhắc.</span></li></ol>
+      <div class="card peach" style="font-size:13.5px">Hủy trước <b>${fmtDate(nextRenewal(s))}</b> để không bị trừ <b>${vnd(s.price)}</b>.</div>
+      <button class="btn btn-primary btn-block mt16" data-sheet-act="cancel" data-id="${s.id}">Tôi đã hủy xong</button>
+      <button class="btn btn-block mt8" style="color:var(--ink-2)" data-sheet-act="close">Để sau</button>`;
+  } else if (kind === 'archive'){
+    const s = byId(data);
+    body.innerHTML = `<h3>Lưu trữ ${s.name}?</h3><p class="sub">Subscription sẽ bị ẩn khỏi danh sách và không tính vào tổng chi phí. Bạn có thể khôi phục bất cứ lúc nào.</p>
+      <button class="btn btn-primary btn-block mt20" data-sheet-act="archive" data-id="${s.id}">${icon('archive')}Lưu trữ</button>
+      <button class="btn btn-block mt8" style="color:var(--ink-2)" data-sheet-act="close">Hủy bỏ</button>`;
+  } else if (kind === 'budget'){
+    body.innerHTML = `<h3>Hạn mức hằng tháng</h3><p class="sub">Kéo để đặt ngân sách cho subscription.</p>
+      <div class="d-price num" style="text-align:center;margin:18px 0 6px" id="rangeVal">${vnd(budget)}</div>
+      <input type="range" class="range" min="500000" max="5000000" step="100000" value="${budget}" id="rangeIn" aria-label="Hạn mức">
+      <div class="flex between muted"><span>500K</span><span>5tr</span></div>
+      <button class="btn btn-primary btn-block mt20" data-sheet-act="budget">Lưu hạn mức</button>`;
+    $('#rangeIn').oninput = e => $('#rangeVal').textContent = vnd(+e.target.value);
+  } else if (kind === 'export'){
+    body.innerHTML = `<h3>Xuất dữ liệu</h3><p class="sub">Tải về toàn bộ subscription và lịch sử thanh toán.</p>
+      <div class="set-group mt16"><button class="set-row" data-sheet-act="export" data-fmt="CSV"><span class="ic" style="background:var(--mint)">${icon('download')}</span><span class="t">Bảng tính (.csv)</span></button>
+      <button class="set-row" data-sheet-act="export" data-fmt="PDF"><span class="ic" style="background:var(--peach)">${icon('download')}</span><span class="t">Báo cáo (.pdf)</span></button></div>`;
+  } else if (kind === 'currency'){
+    body.innerHTML = `<h3>Tiền tệ chính</h3><p class="sub">Các khoản ngoại tệ sẽ được quy đổi theo tỷ giá hằng ngày.</p>
+      <div class="set-group mt16">${['VND (đ)','USD ($)','EUR (€)','JPY (¥)'].map((c,i)=>`<button class="set-row" data-sheet-act="currency" data-v="${c}"><span class="t">${c}</span>${$('#curVal').textContent===c?icon('check','color:var(--sky-deep)'):''}</button>`).join('')}</div>`;
+  } else if (kind === 'newGroup'){
+    const cands = paying().filter(x => !GROUPS.some(g => g.sub === x.id) && x.cycle === 'Tháng');
+    ng = {sub: (cands[0] || {}).id, n: 4};
+    body.innerHTML = `<h3>Tạo nhóm chia tiền</h3><p class="sub">Chọn gói bạn đang trả và số người dùng chung.</p>
+      <div class="flabel mt16">Gói dùng chung</div>
+      <div class="pick-sub" id="ngPick">${cands.map((x, i) => `<button class="${i === 0 ? 'on' : ''}" data-ng="${x.id}">${logo(x)}${x.name.split(' ')[0]}</button>`).join('')}</div>
+      <div class="flex between mt16"><div><div class="flabel" style="margin:0">Số người (gồm bạn)</div><span class="muted">Tối đa 6 người</span></div>
+        <div class="stepper"><button id="ngMinus" aria-label="Bớt người">${icon('minus')}</button><b class="num" id="ngN">4</b><button id="ngPlus" aria-label="Thêm người">${icon('plus')}</button></div></div>
+      <div class="card mint mt16 flex between"><div><div class="muted" style="color:#3A5A4C">Mỗi người trả</div><b class="num" style="font-size:22px" id="ngShare">—</b></div><span class="muted num" style="color:#3A5A4C" id="ngTotal"></span></div>
+      <button class="btn btn-primary btn-block mt16" data-sheet-act="createGroup">${icon('link')}Tạo nhóm & lấy link mời</button>`;
+    const upd = () => { const x = byId(ng.sub); $('#ngN').textContent = ng.n; $('#ngShare').textContent = vnd(Math.round(x.price / ng.n)); $('#ngTotal').textContent = `${x.name} · ${vnd(x.price)}/tháng`; };
+    $('#ngPick').onclick = e => { const b = e.target.closest('[data-ng]'); if (!b) return; $$('#ngPick button').forEach(y => y.classList.toggle('on', y === b)); ng.sub = b.dataset.ng; upd(); };
+    $('#ngMinus').onclick = () => { ng.n = Math.max(2, ng.n - 1); upd(); };
+    $('#ngPlus').onclick = () => { ng.n = Math.min(6, ng.n + 1); upd(); };
+    if (ng.sub) upd();
+  } else if (kind === 'qr'){
+    const g = GROUPS.find(x => x.id === data);
+    body.innerHTML = `<h3>Mã QR nhận tiền</h3><p class="sub">Gửi cho thành viên để chuyển khoản nhanh, nội dung đã điền sẵn.</p>${qrCard(g, true)}
+      <button class="btn btn-primary btn-block mt16" data-sheet-act="shareQR">${icon('link')}Chia sẻ vào nhóm chat</button>`;
+  } else if (kind === 'buy'){
+    const pl = PLUS_PLANS[plusPlan];
+    body.innerHTML = `<h3>Xác nhận nâng cấp</h3><p class="sub">Thanh toán an toàn qua tài khoản App Store của bạn.</p>
+      <div class="info-list mt16">
+        <div class="info-row"><span>${icon('sparkle')}Gói</span><b>Subca Plus · ${pl.name}</b></div>
+        <div class="info-row"><span>${icon('coin')}Hôm nay trả</span><b class="num">${pl.trial ? '0đ' : vnd(pl.price)}</b></div>
+        ${pl.trial ? `<div class="info-row"><span>${icon('cal')}Từ ${fmtDate(trialEnd())}</span><b class="num">${vnd(pl.price)}/${pl.per}</b></div>` : ''}
+        <div class="info-row"><span>${icon('card')}Thanh toán</span><b>Tài khoản App Store</b></div>
+      </div>
+      ${pl.trial ? `<p class="muted mt12">Subca sẽ nhắc bạn vào ${fmtDate(trialRemind())}, 2 ngày trước khi bắt đầu tính phí.</p>` : ''}
+      <button class="btn btn-primary btn-block mt16" id="buyConfirm">${pl.trial ? 'Bắt đầu dùng thử' : 'Thanh toán ' + vnd(pl.price)}</button>
+      <button class="btn btn-block mt8" style="color:var(--ink-2)" data-sheet-act="close">Để sau</button>`;
+    $('#buyConfirm').onclick = () => { const b = $('#buyConfirm'); b.disabled = true; b.innerHTML = '<span class="spin"></span>Đang xử lý…';
+      setTimeout(() => { closeSheet(); isPlus = true; plusSince = plusPlan; applyPlus(); renderPlus(); $('#s-plus').scrollTop = 0; }, 1300); };
+  } else if (kind === 'day'){
+    body.innerHTML = data;
+  }
+  $('#scrim').classList.add('show'); $('#sheet').classList.add('show');
+}
+function closeSheet(){ $('#scrim').classList.remove('show'); $('#sheet').classList.remove('show'); }
+$('#scrim').onclick = closeSheet;
+$('#sheet').addEventListener('click', e => {
+  const a = e.target.closest('[data-sheet-act]'); if (!a) return;
+  const act = a.dataset.sheetAct;
+  if (act === 'cancel'){ byId(a.dataset.id).status = 'cancelled'; renderAll(); renderDetail(a.dataset.id); toast('Đã đánh dấu là đã hủy'); }
+  if (act === 'archive'){ const i = SUBS.findIndex(s => s.id === a.dataset.id); const n = SUBS[i].name; SUBS.splice(i,1); renderAll(); closeSheet(); toast(`Đã lưu trữ ${n}`); back(); return; }
+  if (act === 'budget'){ budget = +$('#rangeIn').value; renderBudget(); renderHome(); toast('Đã cập nhật ngân sách'); }
+  if (act === 'export'){ toast(`Đang xuất file ${a.dataset.fmt}…`); }
+  if (act === 'createGroup'){ const x = byId(ng.sub); if (!x){ closeSheet(); return; }
+    const id = 'g-' + x.id; GROUPS.unshift({id, sub:x.id, name:x.name, total:x.price, due:fmtDate(nextRenewal(x)).slice(0,5), owner:true, mode:'equal', members:[{n:'Bạn', me:true, paid:true}, ...Array.from({length: ng.n - 1}, (_, i) => ({n:'Chờ tham gia', invited:true}))], history:[]});
+    closeSheet(); renderGroups(); renderHome(); renderGroup(id); go('group'); toast('Đã tạo nhóm · link mời đã được sao chép'); return; }
+  if (act === 'shareQR'){ toast('Đã mở trình chia sẻ (mockup)'); }
+  if (act === 'currency'){ $('#curVal').textContent = a.dataset.v; toast(`Tiền tệ: ${a.dataset.v}`); }
+  closeSheet();
+});
+
+/* Switches, segmented, single-select chips (generic) */
+document.addEventListener('click', e => {
+  const sw = e.target.closest('.switch'); if (sw){ sw.setAttribute('aria-checked', sw.getAttribute('aria-checked') !== 'true'); return; }
+  const seg = e.target.closest('[data-seg] button'); if (seg){ [...seg.parentNode.children].forEach(b => b.classList.toggle('on', b === seg)); return; }
+  const ch = e.target.closest('[data-single] .chip'); if (ch){ [...ch.parentNode.children].forEach(b => b.classList.toggle('on', b === ch)); }
+});
+
+/* ================= Home ================= */
+function subRow(s, right){
+  const d = nextRenewal(s), n = daysUntil(d);
+  return `<div class="sub-item ${s.status==='cancelled'?'cancelled':''}" data-open="${s.id}" role="button" tabindex="0">
+    ${logo(s)}
+    <div class="meta"><b>${s.name}</b><small>${right === 'upcoming' ? `${fmtDate(d)} · ${PM[s.pm].name}` : `${s.cycle === 'Năm' ? 'Hằng năm' : 'Hằng tháng'} · ${s.status==='cancelled' ? 'Đã dừng' : 'Gia hạn ' + fmtDate(d)}`}</small>
+      ${right === 'upcoming' ? '' : `<div style="margin-top:6px"><span class="pill ${STATUS[s.status].c}">${STATUS[s.status].t}</span></div>`}</div>
+    <div class="right"><b class="num">${vnd(s.price)}</b><small class="muted">/${s.cycle === 'Năm' ? 'năm' : 'tháng'}</small>
+      ${right === 'upcoming' ? `<div class="mt8"><span class="pill ${n<=3?'p-warn':'p-trial'}">${relDay(n)}</span></div>` : ''}</div>
+  </div>`;
+}
+function renderHome(){
+  const total = paying().reduce((a,s) => a + monthly(s), 0);
+  $('#homeTotal').innerHTML = Math.round(total).toLocaleString('vi-VN') + '<span>đ</span>';
+  $('#homeActive').textContent = paying().length;
+  const up = live().filter(s => s.status !== 'trial').sort((a,b) => nextRenewal(a) - nextRenewal(b)).slice(0,3);
+  $('#homeUpcoming').innerHTML = up.map(s => subRow(s, 'upcoming')).join('');
+  const wk = live().filter(s => s.status !== 'trial' && daysUntil(nextRenewal(s)) <= 7).length;
+  $('#homeWeek').textContent = wk; $('#homeWeek2').textContent = wk;
+  $('#homeYear').textContent = '≈ ' + short(total*12).replace('tr',' triệu') + ' / năm';
+  $('#homeTrials').textContent = SUBS.filter(s => s.status === 'trial').length;
+  $('#homeSave').textContent = short(SUBS.filter(s => s.status === 'review').reduce((a,s) => a + monthly(s), 0));
+  const pct = total / budget * 100, over = pct > 100;
+  $('#homeBudgetPill').className = 'pill ' + (over ? 'p-warn' : 'p-active');
+  $('#homeBudgetPill').innerHTML = over ? icon('alert') + `Vượt ${Math.round(pct-100)}%` : `Đã dùng ${Math.round(pct)}%`;
+  $('#homeBudgetWrap').classList.toggle('over', over);
+  $('#homeBudgetBar').style.width = Math.min(pct,100) + '%';
+  $('#homeBudgetSpend').textContent = vnd(total);
+  $('#homeBudgetLimit').textContent = 'Hạn mức ' + vnd(budget);
+}
+
+/* ================= List ================= */
+let filter = 'all', q = '';
+const FILTERS = [['all','Tất cả'],['active','Đang hoạt động'],['trial','Dùng thử'],['review','Cần xem lại'],['cancelled','Đã hủy']];
+function renderList(){
+  $('#filterChips').innerHTML = FILTERS.map(([k,t]) => {
+    const n = k === 'all' ? SUBS.length : SUBS.filter(s => s.status === k).length;
+    return `<button class="chip ${filter===k?'on':''}" role="tab" aria-selected="${filter===k}" data-f="${k}">${t}<span class="n">${n}</span></button>`;
+  }).join('');
+  const items = SUBS.filter(s => (filter === 'all' || s.status === filter) && s.name.toLowerCase().includes(q.toLowerCase()));
+  const sum = items.filter(s => s.status !== 'cancelled' && s.status !== 'trial').reduce((a,s) => a + monthly(s), 0);
+  $('#listSum').innerHTML = `<span>${items.length} subscription</span><span class="num">~${vnd(sum)}/tháng</span>`;
+  $('#subList').innerHTML = items.length ? items.map(s => subRow(s)).join('') : `<div class="empty">${icon('search','width:32px;height:32px')}<p class="mt8">Không tìm thấy subscription nào</p></div>`;
+}
+$('#filterChips').addEventListener('click', e => { const c = e.target.closest('[data-f]'); if (c){ filter = c.dataset.f; renderList(); } });
+$('#searchInput').addEventListener('input', e => { q = e.target.value; renderList(); });
+
+/* ================= Add ================= */
+const QUICK = ['netflix','spotify','chatgpt','youtube','canva','icloud','gone','adobe'];
+$('#quickPick').innerHTML = QUICK.map(id => { const s = byId(id); return `<button class="qp" data-qp="${id}">${logo(s)}${s.name.split(' ')[0]}</button>`; }).join('')
+  + `<button class="qp"><span class="logo" style="background:#fff;color:var(--ink);box-shadow:var(--shadow-sm)">${icon('plus')}</span>Khác</button>`;
+$('#quickPick').addEventListener('click', e => {
+  const b = e.target.closest('[data-qp]'); if (!b) return;
+  $$('.qp').forEach(x => x.classList.toggle('on', x === b));
+  const s = byId(b.dataset.qp); $('#fName').value = s.name + ' ' + s.plan; $('#fPrice').value = s.price.toLocaleString('vi-VN');
+});
+$('#saveBtn').onclick = () => {
+  const name = $('#fName').value.trim();
+  if (!name){ $('#fName').focus(); $('#fName').style.borderColor = '#C9694D'; toast('Nhập tên dịch vụ trước nhé'); return; }
+  $('#fName').style.borderColor = '';
+  const price = +($('#fPrice').value.replace(/\D/g,'')) || 0;
+  SUBS.unshift({id:'new'+Date.now(), name, plan:'Gói mới', price, cycle:'Tháng', day:15, cat:'ent', pm:'visa', status:'active', color:'#99CDD8', l:name[0].toUpperCase(), uses:0, start:fmtDate(TODAY), freq:0});
+  renderAll(); toast(`Đã thêm ${name}`);
+  $('#fName').value = ''; $('#fPrice').value = ''; $$('.qp').forEach(x => x.classList.remove('on'));
+  go('list', {replace:true}); filter = 'all'; renderList();
+};
+
+/* ================= Detail ================= */
+function renderDetail(id){
+  const s = byId(id); if (!s) return;
+  const d = nextRenewal(s);
+  const freqLbl = ['Chưa dùng','Hiếm khi','Thỉnh thoảng','Hằng tuần','Vài lần/tuần','Hằng ngày'][s.freq];
+  const hist = (s.status==='trial'?[0]:[0,1,2,3]).map(i => { const h = new Date(d); s.cycle === 'Năm' ? h.setFullYear(h.getFullYear()-i) : h.setMonth(h.getMonth()-i); return h; });
+  const bg = s.status === 'review' ? 'var(--peach)' : s.status === 'trial' ? 'var(--sky-soft)' : s.status === 'cancelled' ? '#EFEFEA' : 'var(--mint)';
+  $('#detailBody').innerHTML = `
+    <div class="d-hero" style="background:${bg}">
+      ${logo(s,'lg')}
+      <h1>${s.name}</h1><div class="sub">${s.plan}</div>
+      <div class="d-price num">${vnd(s.price)}<small> / ${s.cycle === 'Năm' ? 'năm' : 'tháng'}</small></div>
+      ${s.usd ? `<div class="muted">Thanh toán ${s.usd} · quy đổi</div>` : ''}
+      <div class="mt12"><span class="pill ${STATUS[s.status].c}" style="background:#fff">${STATUS[s.status].t}</span></div>
+    </div>
+    ${s.status !== 'cancelled' ? `<div class="card sky mt12 flex between"><div><div class="muted" style="color:#2A6572">${s.status==='trial'?'Hết dùng thử':'Gia hạn tiếp theo'}</div><b style="font-size:17px">${fmtDate(d)}</b></div><span class="pill ${daysUntil(d)<=3?'p-warn':'p-active'}">${relDay(daysUntil(d))}</span></div>` : ''}
+    ${(() => { const g = GROUPS.find(x => x.sub === s.id); if (!g) return ''; const n = g.members.length; return `<div class="group-link" data-group="${g.id}" role="button" tabindex="0"><div class="mstack">${g.members.slice(0,4).map(m => mav(m)).join('')}</div><div class="meta"><b>Đang chia với ${n - 1} người</b><span class="muted" style="color:#3A5A4C">Mỗi người ${vnd(share(g, g.members[1]))} · ${paidCount(g)}/${n - 1} đã trả</span></div>${icon('chev')}</div>`; })()}
+    <div class="sec-head"><h3>Thông tin</h3></div>
+    <div class="info-list">
+      <div class="info-row"><span>${icon('card')}Thanh toán</span><b>${PM[s.pm].name} ${s.pm==='visa'||s.pm==='master'?'•• '+PM[s.pm].last:''}</b></div>
+      <div class="info-row"><span>${icon('cal')}Ngày bắt đầu</span><b>${s.start}</b></div>
+      <div class="info-row"><span>${icon('tag')}Danh mục</span><b>${CATS[s.cat].name}</b></div>
+      <div class="info-row"><span>${icon('repeat')}Chu kỳ</span><b>${s.cycle === 'Năm' ? 'Hằng năm' : 'Hằng tháng'}</b></div>
+      <div class="info-row"><span>${icon('bell')}Nhắc nhở</span><b>${s.cycle==='Năm'?'30 & 7 ngày trước':'3 ngày trước'}</b></div>
+      <div class="info-row"><span>${icon('coin')}Mỗi lần dùng</span><b class="num">${s.uses ? vnd(monthly(s)/s.uses) : '—'}</b></div>
+    </div>
+    <div class="sec-head"><h3>Mức độ sử dụng</h3><span class="muted">${freqLbl}</span></div>
+    <div class="card" style="padding:14px 16px">
+      <div class="usage" aria-label="Mức độ sử dụng ${s.freq}/5">${[1,2,3,4,5].map(i => `<i class="${i<=s.freq?'on':''}"></i>`).join('')}</div>
+      <div class="flex between muted"><span>Hiếm khi</span><span>${s.uses} lần / 30 ngày</span><span>Hằng ngày</span></div>
+    </div>
+    <div class="sec-head"><h3>Lịch sử gia hạn</h3></div>
+    <div class="card"><div class="timeline">
+      ${hist.map((h,i) => `<div class="tl ${i===0?'next':''}"><span>${fmtDate(h)} <span class="muted">${i===0?'· sắp tới':'· đã thanh toán'}</span></span><b class="num">${vnd(s.price)}</b></div>`).join('')}
+    </div></div>
+    <div class="sec-head"><h3>Thao tác</h3></div>
+    <div class="actions">
+      <button class="act" data-toast="Mở form chỉnh sửa (mockup)"><span class="ic" style="background:var(--sky-soft)">${icon('edit')}</span>Chỉnh sửa</button>
+      <button class="act" data-mark="${s.id}"><span class="ic" style="background:var(--peach)">${icon('flag')}</span>${s.status==='review'?'Bỏ đánh dấu xem lại':'Đánh dấu cần xem lại'}</button>
+      <button class="act" data-cancel="${s.id}"><span class="ic" style="background:var(--coral)">${icon('help')}</span>Hướng dẫn hủy</button>
+      <button class="act" data-archive="${s.id}"><span class="ic" style="background:#EEF0E8">${icon('archive')}</span>Lưu trữ</button>
+    </div>`;
+}
+$('#detailBody').addEventListener('click', e => {
+  const m = e.target.closest('[data-mark]'); if (m){ const s = byId(m.dataset.mark); s.status = s.status === 'review' ? 'active' : 'review'; renderAll(); renderDetail(s.id); toast(s.status==='review'?'Đã thêm vào danh sách cần xem lại':'Đã bỏ đánh dấu'); }
+  const c = e.target.closest('[data-cancel]'); if (c) openSheet('cancel', c.dataset.cancel);
+  const a = e.target.closest('[data-archive]'); if (a) openSheet('archive', a.dataset.archive);
+});
+
+/* ================= Calendar ================= */
+let calM = 9, calY = 2026, selDay = null;
+function eventsFor(y, m){
+  const ev = {};
+  live().forEach(s => {
+    let day = null;
+    if (s.status === 'trial'){ const d = nextRenewal(s); if (d.getMonth() === m && d.getFullYear() === y) day = d.getDate(); }
+    else if (s.cycle === 'Năm'){ if (s.month === m) day = s.day; }
+    else day = Math.min(s.day, new Date(y, m+1, 0).getDate());
+    if (day) (ev[day] = ev[day] || []).push(s);
+  });
+  return ev;
+}
+function renderCal(){
+  const ev = eventsFor(calY, calM);
+  $('#calTitle').textContent = `Tháng ${calM+1}, ${calY}`;
+  $('#calTitleBig').textContent = `Tháng ${calM+1}`;
+  const first = (new Date(calY, calM, 1).getDay() + 6) % 7; // Monday first
+  const dim = new Date(calY, calM+1, 0).getDate(), prevDim = new Date(calY, calM, 0).getDate();
+  let html = ['T2','T3','T4','T5','T6','T7','CN'].map(d => `<div class="wd">${d}</div>`).join('');
+  for (let i = first; i > 0; i--) html += `<div class="day other">${prevDim - i + 1}</div>`;
+  for (let d = 1; d <= dim; d++){
+    const list = ev[d] || [], sum = list.reduce((a,s) => a + s.price, 0);
+    const isToday = calY === TODAY.getFullYear() && calM === TODAY.getMonth() && d === TODAY.getDate();
+    html += `<div class="day ${list.length?'has':''} ${sum>=500000?'heavy':''} ${isToday?'today':''} ${selDay===d?'sel':''}" ${list.length?`data-day="${d}" role="button" tabindex="0" aria-label="Ngày ${d}, ${list.length} khoản"`:''}>${d}
+      ${list.length ? `<span class="dots">${list.slice(0,3).map(s => `<i style="background:${s.color}"></i>`).join('')}</span>` : ''}</div>`;
+  }
+  const tail = (7 - (first + dim) % 7) % 7;
+  for (let i = 1; i <= tail; i++) html += `<div class="day other">${i}</div>`;
+  $('#calGrid').innerHTML = html;
+  const all = Object.entries(ev).flatMap(([d, l]) => l.map(s => ({d:+d, s})));
+  $('#calMonthTotal').textContent = vnd(all.filter(x => x.s.status !== 'trial').reduce((a,x) => a + x.s.price, 0));
+  $('#calMonthCount').textContent = `${all.length} khoản`;
+  let rows = all.sort((a,b) => a.d - b.d);
+  if (selDay) rows = rows.filter(x => x.d === selDay);
+  $('#calListTitle').textContent = selDay ? `Ngày ${selDay}/${calM+1}` : 'Gia hạn trong tháng';
+  $('#calClear').hidden = !selDay;
+  $('#calList').innerHTML = rows.map(({d, s}) => `<div class="sub-item" data-open="${s.id}" role="button" tabindex="0">
+    <div class="date-badge"><b>${d}</b><small>Th${calM+1}</small></div>
+    ${logo(s,'sm')}
+    <div class="meta"><b>${s.name}</b><small>${s.status==='trial'?'Hết dùng thử':PM[s.pm].name}</small></div>
+    <div class="right"><b class="num">${vnd(s.price)}</b>${s.status==='trial'?'<span class="pill p-trial">Trial</span>':''}</div></div>`).join('');
+}
+$('#calGrid').addEventListener('click', e => { const d = e.target.closest('[data-day]'); if (!d) return; selDay = selDay === +d.dataset.day ? null : +d.dataset.day; renderCal(); });
+$('#calClear').onclick = () => { selDay = null; renderCal(); };
+$('#calPrev').onclick = () => { calM--; if (calM < 0){ calM = 11; calY--; } selDay = null; renderCal(); };
+$('#calNext').onclick = () => { calM++; if (calM > 11){ calM = 0; calY++; } selDay = null; renderCal(); };
+
+/* ================= Trials ================= */
+function renderTrials(){
+  const trials = SUBS.filter(s => s.status === 'trial').sort((a,b) => nextRenewal(a) - nextRenewal(b));
+  $('#trialCount').textContent = trials.length;
+  $('#trialSum').textContent = vnd(trials.reduce((a,s) => a + s.price, 0));
+  $('#trialList').innerHTML = trials.length ? trials.map(s => {
+    const d = nextRenewal(s), left = Math.max(daysUntil(d), 0), pct = Math.round((1 - left / s.trialDays) * 100);
+    const urgent = left <= 3;
+    return `<div class="trial" id="tr-${s.id}">
+      <div class="trial-top">
+        <div class="ring" style="--p:${pct};--c:${urgent?'#C9694D':'var(--sky-deep)'}"><div><b class="num">${left}</b><small>ngày</small></div></div>
+        <div style="flex:1;min-width:0"><div class="flex" style="gap:8px">${logo(s,'sm')}<b style="font-size:16px">${s.name}</b></div>
+          <div class="mt8">${urgent ? `<span class="pill p-warn">${icon('alert')}Sắp bị trừ tiền</span>` : `<span class="pill p-trial">${icon('hourglass')}Còn ${left} ngày</span>`}</div></div>
+      </div>
+      <div class="trial-info">
+        <div><small>Phí sau trial</small><b class="num">${vnd(s.price)}/th</b></div>
+        <div><small>Hết hạn</small><b>${fmtDate(d)}</b></div>
+      </div>
+      <div class="trial-cta">
+        <button class="btn btn-soft" data-trial="keep" data-id="${s.id}">${icon('check')}Giữ</button>
+        <button class="btn btn-soft" data-trial="remind" data-id="${s.id}">${icon('bell')}Nhắc tôi</button>
+        <button class="btn btn-coral full" data-trial="cancel" data-id="${s.id}">${icon('x')}Hủy trước khi bị trừ tiền</button>
+      </div></div>`;
+  }).join('') : `<div class="empty">${icon('check-circle','width:32px;height:32px')}<p class="mt8">Không còn trial nào. Tuyệt!</p></div>`;
+}
+$('#trialList').addEventListener('click', e => {
+  const b = e.target.closest('[data-trial]'); if (!b) return;
+  const s = byId(b.dataset.id), act = b.dataset.trial;
+  if (act === 'remind'){ toast(`Sẽ nhắc bạn 1 ngày trước khi ${s.name} hết trial`); return; }
+  if (act === 'cancel'){ openSheet('cancel', s.id); return; }
+  $('#tr-' + s.id).classList.add('gone');
+  setTimeout(() => { s.status = 'active'; renderAll(); toast(`Đã chuyển ${s.name} sang gói trả phí`); }, 320);
+});
+
+/* ================= Review ================= */
+const decisions = { adobe:'cancel', youtube:'review' };
+let rvTab = 'todo';
+function renderReview(){
+  const items = paying().concat(SUBS.filter(s => s.status === 'trial'));
+  const done = items.filter(s => decisions[s.id]).length;
+  const save = items.filter(s => decisions[s.id] === 'cancel').reduce((a,s) => a + monthly(s), 0);
+  $('#rvSave').textContent = vnd(save);
+  $('#rvYear').textContent = `${vnd(save*12)} / năm`;
+  $('#rvCount').textContent = `${done}/${items.length} đã đánh giá`;
+  $('#rvProg').style.width = (done / items.length * 100) + '%';
+  $('#rvTabs').innerHTML = [['todo','Chưa đánh giá', items.length - done],['done','Đã đánh giá', done],['all','Tất cả', items.length]]
+    .map(([k,t,n]) => `<button class="chip ${rvTab===k?'on':''}" data-rt="${k}">${t}<span class="n">${n}</span></button>`).join('');
+  const shown = items.filter(s => rvTab === 'all' || (rvTab === 'done' ? decisions[s.id] : !decisions[s.id]));
+  $('#rvList').innerHTML = shown.length ? shown.map(s => {
+    const dcs = decisions[s.id];
+    const hint = s.uses <= 3 ? `<span style="color:#8A4B1E">Ít dùng · ${s.uses} lần/30 ngày</span>` : `${s.uses} lần/30 ngày`;
+    return `<div class="rv">
+      <div class="rv-top" data-open="${s.id}" role="button" tabindex="0">${logo(s)}<div class="meta"><b>${s.name}</b><small>${hint}</small></div><b class="num">${vnd(monthly(s))}</b></div>
+      <div class="rv-act">
+        <button class="keep ${dcs==='keep'?'on':''}" data-dc="keep" data-id="${s.id}">${icon('check')}Giữ</button>
+        <button class="review ${dcs==='review'?'on':''}" data-dc="review" data-id="${s.id}">${icon('flag')}Xem lại</button>
+        <button class="cancel ${dcs==='cancel'?'on':''}" data-dc="cancel" data-id="${s.id}">${icon('x')}Hủy</button>
+      </div></div>`;
+  }).join('') : `<div class="empty">${icon('check-circle','width:32px;height:32px')}<p class="mt8">Bạn đã đánh giá xong tháng này!</p></div>`;
+}
+$('#rvTabs').addEventListener('click', e => { const c = e.target.closest('[data-rt]'); if (c){ rvTab = c.dataset.rt; renderReview(); } });
+$('#rvList').addEventListener('click', e => {
+  const b = e.target.closest('[data-dc]'); if (!b) return;
+  const id = b.dataset.id; decisions[id] = decisions[id] === b.dataset.dc ? undefined : b.dataset.dc;
+  if (!decisions[id]) delete decisions[id];
+  renderReview(); renderBudget();
+});
+$('[data-reco]').onclick = e => { decisions.gone = 'cancel'; renderReview(); renderBudget(); e.target.textContent = 'Đã đánh dấu'; e.target.disabled = true; toast('Google One đã được đánh dấu hủy'); };
+
+/* ================= Analytics ================= */
+let anPeriod = 'm', hiCat = null;
+function renderAnalytics(){
+  const mult = anPeriod === 'y' ? 12 : 1;
+  const byCat = Object.keys(CATS).map(k => ({k, v: paying().filter(s => s.cat === k).reduce((a,s) => a + monthly(s), 0) * mult})).filter(x => x.v);
+  const total = byCat.reduce((a,x) => a + x.v, 0);
+  const perMonth = total / mult;
+  $('#anYear').textContent = short(perMonth * 12); $('#anDay').textContent = vnd(Math.round(perMonth * 12 / 365 / 100) * 100);
+  // Donut with 2px surface gaps
+  const R = 48, C = 2 * Math.PI * R; let off = 0;
+  $('#donutSvg').innerHTML = byCat.map(x => {
+    const len = x.v / total * C, seg = Math.max(len - 2.5, 0.5);
+    const el = `<circle cx="60" cy="60" r="${R}" fill="none" stroke="${CATS[x.k].color}" stroke-width="${hiCat===x.k?18:14}" stroke-dasharray="${seg} ${C-seg}" stroke-dashoffset="${-off}" opacity="${hiCat && hiCat!==x.k ? .35 : 1}" data-cat="${x.k}"><title>${CATS[x.k].name}: ${vnd(x.v)}</title></circle>`;
+    off += len; return el;
+  }).join('');
+  const sel = byCat.find(x => x.k === hiCat);
+  $('#donutVal').textContent = short(sel ? sel.v : total);
+  $('#donutLbl').textContent = sel ? CATS[sel.k].name : (anPeriod === 'y' ? 'Tổng / năm' : 'Tổng / tháng');
+  $('#donutLegend').innerHTML = byCat.sort((a,b) => b.v - a.v).map(x => `<button data-cat="${x.k}" aria-pressed="${hiCat===x.k}"><i style="background:${CATS[x.k].color}"></i><span>${CATS[x.k].name}</span><b class="num">${Math.round(x.v/total*100)}%</b></button>`).join('');
+  $('#catTable').innerHTML = `<div class="info-list" style="box-shadow:none;background:var(--bg)">${byCat.map(x => `<div class="info-row"><span>${CATS[x.k].name}</span><b class="num">${vnd(x.v)}</b></div>`).join('')}</div>`;
+
+  // Trend bars
+  const trend = [['Th4',1795],['Th5',1850],['Th6',1990],['Th7',2040],['Th8',2060],['Th9',Math.round(paying().reduce((a,s)=>a+monthly(s),0)/1000)]];
+  const max = Math.max(...trend.map(t => t[1])) * 1.1;
+  $('#trendBars').innerHTML = trend.map(([m,v],i) => `<div class="bar ${i===trend.length-1?'cur':''}" tabindex="0" data-tip="${m}: ${vnd(v*1000)}"><span class="val num">${i===trend.length-1||i===0?v.toLocaleString('vi-VN'):''}</span><i style="height:${v/max*100}%"></i></div>`).join('');
+  $('#trendX').innerHTML = trend.map(t => `<span>${t[0]}</span>`).join('');
+
+  // Cost per use
+  const cpu = paying().filter(s => s.uses).map(s => ({s, v: monthly(s)/s.uses})).sort((a,b) => b.v - a.v).slice(0,4);
+  $('#cpuList').innerHTML = cpu.map(({s,v}) => {
+    const lvl = v > 60000 ? ['Đắt', 'p-warn'] : v > 20000 ? ['Vừa', 'p-review'] : ['Hời', 'p-active'];
+    return `<div class="rank" data-open="${s.id}" role="button" tabindex="0">${logo(s,'sm')}<div class="meta"><b>${s.name}</b><span class="muted">${s.uses} lần/tháng</span></div><div style="text-align:right"><b class="num" style="font-size:14px">${vnd(v)}</b><div><span class="pill ${lvl[1]}">${lvl[0]}</span></div></div></div>`;
+  }).join('');
+
+  // Top expensive
+  $('#topList').innerHTML = paying().sort((a,b) => monthly(b) - monthly(a)).slice(0,5).map((s,i) =>
+    `<div class="rank" data-open="${s.id}" role="button" tabindex="0"><span class="no">${i+1}</span>${logo(s,'sm')}<div class="meta"><b>${s.name}</b><span class="muted">${CATS[s.cat].name}</span></div><b class="num">${vnd(monthly(s)*mult)}</b></div>`).join('');
+
+  // Payment method bars
+  const pm = Object.keys(PM).map(k => ({k, v: paying().filter(s => s.pm === k).reduce((a,s) => a + monthly(s), 0) * mult})).sort((a,b) => b.v - a.v);
+  const pmMax = pm[0].v;
+  $('#pmBars').innerHTML = pm.map(x => `<div class="hbar"><span class="lbl"><span class="pm-chip" style="background:${PM[x.k].solid}">${pmMark(x.k, x.k==='visa'?20:12)}</span>${PM[x.k].name}</span><span class="track"><i style="width:${x.v/pmMax*100}%"></i></span><b class="num">${short(x.v)}</b></div>`).join('');
+}
+$('#anSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; anPeriod = b.dataset.p; $$('#anSeg button').forEach(x => x.classList.toggle('on', x === b)); renderAnalytics(); });
+$('#s-analytics').addEventListener('click', e => { const c = e.target.closest('[data-cat]'); if (c){ hiCat = hiCat === c.dataset.cat ? null : c.dataset.cat; renderAnalytics(); } });
+$('#catTableBtn').onclick = () => { const t = $('#catTable'); t.hidden = !t.hidden; $('#catTableBtn').textContent = t.hidden ? 'Xem bảng' : 'Ẩn bảng'; };
+const tip = $('#trendTip');
+['mouseover','focusin'].forEach(ev => $('#trendBars').addEventListener(ev, e => {
+  const b = e.target.closest('.bar'); if (!b) return;
+  const card = b.closest('.card').getBoundingClientRect(), r = b.getBoundingClientRect(), bar = b.querySelector('i').getBoundingClientRect();
+  tip.textContent = b.dataset.tip; tip.style.left = (r.left - card.left + r.width/2) + 'px'; tip.style.top = (bar.top - card.top - 34) + 'px'; tip.classList.add('show');
+}));
+['mouseout','focusout'].forEach(ev => $('#trendBars').addEventListener(ev, () => tip.classList.remove('show')));
+
+/* ================= Budget ================= */
+const simSel = new Set(['adobe','gone']);
+function renderBudget(){
+  Object.entries(decisions).forEach(([id, d]) => { if (d === 'cancel') simSel.add(id); });
+  const spend = paying().reduce((a,s) => a + monthly(s), 0);
+  const pct = spend / budget * 100, over = spend > budget;
+  $('#bSpend').textContent = vnd(spend);
+  $('#bLimit').textContent = 'trên ' + vnd(budget);
+  $('#bPct').textContent = Math.round(pct) + '%';
+  $('#bProg').style.width = Math.min(pct, 100) + '%';
+  $('#bProgWrap').classList.toggle('over', over);
+  $('#gaugeArc').setAttribute('stroke-dasharray', `${Math.min(pct,100)} 100`);
+  $('#gaugeArc').setAttribute('stroke', over ? '#C9694D' : '#5A99A8');
+  $('#bWarn').classList.toggle('ok', !over);
+  $('#bWarnTxt').innerHTML = over
+    ? `<b>Bạn đã vượt ngân sách ${vnd(spend - budget)}</b><br>Thử hủy vài subscription ít dùng bên dưới để quay lại hạn mức.`
+    : `<b>Bạn còn ${vnd(budget - spend)} trong ngân sách</b><br>Chi tiêu subscription đang trong tầm kiểm soát.`;
+  const cands = paying().slice().sort((a,b) => a.uses/monthly(a) - b.uses/monthly(b)).slice(0,6);
+  $('#simList').innerHTML = cands.map(s => `<div class="sim-row">${logo(s,'sm')}<div class="meta"><b>${s.name}</b><span class="muted">${s.uses} lần/30 ngày · ${vnd(monthly(s))}/th</span></div>
+    <button class="check" role="checkbox" aria-checked="${simSel.has(s.id)}" data-sim="${s.id}" aria-label="Chọn ${s.name}">${icon('check')}</button></div>`).join('');
+  const save = cands.filter(s => simSel.has(s.id)).reduce((a,s) => a + monthly(s), 0);
+  $('#simSave').textContent = vnd(save);
+  $('#simYear').textContent = vnd(save * 12);
+}
+$('#simList').addEventListener('click', e => { const c = e.target.closest('[data-sim]'); if (!c) return; simSel.has(c.dataset.sim) ? simSel.delete(c.dataset.sim) : simSel.add(c.dataset.sim); renderBudget(); });
+$('#editBudget').onclick = () => openSheet('budget');
+
+/* ================= Payments ================= */
+function renderPayments(){
+  $('#pmList').innerHTML = Object.entries(PM).map(([k, p]) => {
+    const subs = live().filter(s => s.pm === k), tot = subs.filter(s => s.status !== 'trial').reduce((a,s) => a + monthly(s), 0);
+    return `<div class="pm-wrap">
+      <div class="pcard" style="background:${p.bg}" data-pm="${k}" role="button" tabindex="0" aria-expanded="false">
+        <div class="top"><span class="brandtxt flex" style="gap:8px">${pmMark(k, k==='visa'?44:26)}${k==='visa'||k==='master'?'':`<span style="font-size:16px;font-style:normal">${p.name}</span>`}</span><span style="font-size:13px;opacity:.9">${k==='visa'||k==='master'?'•••• '+p.last:p.last}</span></div>
+        <div class="bot"><div><small>Recurring mỗi tháng</small><b class="num">${vnd(tot)}</b><small>${subs.length} subscription</small></div>
+          <div class="stack">${subs.slice(0,4).map(s => logo(s,'sm')).join('')}</div></div>
+      </div>
+      <div class="pm-list" id="pml-${k}"><div class="pm-inner">${subs.map(s => `<div class="rank" data-open="${s.id}" role="button" tabindex="0">${logo(s,'sm')}<div class="meta"><b>${s.name}</b><span class="muted">Gia hạn ${fmtDate(nextRenewal(s))}</span></div><b class="num">${vnd(s.price)}</b></div>`).join('')}</div></div>
+    </div>`;
+  }).join('');
+}
+$('#pmList').addEventListener('click', e => { const c = e.target.closest('[data-pm]'); if (!c) return; const l = $('#pml-' + c.dataset.pm); l.classList.toggle('open'); c.setAttribute('aria-expanded', l.classList.contains('open')); });
+
+/* ================= Notifications ================= */
+const NOTIFS = [
+  {g:'Hôm nay', go:'g-netflix', ic:'users', bg:'var(--mint)', t:'Nguyễn Thùy Linh đã chuyển 65.000đ', p:'Nhóm Netflix Premium · còn 2 người chưa trả, hạn 28/09.', time:'09:12', unread:true},
+  {g:'Hôm nay', go:'g-apple', ic:'alert', bg:'var(--peach)', t:'Bạn chưa trả Quang Huy 96.250đ', p:'Nhóm Apple One Gia đình · hạn 05/10.', time:'08:30', unread:true},
+  {g:'Hôm nay', id:'notion', ic:'hourglass', bg:'var(--coral)', t:'Notion AI hết dùng thử sau 2 ngày', p:'Sau 29/09 bạn sẽ bị trừ 250.000đ/tháng.', time:'08:30', unread:true},
+  {g:'Hôm nay', id:'netflix', ic:'clock', bg:'var(--sky-soft)', t:'Netflix gia hạn sau 3 ngày', p:'260.000đ sẽ được trừ từ Visa •• 4821.', time:'08:30', unread:true},
+  {g:'Hôm nay', id:'gym', ic:'bell', bg:'var(--peach)', t:'CitiGym gia hạn sau 4 ngày', p:'01/10 · 550.000đ từ Mastercard •• 7703.', time:'08:30', unread:true},
+  {g:'Tuần này', id:'domain', ic:'cal', bg:'var(--mint)', t:'Gia hạn hằng năm: subca.app', p:'Còn 12 ngày · 420.000đ/năm. Kiểm tra thẻ còn hạn nhé.', time:'Th 5', unread:false},
+  {g:'Tuần này', id:'hosting', ic:'repeat', bg:'#EEF0E8', t:'Gia hạn hằng năm: Hostinger', p:'Còn 46 ngày · 1.800.000đ vào 12/11 — khoản lớn nhất năm.', time:'Th 3', unread:false},
+  {g:'Tuần này', id:'gone', ic:'check-circle', bg:'var(--mint)', t:'Hôm nay là ngày gia hạn Google One', p:'45.000đ đã được trừ từ Visa •• 4821.', time:'Th 2, 21/09', unread:false},
+];
+const RULES = [['30 ngày trước','Chỉ cho gói hằng năm', true],['7 ngày trước','Cho khoản trên 200.000đ', true],['1 ngày trước','Cho tất cả subscription', true],['Vào ngày gia hạn','Xác nhận đã bị trừ tiền', false],['Trial sắp hết','3 ngày và 1 ngày trước', true],['Gia hạn hằng năm','Nhắc thêm 60 ngày trước', true]];
+function renderNotifs(){
+  let g = '';
+  $('#ntFeed').innerHTML = NOTIFS.map(n => { const s = byId(n.id); const head = n.g !== g ? `<div class="group-label">${(g = n.g)}</div>` : '';
+    return head + `<div class="notif ${n.unread?'unread':''}" ${n.go?`data-group="${n.go}" role="button" tabindex="0"`:s?`data-open="${n.id}" role="button" tabindex="0"`:''}><span class="ic" style="background:${n.bg}">${icon(n.ic)}</span><div class="meta"><b>${n.t}</b><p>${n.p}</p><small>${n.time}</small></div></div>`; }).join('');
+  $('#ruleList').innerHTML = RULES.map(([t,d,on]) => `<div class="toggle-row"><div><b>${t}</b><span class="muted">${d}</span></div><button class="switch" role="switch" aria-checked="${on}" aria-label="${t}"></button></div>`).join('');
+}
+$('#ntSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; $$('#ntSeg button').forEach(x => x.classList.toggle('on', x === b)); $('#ntFeed').hidden = b.dataset.t !== 'feed'; $('#ntRules').hidden = b.dataset.t !== 'rules'; });
+$('#markRead').onclick = () => { NOTIFS.forEach(n => n.unread = false); renderNotifs(); $$('.dot-badge').forEach(x => x.classList.remove('dot-badge')); toast('Đã đánh dấu tất cả là đã đọc'); };
+
+
+/* ================= Family split ================= */
+const GROUPS = [
+  {id:'g-netflix', sub:'netflix', name:'Netflix Premium 4K', total:260000, due:'28/09', owner:true, mode:'equal',
+   members:[{n:'Bạn', me:true, paid:true},{n:'Nguyễn Thùy Linh', paid:true, when:'Hôm nay 09:12'},{n:'Hồ Anh Tú', paid:false},{n:'Lê Ngọc Hà', paid:false, reminded:'Đã nhắc hôm qua'}],
+   history:[['Tháng 8', '3/3 đã trả', true],['Tháng 7', '3/3 đã trả', true],['Tháng 6', 'Tú trả trễ 3 ngày', false]]},
+  {id:'g-spotify', sub:'spotify', name:'Spotify Premium Family', total:89000, due:'01/10', owner:true, mode:'equal',
+   members:[{n:'Bạn', me:true, paid:true},{n:'Phạm Minh Châu', paid:true, when:'24/09'},{n:'Trần Gia Huy', paid:true, when:'25/09'},{n:'Vũ Thảo My', paid:false}],
+   history:[['Tháng 8', '3/3 đã trả', true],['Tháng 7', '3/3 đã trả', true]]},
+  {id:'g-apple', name:'Apple One Gia đình', brand:'apple', total:385000, due:'05/10', owner:false, ownerName:'Quang Huy', mode:'equal',
+   members:[{n:'Quang Huy', host:true, paid:true},{n:'Bạn', me:true, paid:false},{n:'Mai Anh', paid:true, when:'26/09'},{n:'Đức Minh', paid:true, when:'26/09'}],
+   history:[['Tháng 8', 'Bạn đã trả 96.250đ', true],['Tháng 7', 'Bạn đã trả 96.250đ', true]]},
+];
+let curGroup = null, ng = {sub:null, n:4};
+const AV = ['#F3C3B2','#DAEBE3','#FDE8D3','#C9E4EA','#CFD6C4','#E7DDF3'];
+const initials = n => n === 'Bạn' ? 'K' : n === 'Chờ tham gia' ? '+' : n.split(' ').slice(-2).map(w => w[0]).join('').toUpperCase();
+const mav = (m, cls = '') => `<span class="mav ${cls}" style="background:${m.invited ? '#EFEFEA' : AV[[...m.n].reduce((a, c) => a + c.charCodeAt(0), 0) % AV.length]}">${initials(m.n)}${m.invited ? '' : `<span class="st ${m.paid ? 'ok' : 'no'}">${icon(m.paid ? 'check' : 'x')}</span>`}</span>`;
+const share = (g, m) => m && m.custom != null ? m.custom : Math.round(g.total / g.members.length);
+const payers = g => g.members.filter(m => !(g.owner ? m.me : m.host) && !m.invited);
+const paidCount = g => payers(g).filter(m => m.paid).length;
+const groupLogo = (g, cls = '') => g.sub ? logo(byId(g.sub), cls) : `<span class="logo brand ${cls}" aria-hidden="true">${glyph(g.brand, '#000')}</span>`;
+function groupTotals(){
+  let inAmt = 0, inPpl = 0, out = 0, outG = 0;
+  GROUPS.forEach(g => { if (g.owner) payers(g).filter(m => !m.paid).forEach(m => { inAmt += share(g, m); inPpl++; }); else { const me = g.members.find(m => m.me); if (!me.paid){ out += share(g, me); outG++; } } });
+  return {inAmt, inPpl, out, outG};
+}
+function gCard(g){
+  const p = payers(g), done = paidCount(g), me = g.members.find(m => m.me);
+  const right = g.owner
+    ? `<span class="pill ${done === p.length ? 'p-active' : 'p-review'}">${done === p.length ? icon('check') + 'Đã thu đủ' : `${done}/${p.length} đã trả`}</span>`
+    : `<span class="pill ${me.paid ? 'p-active' : 'p-warn'}">${me.paid ? icon('check') + 'Bạn đã trả' : 'Bạn chưa trả'}</span>`;
+  return `<div class="gcard" data-group="${g.id}" role="button" tabindex="0">
+    <div class="row1">${groupLogo(g)}<div class="meta"><b>${g.name}</b><span class="muted">${g.owner ? 'Bạn là chủ nhóm' : 'Chủ nhóm: ' + g.ownerName} · hạn ${g.due}</span></div>
+      <div style="text-align:right"><b class="num">${vnd(share(g, g.owner ? p[0] : me))}</b><small class="muted" style="display:block">/người</small></div></div>
+    <div class="row2"><div class="mstack">${g.members.map(m => mav(m)).join('')}</div>${right}</div></div>`;
+}
+function renderGroups(){
+  const t = groupTotals();
+  $('#gIn').textContent = vnd(t.inAmt); $('#gInSub').textContent = `từ ${t.inPpl} người chưa trả`;
+  $('#gOut').textContent = vnd(t.out); $('#gOutSub').textContent = t.outG ? `cho ${t.outG} nhóm` : 'Không còn khoản nào';
+  const own = GROUPS.filter(g => g.owner), mem = GROUPS.filter(g => !g.owner);
+  $('#gOwnCount').textContent = `${own.length} nhóm`;
+  $('#gOwn').innerHTML = own.map(gCard).join('');
+  $('#gMember').innerHTML = mem.length ? mem.map(gCard).join('') : '<div class="empty">Chưa tham gia nhóm nào</div>';
+  $('#homeGroups').innerHTML = `<div class="flex between"><div class="flex">${icon('users')}<b>${GROUPS.length} nhóm đang chia</b></div><div class="mstack">${GROUPS.slice(0,3).map(g => `<span class="mav" style="background:#fff;box-shadow:var(--shadow-sm)">${groupLogo(g, 'sm')}</span>`).join('')}</div></div>
+    <div class="sum2 mt12"><div style="background:var(--mint);padding:10px 12px"><small style="color:#2E5B45">Sẽ nhận</small><b class="num" style="font-size:17px;margin-top:2px">${vnd(t.inAmt)}</b></div><div style="background:var(--peach);padding:10px 12px"><small style="color:#8A4B1E">Cần trả</small><b class="num" style="font-size:17px;margin-top:2px">${vnd(t.out)}</b></div></div>`;
+}
+function qrSvg(seedStr){
+  let h = [...seedStr].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+  const r = () => (h = (h * 1103515245 + 12345) >>> 0) / 4294967296;
+  const N = 25, cell = [];
+  const finder = (x, y) => { for (let i = 0; i < 7; i++) for (let j = 0; j < 7; j++) cell.push([x + i, y + j, i === 0 || i === 6 || j === 0 || j === 6 || (i > 1 && i < 5 && j > 1 && j < 5)]); };
+  const inF = (x, y) => (x < 8 && y < 8) || (x > N - 9 && y < 8) || (x < 8 && y > N - 9);
+  finder(0, 0); finder(N - 7, 0); finder(0, N - 7);
+  let rects = cell.filter(c => c[2]).map(([x, y]) => `<rect x="${x}" y="${y}" width="1" height="1"/>`).join('');
+  for (let x = 0; x < N; x++) for (let y = 0; y < N; y++) if (!inF(x, y) && r() < .47) rects += `<rect x="${x}" y="${y}" width="1" height="1"/>`;
+  return `<svg class="qr" viewBox="0 0 ${N} ${N}" role="img" aria-label="Mã QR chuyển khoản (mẫu)"><g fill="#27322A" shape-rendering="crispEdges">${rects}</g></svg>`;
+}
+function qrCard(g, own){
+  const me = g.members.find(m => m.me), amt = own ? share(g, payers(g)[0]) : share(g, me);
+  const acc = own ? ['KHANH NGUYEN', 'MB Bank', '0901 234 567'] : ['NGUYEN QUANG HUY', 'Techcombank', '1903 5566 7788'];
+  const memo = `SUBCA ${g.name.split(' ')[0].toUpperCase()} T${TODAY.getMonth() + 2 > 12 ? 1 : TODAY.getMonth() + 1}`;
+  return `<div class="qr-card mt12">${qrSvg(g.id + acc[2])}
+    <div class="bank-row"><span>Người nhận</span><b>${acc[0]}</b></div><div class="bank-row"><span>Ngân hàng</span><b>${acc[1]}</b></div>
+    <div class="bank-row"><span>Số tài khoản</span><b class="num">${acc[2]}</b></div><div class="bank-row"><span>Số tiền</span><b class="num">${vnd(amt)}</b></div>
+    <div class="bank-row"><span>Nội dung</span><b>${memo}</b></div></div>`;
+}
+function renderGroup(id){
+  const g = GROUPS.find(x => x.id === id); if (!g) return; curGroup = id;
+  const p = payers(g), done = paidCount(g), me = g.members.find(m => m.me);
+  const got = p.filter(m => m.paid).reduce((a, m) => a + share(g, m), 0), need = p.reduce((a, m) => a + share(g, m), 0);
+  const sum = g.members.reduce((a, m) => a + share(g, m), 0), diff = g.total - sum;
+  const memberRow = m => {
+    const isPayer = !(g.owner ? m.me : m.host);
+    const tag = m.me ? (g.owner ? 'Bạn · chủ nhóm' : 'Bạn') : m.host ? 'Chủ nhóm' : m.invited ? 'Đã gửi link mời' : m.paid ? `Đã trả · ${m.when || 'tháng này'}` : (m.reminded || 'Chưa trả');
+    let right;
+    if (g.mode === 'custom' && g.owner && !m.invited) right = `<input class="amt-input num" inputmode="numeric" value="${fmtN(share(g, m))}" data-amt="${g.members.indexOf(m)}" aria-label="Số tiền của ${m.n}">`;
+    else right = `<b class="num">${vnd(share(g, m))}</b>`;
+    let acts = '';
+    if (g.owner && isPayer && !m.invited && !m.paid) acts = `<div class="acts"><button class="mini-btn" data-remind="${g.members.indexOf(m)}">${icon('bell')}Nhắc</button><button class="mini-btn dark" data-paid="${g.members.indexOf(m)}">${icon('check')}Đã nhận</button></div>`;
+    if (m.invited) acts = `<div class="acts"><button class="mini-btn" data-toast="Đã sao chép link mời">${icon('copy')}Link mời</button></div>`;
+    return `<div class="member">${mav(m, 'lg')}<div class="meta"><b>${m.me ? 'Bạn' : m.n}</b><small style="${!m.paid && isPayer && !m.invited ? 'color:#A5462C;font-weight:600' : ''}">${tag}</small></div><div class="amt">${right}</div>${acts}</div>`;
+  };
+  const head = `<div class="d-hero" style="background:${g.owner ? 'var(--mint)' : 'var(--sky-soft)'}">${groupLogo(g, 'lg')}<h1>${g.name}</h1>
+      <div class="sub">${g.owner ? 'Bạn là chủ nhóm' : 'Chủ nhóm: ' + g.ownerName} · ${g.members.length} người · ${g.mode === 'equal' ? 'chia đều' : 'chia tùy chỉnh'}</div>
+      <div class="d-price num">${vnd(share(g, g.owner ? p[0] : me))}<small> / người</small></div><div class="muted">Tổng ${vnd(g.total)}/tháng · hạn chuyển ${g.due}</div></div>`;
+  let body;
+  if (g.owner){
+    const pctDone = need ? got / need * 100 : 0, unpaid = p.filter(m => !m.paid && !m.invited).length;
+    body = `${head}
+      <div class="card mt12"><div class="flex between"><b>Đã thu tháng này</b><span class="num"><b>${vnd(got)}</b> <span class="muted">/ ${vnd(need)}</span></span></div>
+        <div class="progress mt12"><i style="width:${pctDone}%;background:#5A99A8"></i></div>
+        <div class="flex between mt8 muted"><span>${done}/${p.length} người đã trả</span><span>Phần của bạn: ${vnd(share(g, me))}</span></div></div>
+      <div class="sec-head"><h3>Thành viên</h3></div>
+      <div class="seg" id="splitSeg"><button class="${g.mode === 'equal' ? 'on' : ''}" data-mode="equal">Chia đều</button><button class="${g.mode === 'custom' ? 'on' : ''}" data-mode="custom">Tùy chỉnh</button></div>
+      <div class="card mt12" style="padding:4px 16px">${g.members.map(memberRow).join('')}</div>
+      ${g.mode === 'custom' ? `<div class="split-check" style="background:${diff === 0 ? 'var(--mint)' : 'var(--coral)'}">${icon(diff === 0 ? 'check-circle' : 'alert')}${diff === 0 ? 'Đã chia khớp tổng tiền gói' : diff > 0 ? `Còn thiếu ${vnd(diff)} so với giá gói` : `Đang dư ${vnd(-diff)} so với giá gói`}</div>` : ''}
+      <div class="row mt16"><button class="btn btn-soft" data-qr="${g.id}">${icon('qr')}Mã QR</button><button class="btn btn-primary" data-remind-all ${unpaid ? '' : 'disabled style="opacity:.5"'}>${icon('bell')}Nhắc ${unpaid ? `(${unpaid})` : 'tất cả'}</button></div>
+      <div class="sec-head"><h3>Mời thêm người</h3><span class="muted">${g.members.length}/${g.sub === 'netflix' ? 4 : 6} chỗ</span></div>
+      <div class="card"><span class="sub">Gửi link để bạn bè tham gia nhóm và nhận nhắc chuyển tiền mỗi tháng.</span>
+        <div class="invite"><code>subca.app/j/${g.id.slice(2).toUpperCase()}-4821</code><button class="mini-btn dark" data-toast="Đã sao chép link mời">${icon('copy')}Sao chép</button></div></div>`;
+  } else {
+    body = `${head}
+      ${me.paid ? `<div class="card mint mt12 flex" style="gap:12px">${icon('check-circle')}<div><b>Bạn đã trả tháng này</b><div class="muted" style="color:#3A5A4C">${me.when || ''}</div></div></div>`
+        : `<div class="card coral mt12"><b style="font-size:16px">Bạn cần trả ${g.ownerName} ${vnd(share(g, me))}</b><div style="font-size:13px;color:#5E2513;margin-top:2px">Trước ${g.due} · quét mã hoặc chuyển khoản theo thông tin bên dưới</div></div>
+        ${qrCard(g, false)}
+        <div class="row mt12"><button class="btn btn-soft" data-toast="Đã sao chép số tài khoản">${icon('copy')}Sao chép STK</button><button class="btn btn-primary" data-self-paid>${icon('check')}Tôi đã chuyển</button></div>`}
+      <div class="sec-head"><h3>Thành viên</h3><span class="muted">${done}/${p.length} đã trả</span></div>
+      <div class="card" style="padding:4px 16px">${g.members.map(memberRow).join('')}</div>`;
+  }
+  body += `<div class="sec-head"><h3>Lịch sử</h3></div><div class="card"><div class="timeline">
+    <div class="tl next"><span>Tháng 9 <span class="muted">· đang thu</span></span><b class="num">${done}/${p.length}</b></div>
+    ${g.history.map(([m, t, ok]) => `<div class="tl"><span>${m} <span class="muted">· ${t}</span></span>${ok ? icon('check', 'color:#3E8E6A') : icon('alert', 'color:#B5553A')}</div>`).join('')}
+    ${g.history.length ? '' : '<p class="muted">Chưa có lịch sử</p>'}</div></div>`;
+  $('#groupBody').innerHTML = body;
+}
+const fmtN = n => Math.round(n).toLocaleString('vi-VN');
+document.addEventListener('click', e => {
+  const gc = e.target.closest('[data-group]'); if (gc){ renderGroup(gc.dataset.group); go('group'); }
+});
+$('#newGroupBtn').onclick = $('#newGroupBtn2').onclick = () => openSheet('newGroup');
+$('#groupBody').addEventListener('click', e => {
+  const g = GROUPS.find(x => x.id === curGroup); if (!g) return;
+  const md = e.target.closest('[data-mode]'); if (md){ g.mode = md.dataset.mode; if (g.mode === 'equal') g.members.forEach(m => delete m.custom); renderGroup(g.id); return; }
+  const pd = e.target.closest('[data-paid]'); if (pd){ const m = g.members[+pd.dataset.paid]; m.paid = true; m.when = 'Vừa xong'; renderGroup(g.id); renderGroups(); toast(`Đã ghi nhận ${m.n} trả ${vnd(share(g, m))}`); return; }
+  const rm = e.target.closest('[data-remind]'); if (rm){ const m = g.members[+rm.dataset.remind]; m.reminded = 'Đã nhắc vừa xong'; renderGroup(g.id); toast(`Đã gửi nhắc tới ${m.n}`); return; }
+  if (e.target.closest('[data-remind-all]')){ payers(g).filter(m => !m.paid && !m.invited).forEach(m => m.reminded = 'Đã nhắc vừa xong'); renderGroup(g.id); toast('Đã gửi nhắc tới các thành viên chưa trả'); return; }
+  const qr = e.target.closest('[data-qr]'); if (qr){ openSheet('qr', qr.dataset.qr); return; }
+  if (e.target.closest('[data-self-paid]')){ const me = g.members.find(m => m.me); me.paid = true; me.when = 'Vừa xong · chờ chủ nhóm xác nhận'; renderGroup(g.id); renderGroups(); toast(`Đã báo ${g.ownerName} là bạn đã chuyển tiền`); }
+});
+$('#groupBody').addEventListener('change', e => {
+  const inp = e.target.closest('[data-amt]'); if (!inp) return;
+  const g = GROUPS.find(x => x.id === curGroup); g.members[+inp.dataset.amt].custom = +inp.value.replace(/\D/g, '') || 0; renderGroup(g.id); renderGroups();
+});
+
+/* ================= Subca Plus ================= */
+const PLUS_PLANS = {
+  year:{name:'Năm', price:199000, per:'năm', sub:'≈ 16.583đ/tháng · dùng thử 7 ngày', badge:['Tiết kiệm 43%', 'var(--peach)', '#7A3F17'], trial:true},
+  month:{name:'Tháng', price:29000, per:'tháng', sub:'Dùng thử 7 ngày, hủy bất cứ lúc nào', trial:true},
+  life:{name:'Trọn đời', price:399000, per:'một lần', sub:'Trả một lần, dùng mãi mãi', badge:['Ưu đãi ra mắt', 'var(--sky-soft)', '#2A6572'], trial:false},
+};
+let plusPlan = 'year', isPlus = false, plusSince = null;
+const trialEnd = () => { const d = new Date(TODAY); d.setDate(d.getDate() + 7); return d; };
+const trialRemind = () => { const d = new Date(TODAY); d.setDate(d.getDate() + 5); return d; };
+const FEATS = [
+  ['layers', 'Số subscription', '8', 'Vô hạn'],
+  ['bell', 'Mốc nhắc gia hạn', '1 mốc', '4 mốc'],
+  ['chart', 'Phân tích nâng cao', 'Cơ bản', true],
+  ['bulb', 'Gợi ý tiết kiệm', false, true],
+  ['users', 'Nhóm chia tiền', '1 nhóm', 'Vô hạn'],
+  ['download', 'Xuất CSV / PDF', false, true],
+  ['widget', 'Widget màn hình chính', false, true],
+  ['devices', 'Đồng bộ đa thiết bị', false, true],
+];
+function renderPlus(){
+  const save = SUBS.filter(x => x.status === 'review').reduce((a, x) => a + monthly(x), 0);
+  const perMonth = PLUS_PLANS.year.price / 12, times = Math.floor(save / perMonth);
+  const cell = v => v === true ? `<span class="yes">${icon('check')}</span>` : v === false ? `<span class="no">—</span>` : `<span>${v}</span>`;
+  if (isPlus){
+    const pl = PLUS_PLANS[plusSince];
+    $('#plusBody').innerHTML = `<div style="text-align:center">
+      <div class="success-mark">${icon('check')}</div>
+      <h1 class="h-title">Chào mừng đến Subca Plus!</h1>
+      <p class="sub mt8">${pl.trial ? `Bạn đang dùng thử miễn phí đến <b>${fmtDate(trialEnd())}</b>. Subca sẽ nhắc bạn vào ${fmtDate(trialRemind())}, trước khi bị tính phí.` : 'Bạn đã sở hữu Subca Plus trọn đời. Cảm ơn bạn đã ủng hộ!'}</p></div>
+      <div class="info-list mt20">
+        <div class="info-row"><span>${icon('sparkle')}Gói hiện tại</span><b>Plus · ${pl.name}</b></div>
+        <div class="info-row"><span>${icon('coin')}Giá</span><b class="num">${vnd(pl.price)}/${pl.per}</b></div>
+        ${pl.trial ? `<div class="info-row"><span>${icon('cal')}Lần thanh toán đầu</span><b>${fmtDate(trialEnd())}</b></div>` : ''}
+      </div>
+      <div class="sec-head"><h3>Đã mở khóa</h3></div>
+      <div class="card" style="padding:6px 16px">${FEATS.map(([ic, t]) => `<div class="info-row"><span>${icon(ic)}${t}</span>${icon('check', 'color:#2E7D5B')}</div>`).join('')}</div>
+      <button class="btn btn-primary btn-block mt20" data-go="analytics">${icon('chart')}Xem phân tích đầy đủ</button>
+      ${pl.trial ? `<button class="btn btn-block mt8" style="color:var(--ink-2)" data-toast="Mở Cài đặt → Apple ID → Gói đăng ký (mockup)">Quản lý hoặc hủy gia hạn</button>` : ''}`;
+    return;
+  }
+  const pl = PLUS_PLANS[plusPlan];
+  $('#plusBody').innerHTML = `
+    <div class="plus-hero">
+      <div class="plus-mark">${icon('repeat')}</div>
+      <h1>Kiểm soát trọn vẹn<br>mọi khoản phí định kỳ</h1>
+      <p>Nhắc đúng lúc, phân tích sâu, và cắt bỏ những gói bạn không còn dùng.</p>
+      ${save ? `<div class="value-card"><span class="ic">${icon('piggy')}</span><div><b>Subca đã tìm ra ${vnd(save)}/tháng bạn có thể tiết kiệm</b><div class="muted">Gấp ${times} lần giá Plus năm. Hủy 1 gói là đủ hoàn vốn.</div></div></div>` : ''}
+    </div>
+    <div class="sec-head"><h3>Free và Plus khác gì?</h3></div>
+    <div class="cmp">
+      <div class="cmp-row head"><span>Tính năng</span><span>Free</span><span>Plus</span></div>
+      ${FEATS.map(([ic, t, f, pv]) => `<div class="cmp-row"><span class="feat">${icon(ic)}${t}</span>${cell(f)}${cell(pv)}</div>`).join('')}
+    </div>
+    <div class="sec-head"><h3>Chọn gói</h3></div>
+    <div role="radiogroup" aria-label="Chọn gói Subca Plus" id="planPick">
+      ${Object.entries(PLUS_PLANS).map(([k, x]) => `<button class="plan ${plusPlan === k ? 'on' : ''}" role="radio" aria-checked="${plusPlan === k}" data-plan="${k}">
+        ${x.badge ? `<span class="badge" style="background:${x.badge[1]};color:${x.badge[2]}">${x.badge[0]}</span>` : ''}
+        <span class="radio"></span><span class="meta"><b>${x.name}</b><span class="muted">${x.sub}</span></span>
+        <span class="price"><b class="num">${vnd(x.price)}</b><span class="muted">/${x.per}</span></span></button>`).join('')}
+    </div>
+    ${pl.trial ? `<div class="sec-head"><h3>Dùng thử hoạt động thế nào?</h3></div>
+    <div class="trial-steps">
+      <div class="tstep"><span class="ic" style="background:var(--mint)">${icon('lockopen')}</span><div><b>Hôm nay</b><span>Mở khóa toàn bộ tính năng Plus, không trừ tiền.</span></div></div>
+      <div class="tstep"><span class="ic" style="background:var(--peach)">${icon('bell')}</span><div><b>${fmtDate(trialRemind())}</b><span>Subca nhắc bạn: còn 2 ngày trước khi tính phí.</span></div></div>
+      <div class="tstep"><span class="ic" style="background:var(--sky-soft)">${icon('card')}</span><div><b>${fmtDate(trialEnd())}</b><span>Bắt đầu tính ${vnd(pl.price)}/${pl.per}. Hủy trước ngày này để không mất phí.</span></div></div>
+    </div>` : ''}
+    <div class="sec-head"><h3>Người dùng nói gì</h3><span class="muted">4,8 · 2.300 đánh giá</span></div>
+    <div class="quotes">
+      ${[['Linh Đan', 'Nhờ nhắc trial mà mình hủy kịp 3 gói, đỡ mất gần 500K. Plus tự hoàn vốn ngay tháng đầu.'], ['Minh Quân', 'Chia tiền YouTube Family với 5 đứa bạn giờ không phải đòi nữa, app tự nhắc.'], ['Thảo Vy', 'Xem chi phí mỗi lần dùng mới biết gym của mình đắt thế nào.']].map(([n, t]) => `<div class="quote"><div class="stars" aria-label="5 sao">${icon('star').repeat(5)}</div><p>"${t}"</p><b style="font-size:13px">${n}</b></div>`).join('')}
+    </div>
+    <div class="sec-head"><h3>Câu hỏi thường gặp</h3></div>
+    <div class="faq">
+      <details><summary>Tôi có bị tự động trừ tiền sau khi dùng thử?${icon('chev')}</summary><p>Có, nếu không hủy trước ngày kết thúc. Subca sẽ nhắc bạn 2 ngày trước để bạn quyết định.</p></details>
+      <details><summary>Hủy gói như thế nào?${icon('chev')}</summary><p>Vào Cài đặt → Apple ID → Gói đăng ký → Subca Plus → Hủy. Bạn vẫn dùng Plus đến hết kỳ đã trả.</p></details>
+      <details><summary>Dữ liệu của tôi có bị bán cho bên thứ ba?${icon('chev')}</summary><p>Không. Subca kiếm tiền từ gói Plus, không bán dữ liệu người dùng.</p></details>
+      <details><summary>Hết Plus thì dữ liệu có mất không?${icon('chev')}</summary><p>Không mất. Bạn vẫn xem được mọi subscription, chỉ các tính năng Plus bị khóa lại.</p></details>
+    </div>
+    <div class="legal"><button data-toast="Điều khoản sử dụng (mockup)">Điều khoản</button><button data-toast="Chính sách quyền riêng tư (mockup)">Quyền riêng tư</button></div>
+    <div class="sticky-cta"><button class="btn btn-primary btn-block" id="plusCta">${pl.trial ? 'Dùng thử miễn phí 7 ngày' : `Mua trọn đời ${vnd(pl.price)}`}</button>
+      <div class="plus-cta-note">${pl.trial ? `Sau đó ${vnd(pl.price)}/${pl.per} · Hủy bất cứ lúc nào` : 'Thanh toán một lần · Không tự gia hạn'}</div></div>`;
+}
+function applyPlus(){
+  document.body.classList.toggle('is-plus', isPlus);
+  const pl = isPlus ? PLUS_PLANS[plusSince] : null;
+  $('#planPill').className = 'pill mt8 ' + (isPlus ? 'p-trial' : 'p-cancel');
+  $('#planPill').innerHTML = isPlus ? icon('sparkle') + 'Subca Plus' + (pl.trial ? ' · dùng thử' : '') : 'Gói Free';
+  const banner = isPlus
+    ? `<span class="ic">${icon('sparkle')}</span><div style="flex:1;position:relative;z-index:1"><b>Bạn đang dùng Subca Plus</b><span>${pl.trial ? 'Dùng thử đến ' + fmtDate(trialEnd()) : 'Gói trọn đời'} · Quản lý gói</span></div>${icon('chev')}`
+    : `<span class="ic">${icon('sparkle')}</span><div style="flex:1;position:relative;z-index:1"><b>Nâng cấp Subca Plus</b><span>Dùng thử 7 ngày miễn phí · từ 16.583đ/tháng</span></div>${icon('chev')}`;
+  $('#profilePlus').innerHTML = banner;
+  $('#homePlus').innerHTML = banner;
+  $('#homePlus').hidden = isPlus;
+}
+$('#plusBody').addEventListener('click', e => {
+  const b = e.target.closest('[data-plan]'); if (b){ plusPlan = b.dataset.plan; const top = $('#s-plus').scrollTop; renderPlus(); $('#s-plus').scrollTop = top; return; }
+  if (e.target.closest('#plusCta')) openSheet('buy');
+});
+document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.plus-tag')){ e.preventDefault(); e.stopPropagation(); go('plus'); } }, true);
+/* ================= Boot ================= */
+function renderAll(){ renderHome(); renderList(); renderCal(); renderTrials(); renderReview(); renderAnalytics(); renderBudget(); renderPayments(); renderGroups(); }
+renderAll(); renderNotifs(); renderPlus(); applyPlus();
+$$('[data-logo]').forEach(el => el.outerHTML = logo(byId(el.dataset.logo), 'sm'));
+$('#s-onboarding').classList.add('active');
+$('#nav').classList.add('hide');
+$$('#sideNav button')[0].classList.add('on');
+</script>
+</body>
+</html>
