@@ -1,6 +1,10 @@
 # React Native / Expo cần node_modules dạng hoisted trong monorepo
 nodeLinker: hoisted
 
+# Không tự chạy `pnpm install` trước mỗi `pnpm run`: turbo chạy song song nhiều task,
+# các lệnh install đồng thời chặn lẫn nhau và treo. Chỉ cảnh báo, cài thủ công bằng `pnpm install`.
+verifyDepsBeforeRun: warn
+
 packages:
   - 'apps/*'
   - 'packages/*'
