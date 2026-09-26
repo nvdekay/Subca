@@ -1,0 +1,8 @@
+design/
+pnpm-lock.yaml
+**/dist/
+**/.next/
+**/.expo/
+apps/api/src/generated/
+apps/api/prisma/migrations/
+docs/

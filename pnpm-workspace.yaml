@@ -1,0 +1,14 @@
+# React Native / Expo cần node_modules dạng hoisted trong monorepo
+nodeLinker: hoisted
+
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# Cho phép các package cần chạy script cài đặt (build native / engine)
+allowBuilds:
+  '@prisma/engines': true
+  prisma: true
+  esbuild: true
+  sharp: false
+  unrs-resolver: false

@@ -1,0 +1,25 @@
+{
+  "name": "subca",
+  "private": true,
+  "packageManager": "pnpm@11.9.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:generate": "pnpm --filter @subca/api prisma:generate",
+    "db:migrate": "pnpm --filter @subca/api prisma:migrate",
+    "db:studio": "pnpm --filter @subca/api prisma:studio"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2",
+    "turbo": "^2.11.4",
+    "typescript": "~6.0.2"
+  }
+}
