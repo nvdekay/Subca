@@ -299,7 +299,7 @@ function BudgetCard({
 }) {
   const over = budget.overBudget;
   return (
-    <Card className="mt-3">
+    <Card className="mt-3" onPress={() => router.push('/budget')}>
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-[10px]">
           <View className="h-[30px] w-[30px] items-center justify-center rounded-[10px] bg-coral">

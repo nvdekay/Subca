@@ -1,4 +1,4 @@
-import { CURRENCY_DECIMALS, toMinor, type CurrencyCode } from '@subca/shared';
+import type { CurrencyCode } from '@subca/shared';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useState, type ReactNode } from 'react';
@@ -15,7 +15,6 @@ import { Text } from '@/components/ui/text';
 import {
   useBudget,
   useDeleteAccount,
-  useSaveBudget,
   useUpdateProfile,
   useUpdateSettings,
 } from '@/features/account/queries';
@@ -50,7 +49,7 @@ const REMIND_TIMES = [420, 510, 720, 1080, 1260].map((m) => ({
   label: `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`,
 }));
 
-type SheetKind = 'name' | 'currency' | 'timezone' | 'time' | 'budget' | null;
+type SheetKind = 'name' | 'currency' | 'timezone' | 'time' | null;
 
 /** Hồ sơ & Cài đặt — màn 16 của mockup. */
 export default function Settings() {
@@ -232,7 +231,7 @@ export default function Settings() {
                 ? 'Chưa đặt'
                 : undefined
           }
-          onPress={() => setSheet('budget')}
+          onPress={() => router.push('/budget')}
           divider
         />
         <SetRow
@@ -295,13 +294,6 @@ export default function Settings() {
         onPick={(reminderMinuteOfDay) => changeSettings({ reminderMinuteOfDay })}
         onClose={() => setSheet(null)}
       />
-      {sheet === 'budget' ? (
-        <BudgetSheet
-          currency={settings?.currency ?? 'VND'}
-          current={budget.data ?? null}
-          onClose={() => setSheet(null)}
-        />
-      ) : null}
     </Screen>
   );
 }
@@ -394,84 +386,6 @@ function NameSheet({ initial, onClose }: { initial: string; onClose: () => void 
           )
         }
       />
-    </Sheet>
-  );
-}
-
-function BudgetSheet({
-  currency,
-  current,
-  onClose,
-}: {
-  currency: CurrencyCode;
-  current: { amountMinor: string; currency: CurrencyCode } | null;
-  onClose: () => void;
-}) {
-  const budgetCurrency = current?.currency ?? currency;
-  const decimals = CURRENCY_DECIMALS[budgetCurrency];
-  // Ô nhập hiện đơn vị lớn (VD 20.5 USD), API lưu đơn vị nhỏ nhất (2050 cent).
-  const [value, setValue] = useState(() =>
-    current ? String(Number(current.amountMinor) / 10 ** decimals) : '',
-  );
-  const [error, setError] = useState<string | null>(null);
-  const save = useSaveBudget();
-
-  function submit() {
-    let amountMinor: string;
-    try {
-      const text = value.replace(/\s/g, '');
-      amountMinor = toMinor(
-        decimals === 0 ? text.replace(/[.,]/g, '') : text.replace(',', '.'),
-        budgetCurrency,
-      ).toString();
-    } catch {
-      setError('Nhập số tiền, VD 2000000');
-      return;
-    }
-    if (amountMinor === '0') {
-      setError('Hạn mức phải lớn hơn 0');
-      return;
-    }
-    save.mutate(
-      { amountMinor, currency: budgetCurrency, alertAtPercent: 90 },
-      { onSuccess: onClose, onError: (e) => setError(e.message) },
-    );
-  }
-
-  return (
-    <Sheet
-      visible
-      onClose={onClose}
-      title="Ngân sách mỗi tháng"
-      subtitle="Subca cảnh báo khi tổng chi phí subscription vượt 90% hạn mức."
-    >
-      <Input
-        label={`Hạn mức (${budgetCurrency})`}
-        value={value}
-        onChangeText={(t) => {
-          setValue(t);
-          setError(null);
-        }}
-        placeholder="2000000"
-        keyboardType={decimals === 0 ? 'number-pad' : 'decimal-pad'}
-        autoFocus
-        error={error}
-      />
-      <Button
-        title="Lưu ngân sách"
-        icon="check"
-        className="mt-4"
-        loading={save.isPending}
-        onPress={submit}
-      />
-      {current ? (
-        <Button
-          title="Bỏ ngân sách"
-          variant="ghost"
-          className="mt-2"
-          onPress={() => save.mutate(null, { onSuccess: onClose })}
-        />
-      ) : null}
     </Sheet>
   );
 }
