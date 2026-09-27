@@ -6,7 +6,7 @@
  * vì JSON không có BigInt. Dùng `toMinor()` để đổi số người dùng nhập sang chuỗi này.
  */
 import { z } from 'zod';
-import { IntervalUnit, SubscriptionStatus, UsageFrequency } from '../enums.js';
+import { IntervalUnit, PaymentMethodType, SubscriptionStatus, UsageFrequency } from '../enums.js';
 import { CurrencyCode } from '../money.js';
 import { IsoDateSchema, type IsoDate } from '../renewal.js';
 
@@ -109,6 +109,22 @@ export interface SubscriptionDto {
   notes: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+/** `GET /subscriptions/:id`: đủ dữ liệu cho màn Chi tiết trong 1 request. */
+export interface SubscriptionDetailDto extends SubscriptionDto {
+  paymentMethod: {
+    id: string;
+    type: PaymentMethodType;
+    brand: string | null;
+    label: string;
+    last4: string | null;
+  } | null;
+  category: { id: string; name: string; icon: string | null; color: string | null } | null;
+  /** Hướng dẫn hủy lấy từ thư viện dịch vụ; null nếu tự nhập tên. */
+  cancelGuide: { url: string | null; website: string | null; steps: string[] } | null;
+  /** Các lần đã bị trừ tiền, mới nhất trước (tối đa 12). */
+  charges: { chargedOn: IsoDate; amountMinor: string; currency: CurrencyCode }[];
 }
 
 export interface SubscriptionListDto {

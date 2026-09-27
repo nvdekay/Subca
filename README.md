@@ -75,7 +75,7 @@ Migration hiện có:
 | GET                | `/catalog/categories`              | Danh mục hệ thống + danh mục người dùng                                                                                                                    |
 | GET                | `/catalog/services?q=&categoryId=` | Thư viện dịch vụ kèm gói giá                                                                                                                               |
 | GET                | `/subscriptions?status=&q=`        | Danh sách, sắp theo kỳ gia hạn gần nhất, kèm `trackedCount` và `limit`                                                                                     |
-| GET                | `/subscriptions/:id`               | Chi tiết                                                                                                                                                   |
+| GET                | `/subscriptions/:id`               | Chi tiết cho màn Chi tiết: kèm phương thức thanh toán, danh mục, hướng dẫn hủy, 12 lần trừ tiền gần nhất                                                   |
 | POST               | `/subscriptions`                   | Thêm; server tự tính kỳ gia hạn tiếp theo theo múi giờ người dùng                                                                                          |
 | PATCH              | `/subscriptions/:id`               | Sửa một phần, hủy (`status: CANCELLED`) hoặc mở lại                                                                                                        |
 | DELETE             | `/subscriptions/:id`               | Lưu trữ (xóa mềm)                                                                                                                                          |

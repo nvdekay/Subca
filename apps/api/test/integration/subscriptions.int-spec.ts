@@ -173,6 +173,50 @@ describe('Subscriptions + Catalog trên database thật', () => {
     ).rejects.toMatchObject({ response: { code: 'INVALID_REFERENCE' } });
   });
 
+  it('chi tiết: kèm thanh toán, danh mục, hướng dẫn hủy và lịch sử trừ tiền', async () => {
+    const netflix = (await subs.list(userId, { q: 'netf' })).items[0]!;
+    const [category] = await catalog.categories(userId);
+    const pm = await prisma.paymentMethod.create({
+      data: {
+        userId,
+        type: 'CARD',
+        brand: 'VISA',
+        label: 'Visa cá nhân',
+        last4: '4821',
+      },
+    });
+    await subs.update(userId, netflix.id, {
+      paymentMethodId: pm.id,
+      categoryId: category!.id,
+    });
+    await prisma.renewalCharge.createMany({
+      data: [addDays(today, -60), addDays(today, -30)].map((d) => ({
+        subscriptionId: netflix.id,
+        userId,
+        chargedOn: new Date(`${d}T00:00:00.000Z`),
+        amountMinor: 260000n,
+        currency: 'VND',
+      })),
+    });
+
+    const detail = await subs.get(userId, netflix.id);
+    expect(detail).toMatchObject({
+      name: 'Netflix',
+      paymentMethod: { label: 'Visa cá nhân', last4: '4821', brand: 'VISA' },
+      category: { id: category!.id, name: category!.name },
+      cancelGuide: { url: 'https://www.netflix.com/cancelplan' },
+    });
+    // Mới nhất trước
+    expect(detail.charges.map((c) => c.chargedOn)).toEqual([
+      addDays(today, -30),
+      addDays(today, -60),
+    ]);
+    expect(detail.charges[0]).toMatchObject({
+      amountMinor: '260000',
+      currency: 'VND',
+    });
+  });
+
   it('giới hạn gói Free: tối đa 8, có Plus thì không giới hạn', async () => {
     const current = (await subs.list(userId, {})).trackedCount;
     for (let i = current; i < FREE_LIMITS.maxSubscriptions; i++) {

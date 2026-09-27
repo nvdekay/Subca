@@ -16,6 +16,7 @@ import {
   UpdateSubscriptionSchema,
   type CreateSubscription,
   type ListSubscriptionsQuery,
+  type SubscriptionDetailDto,
   type SubscriptionDto,
   type SubscriptionListDto,
   type UpdateSubscription,
@@ -43,7 +44,7 @@ export class SubscriptionsController {
   get(
     @CurrentUser() user: AuthUser,
     @Param('id', uuidParam) id: string,
-  ): Promise<SubscriptionDto> {
+  ): Promise<SubscriptionDetailDto> {
     return this.subscriptions.get(user.id, id);
   }
 

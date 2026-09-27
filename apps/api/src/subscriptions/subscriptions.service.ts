@@ -13,6 +13,7 @@ import {
   type CurrencyCode,
   type IsoDate,
   type ListSubscriptionsQuery,
+  type SubscriptionDetailDto,
   type SubscriptionDto,
   type SubscriptionListDto,
   type UpdateSubscription,
@@ -45,6 +46,27 @@ export const subscriptionInclude = {
     },
   },
 } satisfies Prisma.SubscriptionInclude;
+/** Chỉ dùng cho màn Chi tiết (thêm dữ liệu so với danh sách). */
+const detailInclude = {
+  service: {
+    select: {
+      ...subscriptionInclude.service.select,
+      website: true,
+      cancelUrl: true,
+      cancelSteps: true,
+    },
+  },
+  paymentMethod: {
+    select: { id: true, type: true, brand: true, label: true, last4: true },
+  },
+  category: { select: { id: true, name: true, icon: true, color: true } },
+  renewalCharges: {
+    select: { chargedOn: true, amountMinor: true, currency: true },
+    orderBy: { chargedOn: 'desc' },
+    take: 12,
+  },
+} satisfies Prisma.SubscriptionInclude;
+
 export type SubscriptionRow = Prisma.SubscriptionGetPayload<{
   include: typeof subscriptionInclude;
 }>;
@@ -98,12 +120,43 @@ export class SubscriptionsService {
     return { items: rows.map((r) => toDto(r, today)), trackedCount, limit };
   }
 
-  async get(userId: string, id: string): Promise<SubscriptionDto> {
+  /** Chi tiết cho màn Chi tiết: kèm phương thức thanh toán, danh mục, hướng dẫn hủy, lịch sử trừ tiền. */
+  async get(userId: string, id: string): Promise<SubscriptionDetailDto> {
     const [row, today] = await Promise.all([
-      this.findOwned(userId, id),
+      this.prisma.subscription.findFirst({
+        where: { id, userId, status: { not: 'ARCHIVED' } },
+        include: detailInclude,
+      }),
       this.today(userId),
     ]);
-    return toDto(row, today);
+    if (!row) throw subscriptionNotFound();
+    const pm = row.paymentMethod;
+    const svc = row.service;
+    return {
+      ...toDto(row, today),
+      paymentMethod: pm
+        ? {
+            id: pm.id,
+            type: pm.type,
+            brand: pm.brand,
+            label: pm.label,
+            last4: pm.last4,
+          }
+        : null,
+      category: row.category,
+      cancelGuide: svc
+        ? {
+            url: svc.cancelUrl,
+            website: svc.website,
+            steps: cancelSteps(svc.cancelSteps),
+          }
+        : null,
+      charges: row.renewalCharges.map((c) => ({
+        chargedOn: fromDbDate(c.chargedOn),
+        amountMinor: c.amountMinor.toString(),
+        currency: c.currency as CurrencyCode,
+      })),
+    };
   }
 
   async create(
@@ -285,12 +338,7 @@ export class SubscriptionsService {
       include: subscriptionInclude,
     });
     // Không phân biệt "không tồn tại" và "của người khác" để không lộ thông tin
-    if (!row)
-      throw new NotFoundException({
-        statusCode: 404,
-        code: 'SUBSCRIPTION_NOT_FOUND',
-        message: 'Không tìm thấy subscription',
-      });
+    if (!row) throw subscriptionNotFound();
     return row;
   }
 
@@ -397,6 +445,20 @@ function scheduleFrom(
     intervalUnit,
     intervalCount,
   };
+}
+
+function subscriptionNotFound(): NotFoundException {
+  return new NotFoundException({
+    statusCode: 404,
+    code: 'SUBSCRIPTION_NOT_FOUND',
+    message: 'Không tìm thấy subscription',
+  });
+}
+
+/** `cancel_steps` là JSON do admin nhập; chỉ nhận mảng chuỗi, còn lại coi như không có. */
+function cancelSteps(value: Prisma.JsonValue | null): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((v): v is string => typeof v === 'string');
 }
 
 function badRequest(
