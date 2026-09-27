@@ -53,3 +53,19 @@ export function splitEvenly(totalMinor: bigint, parts: number): bigint[] {
   const remainder = Number(totalMinor % n);
   return Array.from({ length: parts }, (_, i) => base + (i < remainder ? 1n : 0n));
 }
+
+/**
+ * Quy đổi số tiền (đơn vị nhỏ nhất) sang tiền tệ khác theo tỷ giá `rate` (1 `from` = rate `to`).
+ * Làm tròn đến đơn vị nhỏ nhất của tiền tệ đích. VD 2000n USD (= $20) × 26000 → 520000n VND.
+ */
+export function convertMinor(
+  amountMinor: bigint,
+  from: CurrencyCode,
+  to: CurrencyCode,
+  rate: number,
+): bigint {
+  if (from === to) return amountMinor;
+  if (!Number.isFinite(rate) || rate <= 0) throw new Error(`Tỷ giá không hợp lệ: ${rate}`);
+  const value = (Number(amountMinor) / 10 ** CURRENCY_DECIMALS[from]) * rate;
+  return BigInt(Math.round(value * 10 ** CURRENCY_DECIMALS[to]));
+}

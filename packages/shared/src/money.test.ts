@@ -37,3 +37,18 @@ describe('formatMoney', () => {
     expect(formatMoney(1999n, 'USD', 'en-US')).toBe('$19.99');
   });
 });
+
+describe('convertMinor', () => {
+  it('USD → VND và VND → USD', async () => {
+    const { convertMinor } = await import('./money.js');
+    expect(convertMinor(2000n, 'USD', 'VND', 26000)).toBe(520000n);
+    expect(convertMinor(520000n, 'VND', 'USD', 1 / 26000)).toBe(2000n);
+    expect(convertMinor(1999n, 'USD', 'VND', 25432.5)).toBe(508396n); // 19,99 × 25.432,5 = 508.395,675
+  });
+  it('cùng tiền tệ thì giữ nguyên; tỷ giá sai thì báo lỗi', async () => {
+    const { convertMinor } = await import('./money.js');
+    expect(convertMinor(123n, 'VND', 'VND', 0)).toBe(123n);
+    expect(() => convertMinor(1n, 'USD', 'VND', 0)).toThrow();
+    expect(() => convertMinor(1n, 'USD', 'VND', Number.NaN)).toThrow();
+  });
+});
