@@ -13,7 +13,7 @@
 - Monorepo: Expo SDK 57, NestJS 12 + Fastify, Next.js 16, Prisma 7.10, TypeScript 6.0, pnpm 11 + Turborepo; CI GitHub Actions (có Redis cho smoke test).
 - Supabase dev (Tokyo): 26 bảng, RLS mọi bảng, trigger đăng ký / xóa tài khoản, 3 migration, seed 53 dịch vụ, tỷ giá thật. **Auth:** email OTP 6 số qua SMTP Gmail (dev), template tiếng Việt đã áp.
 - API: xác thực JWT Supabase, `/me` (+ cài đặt, ngân sách, xóa tài khoản), thư viện dịch vụ, subscription CRUD (giới hạn Free, chi tiết kèm thanh toán / hướng dẫn hủy / lịch sử trừ tiền), `/home`, phương thức thanh toán, lịch, đánh giá tháng, phân tích, push token, nhắc nhở BullMQ + Expo Push + receipt, job tỷ giá.
-- **App mobile** (`apps/mobile`): design system theo mockup (NativeWind), đăng nhập OTP 6 số (đếm ngược gửi lại), Trang chủ, Danh sách / Thêm / Sửa / Chi tiết subscription, Lịch, Quản lý Trial, Đánh giá tháng (optimistic), Phân tích, Ngân sách (mô phỏng tiết kiệm), Phương thức thanh toán (tạo ngay trong form + màn phụ), Cài đặt (tiền tệ, múi giờ, giờ nhắc, ngân sách, đăng xuất, xóa tài khoản), đăng ký push token (EAS project `@nvdeekay/subca`).
+- **App mobile** (`apps/mobile`): design system theo mockup (NativeWind), đăng nhập OTP 6 số (đếm ngược gửi lại), Trang chủ, Danh sách / Thêm / Sửa / Chi tiết subscription, Lịch, Quản lý Trial, Đánh giá tháng (optimistic), Phân tích, Ngân sách (mô phỏng tiết kiệm), Phương thức thanh toán (tạo ngay trong form + màn phụ), Cài đặt (tiền tệ, múi giờ, giờ nhắc, ngân sách, đăng xuất, xóa tài khoản), Nhắc nhở (lịch sử + sắp tới + cài mốc nhắc), đăng ký push token (EAS project `@nvdeekay/subca`), thông báo cục bộ dự phòng, cache dữ liệu trên máy (MMKV mã hóa).
 - **Quyết định sản phẩm:** đã **bỏ danh mục** khỏi app + API (bảng còn trong DB, không dùng) — xem `docs/ARCHITECTURE.md`.
 - Test: shared 51 · API unit + e2e (CI) · 28 tích hợp trên Supabase + Redis thật (`test:int`).
 
@@ -26,7 +26,7 @@
 6. Xác minh giá các gói trong seed.
 
 **Việc kỹ thuật tiếp theo (gợi ý thứ tự)**
-1. **App mobile:** ~~màn Thông báo~~ → ~~thông báo cục bộ dự phòng~~ → ~~cache xuống máy~~ → rà soát UI Android (cần Android Studio + emulator trên máy dev) → thử nhận push thật (cần máy thật + tài khoản Apple / EAS build Android).
+1. **App mobile (cần thiết bị / tài khoản):** rà soát UI Android (cài Android Studio + emulator trên máy dev) → thử nhận push thật (máy thật + tài khoản Apple, hoặc EAS build Android) → Sentry + PostHog (cần tạo tài khoản) → hàng đợi thao tác khi mất mạng (tùy chọn).
 2. Dọn dữ liệu mẫu trong tài khoản dev `khanhnvd07@gmail.com` khi chủ dự án yêu cầu (subscription có ghi chú `[dữ liệu mẫu]`, 2 phương thức mẫu, ngân sách 800.000đ).
 3. EAS Build (eas.json, development / preview) → TestFlight nội bộ khi có tài khoản Apple.
 4. Giai đoạn 3: Subca Plus (RevenueCat), chia tiền nhóm (API + VietQR), admin v1.
