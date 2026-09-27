@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './auth/auth.module.js';
 import { CatalogModule } from './catalog/catalog.module.js';
 import { validateEnv } from './config/env.js';
@@ -19,6 +20,7 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module.js';
       cache: true,
       validate: validateEnv,
     }),
+    ScheduleModule.forRoot(),
     PrismaModule,
     PlanModule,
     FxModule,

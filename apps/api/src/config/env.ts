@@ -10,6 +10,11 @@ const EnvSchema = z.object({
   // Dùng để xác minh token đăng nhập (JWKS + issuer)
   SUPABASE_URL: z.url(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
+  // Tắt job cập nhật tỷ giá (VD khi chạy nhiều instance chỉ cần 1 nơi chạy, hoặc khi test)
+  FX_SYNC_ENABLED: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((v) => v === 'true'),
 });
 
 export type Env = z.infer<typeof EnvSchema>;
