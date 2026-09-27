@@ -7,6 +7,7 @@ import { validateEnv } from './config/env.js';
 import { FxModule } from './fx/fx.module.js';
 import { HealthController } from './health/health.controller.js';
 import { HomeModule } from './home/home.module.js';
+import { InsightsModule } from './insights/insights.module.js';
 import { MeModule } from './me/me.module.js';
 import { PaymentMethodsModule } from './payment-methods/payment-methods.module.js';
 import { PlanModule } from './plan/plan.module.js';
@@ -32,6 +33,7 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module.js';
     CatalogModule,
     SubscriptionsModule,
     HomeModule,
+    InsightsModule,
     PaymentMethodsModule,
     QueueModule,
     PushModule,
