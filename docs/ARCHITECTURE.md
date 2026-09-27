@@ -31,6 +31,7 @@
 | Mua trong app | **RevenueCat** (chưa làm) | Lo App Store + Google Play, webhook → bảng `entitlements` |
 | Admin | **Next.js + shadcn/ui** (chưa làm) | |
 | Hosting | Railway / Render / Fly.io, **Singapore** (chưa chọn) | Cùng khu vực với Supabase production |
+| Danh mục | **Bỏ khỏi sản phẩm** (27/09/2026) | Chủ dự án thấy thừa: không chọn danh mục khi thêm subscription, Phân tích không chia theo danh mục, API không còn `/catalog/categories` và `categoryId`. Bảng `categories` và cột `category_id` vẫn còn trong DB (không dùng) để khỏi migration xóa dữ liệu |
 
 ## Dữ liệu
 

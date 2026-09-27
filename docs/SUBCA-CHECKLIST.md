@@ -190,9 +190,9 @@
   - [x] API thư viện: `GET /catalog/categories`, `GET /catalog/services`
   - [x] Schema đầu vào dùng chung (`packages/shared/src/api`) cho API và form trong app
   - [x] Test tích hợp trên Supabase thật (`test:int`, 11 test, tự dọn dữ liệu)
-  - [x] Màn Thêm (chọn nhanh, giá, tiền tệ, chu kỳ, ngày, danh mục, phương thức, mốc nhắc, tự gia hạn, ghi chú) + màn Sửa dùng chung form (chỉ gửi trường đã đổi) _(form dùng state + schema zod chung, chưa dùng react-hook-form)_
+  - [x] Màn Thêm (chọn nhanh, giá, tiền tệ, chu kỳ, ngày, phương thức, mốc nhắc, tự gia hạn, ghi chú) + màn Sửa dùng chung form (chỉ gửi trường đã đổi) _(form dùng state + schema zod chung, chưa dùng react-hook-form)_
   - [x] Màn Danh sách (tìm kiếm không dấu, 5 bộ lọc có đếm, giới hạn gói Free)
-  - [x] Màn Chi tiết (lịch sử, mức độ sử dụng, hướng dẫn hủy, lưu trữ, đánh dấu cần xem lại, dùng lại gói đã hủy); API `GET /subscriptions/:id` trả thêm thanh toán, danh mục, hướng dẫn hủy, lịch sử trừ tiền
+  - [x] Màn Chi tiết (lịch sử, mức độ sử dụng, hướng dẫn hủy, lưu trữ, đánh dấu cần xem lại, dùng lại gói đã hủy); API `GET /subscriptions/:id` trả thêm thanh toán, hướng dẫn hủy, lịch sử trừ tiền
 - [ ] **Trang chủ:** tổng tiền theo tháng, số đang hoạt động, sắp gia hạn, trial, cảnh báo
   - [x] API `GET /home` (1 request cho cả màn): tổng tháng/năm quy đổi tiền tệ, trial, sắp gia hạn 7 ngày, có thể tiết kiệm, ngân sách, 5 khoản sắp tới, `missingRates`
   - [x] Màn Trang chủ trong app (thẻ tổng, 4 ô thống kê, ngân sách, sắp gia hạn, trial, kéo để làm mới, ghi nguồn tỷ giá) _(chưa có: % so với tháng trước, chia tiền nhóm, lối tắt, banner Plus)_
@@ -228,7 +228,7 @@
   - [x] API `GET /reviews`, `PUT/DELETE /reviews/:subscriptionId` (đồng bộ trạng thái REVIEW/ACTIVE, tổng tiết kiệm)
 - [ ] Ngân sách (hạn mức, cảnh báo vượt, mô phỏng "nếu hủy thì tiết kiệm bao nhiêu") _(đặt/bỏ hạn mức trong Cài đặt + thẻ ở Trang chủ đã có; màn Ngân sách + mô phỏng chưa làm)_
   - [x] API `GET/PUT/DELETE /me/budget`; tình trạng ngân sách (đã chi, %, vượt) trả trong `/home`
-- [ ] Phân tích (theo danh mục, xu hướng, dự tính năm, chi phí mỗi lần dùng, top đắt nhất, theo phương thức thanh toán)
+- [ ] Phân tích (xu hướng, dự tính năm, chi phí mỗi lần dùng, top đắt nhất, theo phương thức thanh toán)
   - [x] API `GET /analytics` (xu hướng 6 tháng là ước tính từ các gói còn hoạt động mỗi tháng; chi phí mỗi lần dùng theo mức độ sử dụng người dùng chọn)
 - [x] Phương thức thanh toán (chỉ lưu nhãn + 4 số cuối) — chọn / tạo nhanh ngay trong form subscription (chip "+ Thêm"); màn quản lý phụ trong Cài đặt: thẻ gradient, xem gói theo thẻ, sửa/xóa, mặc định
   - [x] API `/payment-methods`: chỉ nhận 4 số cuối, luôn đúng 1 phương thức mặc định (transaction), lưu trữ thì gỡ khỏi subscription, kèm số subscription và tổng tháng quy đổi
