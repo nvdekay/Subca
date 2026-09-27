@@ -1,6 +1,7 @@
 import type { Session } from '@supabase/supabase-js';
 import { useQueryClient } from '@tanstack/react-query';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { queryPersister } from '@/lib/query-client';
 import { supabase } from '@/lib/supabase';
 
 type SessionState = { session: Session | null; ready: boolean };
@@ -19,7 +20,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     });
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       // Đổi người dùng thì bỏ toàn bộ cache của người trước.
-      if (event === 'SIGNED_OUT') queryClient.clear();
+      if (event === 'SIGNED_OUT') {
+        queryClient.clear();
+        // Xóa luôn bản lưu trên máy để người đăng nhập sau không thấy dữ liệu của người trước.
+        queryPersister.removeClient();
+      }
       setState({ session, ready: true });
     });
     return () => {

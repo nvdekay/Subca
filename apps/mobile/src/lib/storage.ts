@@ -18,10 +18,19 @@ function encryptionKey(): string {
   return key;
 }
 
+const key = encryptionKey();
+
 /** Kho mã hóa cho phiên đăng nhập. */
 export const secureStorage = createMMKV({
   id: 'subca-secure',
-  encryptionKey: encryptionKey(),
+  encryptionKey: key,
+  encryptionType: 'AES-256',
+});
+
+/** Cache dữ liệu API (số tiền, danh sách gói…) cũng là dữ liệu cá nhân nên mã hóa như phiên đăng nhập. */
+export const cacheStorage = createMMKV({
+  id: 'subca-cache',
+  encryptionKey: key,
   encryptionType: 'AES-256',
 });
 
