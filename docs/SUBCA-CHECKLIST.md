@@ -26,7 +26,7 @@
 6. **Sửa template email Supabase** (Authentication → Emails: *Magic Link* và *Confirm signup*) thêm `{{ .Token }}` để email có mã OTP cho app, và đặt *Email OTP Length* = **6** (app chỉ nhận đúng 6 số; Supabase không hỗ trợ dưới 6). SMTP mặc định của Supabase chỉ gửi tới email thành viên project.
 
 **Việc kỹ thuật tiếp theo (gợi ý thứ tự)**
-1. **App mobile:** ~~design system từ mockup~~ → ~~đăng nhập email OTP~~ → ~~Trang chủ (`GET /home`)~~ → ~~Danh sách / Thêm / Chi tiết subscription~~ → Lịch → đăng ký push token → màn Phương thức thanh toán.
+1. **App mobile:** ~~design system từ mockup~~ → ~~đăng nhập email OTP~~ → ~~Trang chủ (`GET /home`)~~ → ~~Danh sách / Thêm / Chi tiết subscription~~ → ~~Lịch~~ → ~~đăng ký push token~~ → màn Phương thức thanh toán → Quản lý Trial → Cài đặt.
 2. Ghi nguồn tỷ giá "ExchangeRate-API" nơi hiện số đã quy đổi (bắt buộc) — Trang chủ app đã có; các màn sau cũng phải có.
 3. Giai đoạn 3: Subca Plus (RevenueCat), chia tiền nhóm (API + VietQR), admin v1.
 
@@ -72,9 +72,9 @@
 - [ ] Lưu dữ liệu trên máy: **MMKV** (nhanh) cho cache/cài đặt, **expo-secure-store** cho token _(phiên đăng nhập: MMKV mã hóa AES-256, khóa trong SecureStore — vì SecureStore giới hạn ~2 KB; cache chưa làm)_
 - [ ] Đăng nhập: `@supabase/supabase-js` + `expo-apple-authentication` + `@react-native-google-signin/google-signin` _(supabase-js + email OTP đã làm; Apple/Google chờ tài khoản store)_
 - [ ] Mua trong app: **RevenueCat** (`react-native-purchases`)
-- [ ] Thông báo: **expo-notifications** (push + thông báo cục bộ)
+- [ ] Thông báo: **expo-notifications** (push + thông báo cục bộ) _(push đã làm; thông báo cục bộ dự phòng chưa làm)_
 - [ ] Widget / Live Activity (giai đoạn sau): viết Swift/Kotlin qua **Expo Modules** / `expo-apple-targets`
-- [ ] Build & phát hành: **EAS Build / Submit / Update** (development build, không dùng Expo Go cho bản thật)
+- [ ] Build & phát hành: **EAS Build / Submit / Update** (development build, không dùng Expo Go cho bản thật) _(đã tạo EAS project `@nvdeekay/subca`; chưa cấu hình eas.json / build)_
 
 **Backend & hạ tầng**
 - [x] **Push:** Expo Push Service (gửi cho cả iOS và Android qua 1 API); sau có thể chuyển sang FCM/APNs trực tiếp
@@ -205,10 +205,12 @@
   - [x] Kiểm tra **push receipt** của Expo mỗi 15 phút (xác nhận đã tới máy, xóa token lỗi) và `POST /reminders/:id/opened` ghi `opened_at` khi người dùng bấm thông báo
   - [ ] Trang admin theo dõi hàng đợi (Bull Board) và thống kê lượt nhắc
   - [ ] Thông báo cục bộ làm dự phòng (`expo-notifications`): app lấy danh sách nhắc 30 ngày tới từ server và tự lên lịch (iOS giới hạn 64 thông báo chờ → chỉ lên lịch các mốc gần nhất)
-  - [ ] Xin quyền thông báo đúng lúc (sau khi thêm subscription đầu tiên, không hỏi ngay khi mở app); Android 13+ cần quyền `POST_NOTIFICATIONS`
+  - [x] Xin quyền thông báo đúng lúc (sau khi thêm subscription đầu tiên, có hộp thoại giải thích trước hộp thoại hệ thống); Android 13+ cần quyền `POST_NOTIFICATIONS` (expo-notifications tự khai báo)
+  - [x] App đăng ký push token mỗi lần mở (nếu đã cho phép), gỡ token trước khi đăng xuất; bấm thông báo → ghi `opened` + mở màn Chi tiết _(chưa thử nhận push thật trên máy)_
   - [ ] Màn Thông báo + cài đặt mốc nhắc (30 / 7 / 1 ngày, ngày gia hạn, trial, gia hạn năm)
-- [ ] **Lịch gia hạn** (lịch tháng, bấm ngày để lọc)
+- [x] **Lịch gia hạn** (lịch tháng, bấm ngày để lọc)
   - [x] API `GET /calendar?month=` (gộp theo ngày, ngày hết trial, tổng tháng quy đổi)
+  - [x] Màn Lịch trong app (ngày có gia hạn tô màu, từ 500K màu đào, chấm màu thương hiệu, tổng tháng, danh sách theo ngày)
 - [ ] **Quản lý Trial** (đếm ngày, Giữ / Nhắc tôi / Hủy)
 - [ ] **Cài đặt:** hồ sơ, tiền tệ, múi giờ, giờ nhắc, ngôn ngữ
   - [x] API `PATCH /me`, `PATCH /me/settings` (kiểm tra múi giờ hợp lệ)
