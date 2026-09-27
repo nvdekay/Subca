@@ -68,30 +68,29 @@ Migration hiện có:
 
 ## API hiện có
 
-| Method             | Đường dẫn                          | Mô tả                                                                                                                                                      |
-| ------------------ | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET                | `/health`                          | Kiểm tra API + database (công khai)                                                                                                                        |
-| GET                | `/me`                              | Hồ sơ, cài đặt, gói hiện tại                                                                                                                               |
-| GET                | `/catalog/categories`              | Danh mục hệ thống + danh mục người dùng                                                                                                                    |
-| GET                | `/catalog/services?q=&categoryId=` | Thư viện dịch vụ kèm gói giá                                                                                                                               |
-| GET                | `/subscriptions?status=&q=`        | Danh sách, sắp theo kỳ gia hạn gần nhất, kèm `trackedCount` và `limit`                                                                                     |
-| GET                | `/subscriptions/:id`               | Chi tiết cho màn Chi tiết: kèm phương thức thanh toán, danh mục, hướng dẫn hủy, 12 lần trừ tiền gần nhất                                                   |
-| POST               | `/subscriptions`                   | Thêm; server tự tính kỳ gia hạn tiếp theo theo múi giờ người dùng                                                                                          |
-| PATCH              | `/subscriptions/:id`               | Sửa một phần, hủy (`status: CANCELLED`) hoặc mở lại                                                                                                        |
-| DELETE             | `/subscriptions/:id`               | Lưu trữ (xóa mềm)                                                                                                                                          |
-| GET                | `/home`                            | Toàn bộ số liệu Trang chủ: tổng tháng/năm (đã quy đổi tiền tệ), số đang hoạt động, trial, sắp gia hạn 7 ngày, có thể tiết kiệm, ngân sách, 5 khoản sắp tới |
-| GET · POST         | `/payment-methods`                 | Danh sách (kèm số subscription và tổng tháng) · thêm (chỉ nhận 4 số cuối thẻ)                                                                              |
-| PATCH · DELETE     | `/payment-methods/:id`             | Sửa / đặt mặc định · lưu trữ (gỡ khỏi các subscription)                                                                                                    |
-| PATCH              | `/me`                              | Đổi tên hiển thị                                                                                                                                           |
-| PATCH              | `/me/settings`                     | Tiền tệ, múi giờ, ngôn ngữ, giờ nhắc, bật/tắt thông báo                                                                                                    |
-| GET · PUT · DELETE | `/me/budget`                       | Ngân sách subscription hằng tháng                                                                                                                          |
-| POST · DELETE      | `/push-tokens`                     | Đăng ký / hủy thiết bị nhận thông báo (Expo push token)                                                                                                    |
-| GET                | `/calendar?month=YYYY-MM`          | Lịch gia hạn theo tháng (gộp theo ngày, đánh dấu ngày hết trial, tổng tiền trong tháng)                                                                    |
-| GET                | `/reviews?period=YYYY-MM`          | Đánh giá hằng tháng: danh sách gói, quyết định, số tiền có thể tiết kiệm                                                                                   |
-| PUT · DELETE       | `/reviews/:subscriptionId`         | Đặt / bỏ quyết định Giữ · Xem lại · Hủy (Xem lại → gói chuyển REVIEW, Giữ → ACTIVE)                                                                        |
-| GET                | `/analytics`                       | Phân tích: theo danh mục, theo phương thức thanh toán, top đắt nhất, chi phí mỗi lần dùng, xu hướng 6 tháng (ước tính)                                     |
-| POST               | `/reminders/:id/opened`            | Ghi nhận người dùng đã bấm thông báo nhắc                                                                                                                  |
-| DELETE             | `/me`                              | Xóa vĩnh viễn tài khoản và toàn bộ dữ liệu (cần `SUPABASE_SERVICE_ROLE_KEY`, thiếu → 503)                                                                  |
+| Method             | Đường dẫn                   | Mô tả                                                                                                                                                      |
+| ------------------ | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET                | `/health`                   | Kiểm tra API + database (công khai)                                                                                                                        |
+| GET                | `/me`                       | Hồ sơ, cài đặt, gói hiện tại                                                                                                                               |
+| GET                | `/catalog/services?q=`      | Thư viện dịch vụ kèm gói giá                                                                                                                               |
+| GET                | `/subscriptions?status=&q=` | Danh sách, sắp theo kỳ gia hạn gần nhất, kèm `trackedCount` và `limit`                                                                                     |
+| GET                | `/subscriptions/:id`        | Chi tiết cho màn Chi tiết: kèm phương thức thanh toán, danh mục, hướng dẫn hủy, 12 lần trừ tiền gần nhất                                                   |
+| POST               | `/subscriptions`            | Thêm; server tự tính kỳ gia hạn tiếp theo theo múi giờ người dùng                                                                                          |
+| PATCH              | `/subscriptions/:id`        | Sửa một phần, hủy (`status: CANCELLED`) hoặc mở lại                                                                                                        |
+| DELETE             | `/subscriptions/:id`        | Lưu trữ (xóa mềm)                                                                                                                                          |
+| GET                | `/home`                     | Toàn bộ số liệu Trang chủ: tổng tháng/năm (đã quy đổi tiền tệ), số đang hoạt động, trial, sắp gia hạn 7 ngày, có thể tiết kiệm, ngân sách, 5 khoản sắp tới |
+| GET · POST         | `/payment-methods`          | Danh sách (kèm số subscription và tổng tháng) · thêm (chỉ nhận 4 số cuối thẻ)                                                                              |
+| PATCH · DELETE     | `/payment-methods/:id`      | Sửa / đặt mặc định · lưu trữ (gỡ khỏi các subscription)                                                                                                    |
+| PATCH              | `/me`                       | Đổi tên hiển thị                                                                                                                                           |
+| PATCH              | `/me/settings`              | Tiền tệ, múi giờ, ngôn ngữ, giờ nhắc, bật/tắt thông báo                                                                                                    |
+| GET · PUT · DELETE | `/me/budget`                | Ngân sách subscription hằng tháng                                                                                                                          |
+| POST · DELETE      | `/push-tokens`              | Đăng ký / hủy thiết bị nhận thông báo (Expo push token)                                                                                                    |
+| GET                | `/calendar?month=YYYY-MM`   | Lịch gia hạn theo tháng (gộp theo ngày, đánh dấu ngày hết trial, tổng tiền trong tháng)                                                                    |
+| GET                | `/reviews?period=YYYY-MM`   | Đánh giá hằng tháng: danh sách gói, quyết định, số tiền có thể tiết kiệm                                                                                   |
+| PUT · DELETE       | `/reviews/:subscriptionId`  | Đặt / bỏ quyết định Giữ · Xem lại · Hủy (Xem lại → gói chuyển REVIEW, Giữ → ACTIVE)                                                                        |
+| GET                | `/analytics`                | Phân tích: theo danh mục, theo phương thức thanh toán, top đắt nhất, chi phí mỗi lần dùng, xu hướng 6 tháng (ước tính)                                     |
+| POST               | `/reminders/:id/opened`     | Ghi nhận người dùng đã bấm thông báo nhắc                                                                                                                  |
+| DELETE             | `/me`                       | Xóa vĩnh viễn tài khoản và toàn bộ dữ liệu (cần `SUPABASE_SERVICE_ROLE_KEY`, thiếu → 503)                                                                  |
 
 ### Nhắc nhở (BullMQ + Expo Push)
 

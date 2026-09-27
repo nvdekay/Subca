@@ -59,7 +59,6 @@ const detailInclude = {
   paymentMethod: {
     select: { id: true, type: true, brand: true, label: true, last4: true },
   },
-  category: { select: { id: true, name: true, icon: true, color: true } },
   renewalCharges: {
     select: { chargedOn: true, amountMinor: true, currency: true },
     orderBy: { chargedOn: 'desc' },
@@ -143,7 +142,6 @@ export class SubscriptionsService {
             last4: pm.last4,
           }
         : null,
-      category: row.category,
       cancelGuide: svc
         ? {
             url: svc.cancelUrl,
@@ -190,7 +188,6 @@ export class SubscriptionsService {
         status: input.isTrial ? 'TRIAL' : 'ACTIVE',
         autoRenew: input.autoRenew,
         paymentMethodId: input.paymentMethodId ?? null,
-        categoryId: input.categoryId ?? null,
         usageFrequency: input.usageFrequency ?? null,
         reminderOffsets: input.reminderOffsets ?? [],
         notes: input.notes ?? null,
@@ -240,7 +237,6 @@ export class SubscriptionsService {
               ? existing.servicePlanId
               : undefined,
         paymentMethodId: input.paymentMethodId,
-        categoryId: input.categoryId,
       },
       serviceId,
     );
@@ -261,7 +257,6 @@ export class SubscriptionsService {
       ...(input.paymentMethodId !== undefined && {
         paymentMethodId: input.paymentMethodId,
       }),
-      ...(input.categoryId !== undefined && { categoryId: input.categoryId }),
       ...(input.usageFrequency !== undefined && {
         usageFrequency: input.usageFrequency,
       }),
@@ -368,7 +363,6 @@ export class SubscriptionsService {
       serviceId?: string | null | undefined;
       servicePlanId?: string | null | undefined;
       paymentMethodId?: string | null | undefined;
-      categoryId?: string | null | undefined;
     },
     finalServiceId: string | null,
   ): Promise<void> {
@@ -408,17 +402,6 @@ export class SubscriptionsService {
                 n ||
                 fail('paymentMethodId', 'Phương thức thanh toán không tồn tại')
               ),
-          ),
-      );
-    }
-    if (refs.categoryId) {
-      checks.push(
-        this.prisma.category
-          .count({
-            where: { id: refs.categoryId, OR: [{ userId: null }, { userId }] },
-          })
-          .then(
-            (n) => void (n || fail('categoryId', 'Danh mục không tồn tại')),
           ),
       );
     }
@@ -502,7 +485,6 @@ export function toDto(row: SubscriptionRow, today: IsoDate): SubscriptionDto {
     status: row.status,
     autoRenew: row.autoRenew,
     paymentMethodId: row.paymentMethodId,
-    categoryId: row.categoryId,
     usageFrequency: row.usageFrequency,
     reminderOffsets: row.reminderOffsets,
     notes: row.notes,

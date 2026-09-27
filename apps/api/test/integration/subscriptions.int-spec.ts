@@ -55,11 +55,7 @@ describe('Subscriptions + Catalog trên database thật', () => {
     await prisma.$disconnect();
   });
 
-  it('thư viện: có danh mục hệ thống và tìm dịch vụ không phân biệt hoa thường', async () => {
-    const categories = await catalog.categories(userId);
-    expect(categories.filter((c) => c.isSystem).length).toBeGreaterThanOrEqual(
-      11,
-    );
+  it('thư viện: tìm dịch vụ không phân biệt hoa thường', async () => {
     const found = await catalog.services({ q: 'SPOT' });
     expect(found.map((s) => s.slug)).toContain('spotify');
     expect(
@@ -173,9 +169,8 @@ describe('Subscriptions + Catalog trên database thật', () => {
     ).rejects.toMatchObject({ response: { code: 'INVALID_REFERENCE' } });
   });
 
-  it('chi tiết: kèm thanh toán, danh mục, hướng dẫn hủy và lịch sử trừ tiền', async () => {
+  it('chi tiết: kèm thanh toán, hướng dẫn hủy và lịch sử trừ tiền', async () => {
     const netflix = (await subs.list(userId, { q: 'netf' })).items[0]!;
-    const [category] = await catalog.categories(userId);
     const pm = await prisma.paymentMethod.create({
       data: {
         userId,
@@ -185,10 +180,7 @@ describe('Subscriptions + Catalog trên database thật', () => {
         last4: '4821',
       },
     });
-    await subs.update(userId, netflix.id, {
-      paymentMethodId: pm.id,
-      categoryId: category!.id,
-    });
+    await subs.update(userId, netflix.id, { paymentMethodId: pm.id });
     await prisma.renewalCharge.createMany({
       data: [addDays(today, -60), addDays(today, -30)].map((d) => ({
         subscriptionId: netflix.id,
@@ -203,7 +195,6 @@ describe('Subscriptions + Catalog trên database thật', () => {
     expect(detail).toMatchObject({
       name: 'Netflix',
       paymentMethod: { label: 'Visa cá nhân', last4: '4821', brand: 'VISA' },
-      category: { id: category!.id, name: category!.name },
       cancelGuide: { url: 'https://www.netflix.com/cancelplan' },
     });
     // Mới nhất trước

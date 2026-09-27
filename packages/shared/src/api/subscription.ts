@@ -34,7 +34,6 @@ const SubscriptionFields = z.object({
   isTrial: z.boolean().default(false),
   autoRenew: z.boolean().default(true),
   paymentMethodId: z.uuid().nullable().optional(),
-  categoryId: z.uuid().nullable().optional(),
   usageFrequency: UsageFrequency.nullable().optional(),
   /** Số ngày nhắc trước, ghi đè quy tắc chung (VD [7, 1]). Rỗng = dùng quy tắc chung. */
   reminderOffsets: z
@@ -103,7 +102,6 @@ export interface SubscriptionDto {
   status: SubscriptionStatus;
   autoRenew: boolean;
   paymentMethodId: string | null;
-  categoryId: string | null;
   usageFrequency: UsageFrequency | null;
   reminderOffsets: number[];
   notes: string | null;
@@ -120,7 +118,6 @@ export interface SubscriptionDetailDto extends SubscriptionDto {
     label: string;
     last4: string | null;
   } | null;
-  category: { id: string; name: string; icon: string | null; color: string | null } | null;
   /** Hướng dẫn hủy lấy từ thư viện dịch vụ; null nếu tự nhập tên. */
   cancelGuide: { url: string | null; website: string | null; steps: string[] } | null;
   /** Các lần đã bị trừ tiền, mới nhất trước (tối đa 12). */

@@ -104,7 +104,6 @@ export interface AnalyticsDto {
   monthlyTotalMinor: string;
   yearlyProjectionMinor: string;
   dailyAverageMinor: string;
-  byCategory: AnalyticsSliceDto[];
   byPaymentMethod: AnalyticsSliceDto[];
   /** 5 gói đắt nhất theo chi phí tháng. */
   topExpensive: AnalyticsSubscriptionDto[];

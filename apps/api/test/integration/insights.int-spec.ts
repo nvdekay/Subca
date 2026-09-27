@@ -51,14 +51,6 @@ describe('Lịch + Đánh giá + Phân tích trên database thật', () => {
   beforeAll(async () => {
     await prisma.profile.create({ data: { id: userId } });
     await prisma.userSettings.create({ data: { userId } });
-    const cats = Object.fromEntries(
-      (
-        await prisma.category.findMany({
-          where: { userId: null },
-          select: { id: true, slug: true },
-        })
-      ).map((c) => [c.slug, c.id]),
-    );
     const visa = await methods.create(userId, {
       type: 'CARD',
       brand: 'VISA',
@@ -74,34 +66,29 @@ describe('Lịch + Đánh giá + Phân tích trên database thật', () => {
     await mk('Netflix', {
       amountMinor: '260000',
       billingDate: `${nextMonth}-05`,
-      categoryId: cats['giai-tri'],
       paymentMethodId: visa.id,
       usageFrequency: 'SEVERAL_PER_WEEK',
     });
     await mk('Gym', {
       amountMinor: '550000',
       billingDate: `${nextMonth}-05`,
-      categoryId: cats['suc-khoe'],
       usageFrequency: 'WEEKLY',
     });
     await mk('Hosting', {
       amountMinor: '1800000',
       intervalUnit: 'YEAR',
       billingDate: `${nextMonth}-20`,
-      categoryId: cats['web-hosting'],
     });
     await mk('ChatGPT', {
       amountMinor: '2000',
       currency: 'USD',
       billingDate: `${nextMonth}-10`,
-      categoryId: cats['ai-cong-viec'],
       paymentMethodId: visa.id,
       usageFrequency: 'DAILY',
     });
     await mk('Lightroom', {
       amountMinor: '250000',
       billingDate: `${nextMonth}-18`,
-      categoryId: cats['ai-cong-viec'],
       usageFrequency: 'RARELY',
     });
     await mk('Notion', {
@@ -203,22 +190,13 @@ describe('Lịch + Đánh giá + Phân tích trên database thật', () => {
     });
   });
 
-  it('phân tích: tổng, theo danh mục, theo phương thức, top đắt nhất, chi phí mỗi lần dùng, xu hướng', async () => {
+  it('phân tích: tổng, theo phương thức, top đắt nhất, chi phí mỗi lần dùng, xu hướng', async () => {
     const a = await analytics.get(userId);
     const usd = await usdInVnd(2000n);
     // Không tính trial Notion; Hosting 1,8tr/năm = 150.000/tháng
     const total = 260_000n + 550_000n + 150_000n + usd + 250_000n;
     expect(a.monthlyTotalMinor).toBe(String(total));
     expect(a.yearlyProjectionMinor).toBe(String(total * 12n));
-
-    const cat = Object.fromEntries(
-      a.byCategory.map((c) => [c.label, c.monthlyMinor]),
-    );
-    expect(cat['AI & Công việc']).toBe(String(250_000n + usd));
-    expect(cat['Sức khỏe & Thể thao']).toBe('550000');
-    expect(
-      a.byCategory.reduce((s, c) => s + c.percent, 0),
-    ).toBeGreaterThanOrEqual(99);
 
     const pm = Object.fromEntries(
       a.byPaymentMethod.map((p) => [p.label, p.monthlyMinor]),

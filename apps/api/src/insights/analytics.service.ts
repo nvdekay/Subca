@@ -44,7 +44,6 @@ export class AnalyticsService {
       },
       include: {
         ...subscriptionInclude,
-        category: { select: { id: true, name: true, color: true } },
         paymentMethod: {
           select: { id: true, label: true, last4: true, archivedAt: true },
         },
@@ -141,15 +140,6 @@ export class AnalyticsService {
       monthlyTotalMinor: total.toString(),
       yearlyProjectionMinor: (total * 12n).toString(),
       dailyAverageMinor: ((total * 12n + 182n) / 365n).toString(),
-      byCategory: slices((s) =>
-        s.category
-          ? {
-              id: s.category.id,
-              label: s.category.name,
-              color: s.category.color,
-            }
-          : { id: null, label: 'Chưa phân loại', color: null },
-      ),
       byPaymentMethod: slices((s) =>
         s.paymentMethod && !s.paymentMethod.archivedAt
           ? {
