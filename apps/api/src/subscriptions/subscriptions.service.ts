@@ -27,10 +27,14 @@ import { PlanService } from '../plan/plan.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 /** Trạng thái được tính vào giới hạn gói Free. */
-const TRACKED_STATUSES: SubscriptionStatus[] = ['ACTIVE', 'TRIAL', 'REVIEW'];
-const DEFAULT_TIMEZONE = 'Asia/Ho_Chi_Minh';
+export const TRACKED_STATUSES: SubscriptionStatus[] = [
+  'ACTIVE',
+  'TRIAL',
+  'REVIEW',
+];
+export const DEFAULT_TIMEZONE = 'Asia/Ho_Chi_Minh';
 
-const include = {
+export const subscriptionInclude = {
   service: {
     select: {
       id: true,
@@ -41,8 +45,8 @@ const include = {
     },
   },
 } satisfies Prisma.SubscriptionInclude;
-type SubscriptionRow = Prisma.SubscriptionGetPayload<{
-  include: typeof include;
+export type SubscriptionRow = Prisma.SubscriptionGetPayload<{
+  include: typeof subscriptionInclude;
 }>;
 
 interface Schedule {
@@ -82,7 +86,7 @@ export class SubscriptionsService {
               }
             : {}),
         },
-        include,
+        include: subscriptionInclude,
         orderBy: [
           { nextRenewalDate: { sort: 'asc', nulls: 'last' } },
           { createdAt: 'desc' },
@@ -138,7 +142,7 @@ export class SubscriptionsService {
         reminderOffsets: input.reminderOffsets ?? [],
         notes: input.notes ?? null,
       },
-      include,
+      include: subscriptionInclude,
     });
     return toDto(row, today);
   }
@@ -252,7 +256,7 @@ export class SubscriptionsService {
     const row = await this.prisma.subscription.update({
       where: { id: existing.id },
       data,
-      include,
+      include: subscriptionInclude,
     });
     return toDto(row, today);
   }
@@ -278,7 +282,7 @@ export class SubscriptionsService {
   ): Promise<SubscriptionRow> {
     const row = await this.prisma.subscription.findFirst({
       where: { id, userId, status: { not: 'ARCHIVED' } },
-      include,
+      include: subscriptionInclude,
     });
     // Không phân biệt "không tồn tại" và "của người khác" để không lộ thông tin
     if (!row)

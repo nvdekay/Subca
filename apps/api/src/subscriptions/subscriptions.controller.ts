@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -7,7 +6,6 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -24,17 +22,9 @@ import {
 } from '@subca/shared';
 import type { AuthUser } from '../auth/auth.types.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
+import { uuidParam } from '../common/uuid.pipe.js';
 import { ZodValidationPipe } from '../common/zod-validation.pipe.js';
 import { SubscriptionsService } from './subscriptions.service.js';
-
-const uuidPipe = new ParseUUIDPipe({
-  exceptionFactory: () =>
-    new BadRequestException({
-      statusCode: 400,
-      code: 'VALIDATION_ERROR',
-      message: 'ID không hợp lệ',
-    }),
-});
 
 @Controller('subscriptions')
 export class SubscriptionsController {
@@ -52,7 +42,7 @@ export class SubscriptionsController {
   @Get(':id')
   get(
     @CurrentUser() user: AuthUser,
-    @Param('id', uuidPipe) id: string,
+    @Param('id', uuidParam) id: string,
   ): Promise<SubscriptionDto> {
     return this.subscriptions.get(user.id, id);
   }
@@ -69,7 +59,7 @@ export class SubscriptionsController {
   @Patch(':id')
   update(
     @CurrentUser() user: AuthUser,
-    @Param('id', uuidPipe) id: string,
+    @Param('id', uuidParam) id: string,
     @Body(new ZodValidationPipe(UpdateSubscriptionSchema))
     body: UpdateSubscription,
   ): Promise<SubscriptionDto> {
@@ -81,7 +71,7 @@ export class SubscriptionsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   archive(
     @CurrentUser() user: AuthUser,
-    @Param('id', uuidPipe) id: string,
+    @Param('id', uuidParam) id: string,
   ): Promise<void> {
     return this.subscriptions.archive(user.id, id);
   }
