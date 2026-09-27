@@ -26,7 +26,7 @@
 6. **Sửa template email Supabase** (Authentication → Emails: *Magic Link* và *Confirm signup*) thêm `{{ .Token }}` để email có mã OTP cho app, và đặt *Email OTP Length* = **6** (app chỉ nhận đúng 6 số; Supabase không hỗ trợ dưới 6). SMTP mặc định của Supabase chỉ gửi tới email thành viên project.
 
 **Việc kỹ thuật tiếp theo (gợi ý thứ tự)**
-1. **App mobile:** ~~design system từ mockup~~ → ~~đăng nhập email OTP~~ → ~~Trang chủ (`GET /home`)~~ (đã code, chờ thử đăng nhập thật) → Danh sách / Thêm / Chi tiết subscription → Lịch → đăng ký push token.
+1. **App mobile:** ~~design system từ mockup~~ → ~~đăng nhập email OTP~~ → ~~Trang chủ (`GET /home`)~~ → ~~Danh sách / Thêm / Chi tiết subscription~~ → Lịch → đăng ký push token → màn Phương thức thanh toán.
 2. Ghi nguồn tỷ giá "ExchangeRate-API" nơi hiện số đã quy đổi (bắt buộc) — Trang chủ app đã có; các màn sau cũng phải có.
 3. Giai đoạn 3: Subca Plus (RevenueCat), chia tiền nhóm (API + VietQR), admin v1.
 
@@ -190,9 +190,9 @@
   - [x] API thư viện: `GET /catalog/categories`, `GET /catalog/services`
   - [x] Schema đầu vào dùng chung (`packages/shared/src/api`) cho API và form trong app
   - [x] Test tích hợp trên Supabase thật (`test:int`, 11 test, tự dọn dữ liệu)
-  - [ ] Màn Thêm (chọn nhanh, giá, tiền tệ, chu kỳ, ngày, danh mục, phương thức, mốc nhắc, tự gia hạn, ghi chú)
-  - [ ] Màn Danh sách (tìm kiếm, 5 bộ lọc)
-  - [ ] Màn Chi tiết (lịch sử, mức độ sử dụng, hướng dẫn hủy, lưu trữ)
+  - [x] Màn Thêm (chọn nhanh, giá, tiền tệ, chu kỳ, ngày, danh mục, phương thức, mốc nhắc, tự gia hạn, ghi chú) + màn Sửa dùng chung form (chỉ gửi trường đã đổi) _(form dùng state + schema zod chung, chưa dùng react-hook-form)_
+  - [x] Màn Danh sách (tìm kiếm không dấu, 5 bộ lọc có đếm, giới hạn gói Free)
+  - [x] Màn Chi tiết (lịch sử, mức độ sử dụng, hướng dẫn hủy, lưu trữ, đánh dấu cần xem lại, dùng lại gói đã hủy); API `GET /subscriptions/:id` trả thêm thanh toán, danh mục, hướng dẫn hủy, lịch sử trừ tiền
 - [ ] **Trang chủ:** tổng tiền theo tháng, số đang hoạt động, sắp gia hạn, trial, cảnh báo
   - [x] API `GET /home` (1 request cho cả màn): tổng tháng/năm quy đổi tiền tệ, trial, sắp gia hạn 7 ngày, có thể tiết kiệm, ngân sách, 5 khoản sắp tới, `missingRates`
   - [x] Màn Trang chủ trong app (thẻ tổng, 4 ô thống kê, ngân sách, sắp gia hạn, trial, kéo để làm mới, ghi nguồn tỷ giá) _(chưa có: % so với tháng trước, chia tiền nhóm, lối tắt, banner Plus)_
