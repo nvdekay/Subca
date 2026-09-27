@@ -4,31 +4,32 @@
 > File liên quan: `design/subca-mobile-mockup.html` (app), `design/subca-admin-dashboard.html` (admin).
 > Repo: https://github.com/nvdekay/Subca (nhánh `main`, CI xanh). Tài liệu kỹ thuật: `docs/ARCHITECTURE.md`, hướng dẫn cho Claude: `CLAUDE.md`.
 
-### Hiện trạng (27/09/2026)
+### Hiện trạng (27/09/2026, cuối ngày)
 
-**Đang ở:** Giai đoạn 1. **Backend (API) cho các màn Giai đoạn 1–2 đã xong**; app mobile và admin mới chỉ khởi tạo khung.
+**Đang ở:** Giai đoạn 1–2. **API xong; app mobile đã có đủ các màn lõi** (chạy thật trên simulator iOS với Supabase dev); admin mới có khung.
 
 **Đã xong**
-- Mockup app (16 màn) + admin (12 trang) trong `design/`.
+- Mockup app (16 màn) + admin (12 trang) trong `design/`; template email mã đăng nhập `design/email/otp-code.html`.
 - Monorepo: Expo SDK 57, NestJS 12 + Fastify, Next.js 16, Prisma 7.10, TypeScript 6.0, pnpm 11 + Turborepo; CI GitHub Actions (có Redis cho smoke test).
-- Supabase dev (Tokyo): 26 bảng, RLS mọi bảng, trigger đăng ký / xóa tài khoản, 3 migration đã chạy, seed 11 danh mục + 53 dịch vụ, tỷ giá thật.
-- `packages/shared`: tiền (BigInt, quy đổi), bộ tính ngày gia hạn (38 test + đối chiếu ngẫu nhiên), schema zod + DTO cho mọi API.
-- API: xác thực JWT Supabase (+ chặn tài khoản khóa), `/me` (+ cài đặt, ngân sách, xóa tài khoản), thư viện dịch vụ, subscription CRUD (giới hạn gói Free), `/home`, phương thức thanh toán, lịch, đánh giá tháng, phân tích, push token, nhắc nhở BullMQ + Expo Push + push receipt, job tỷ giá hằng ngày.
-- Test: shared 51 · API 71 unit + 36 e2e (CI) · 27 tích hợp trên Supabase + Redis thật (`test:int`).
-- Tài liệu: `README.md`, `CLAUDE.md` (hướng dẫn cho phiên Claude mới), `docs/ARCHITECTURE.md`.
+- Supabase dev (Tokyo): 26 bảng, RLS mọi bảng, trigger đăng ký / xóa tài khoản, 3 migration, seed 53 dịch vụ, tỷ giá thật. **Auth:** email OTP 6 số qua SMTP Gmail (dev), template tiếng Việt đã áp.
+- API: xác thực JWT Supabase, `/me` (+ cài đặt, ngân sách, xóa tài khoản), thư viện dịch vụ, subscription CRUD (giới hạn Free, chi tiết kèm thanh toán / hướng dẫn hủy / lịch sử trừ tiền), `/home`, phương thức thanh toán, lịch, đánh giá tháng, phân tích, push token, nhắc nhở BullMQ + Expo Push + receipt, job tỷ giá.
+- **App mobile** (`apps/mobile`): design system theo mockup (NativeWind), đăng nhập OTP 6 số (đếm ngược gửi lại), Trang chủ, Danh sách / Thêm / Sửa / Chi tiết subscription, Lịch, Quản lý Trial, Đánh giá tháng (optimistic), Phân tích, Ngân sách (mô phỏng tiết kiệm), Phương thức thanh toán (tạo ngay trong form + màn phụ), Cài đặt (tiền tệ, múi giờ, giờ nhắc, ngân sách, đăng xuất, xóa tài khoản), đăng ký push token (EAS project `@nvdeekay/subca`).
+- **Quyết định sản phẩm:** đã **bỏ danh mục** khỏi app + API (bảng còn trong DB, không dùng) — xem `docs/ARCHITECTURE.md`.
+- Test: shared 51 · API unit + e2e (CI) · 28 tích hợp trên Supabase + Redis thật (`test:int`).
 
 **Việc của chủ dự án (đang chờ)**
 1. **Đổi mật khẩu database Supabase** (đã lộ trong chat) rồi sửa `DATABASE_URL` / `DIRECT_URL` trong `apps/api/.env`.
-2. **Thêm `SUPABASE_SERVICE_ROLE_KEY` vào `apps/api/.env`** (thiếu thì `DELETE /me` trả 503). Không gửi khóa qua chat.
-3. Quyết định có chuyển project dev từ Tokyo sang Singapore (production bắt buộc Singapore).
-4. **Đăng ký Apple Developer + Google Play** (khâu chờ lâu; cần cho đăng nhập Apple/Google, mua trong app, push thật).
-5. Xác minh giá các gói trong seed.
-6. **Sửa template email Supabase** (Authentication → Emails: *Magic Link* và *Confirm signup*) thêm `{{ .Token }}` để email có mã OTP cho app, và đặt *Email OTP Length* = **6** (app chỉ nhận đúng 6 số; Supabase không hỗ trợ dưới 6). SMTP mặc định của Supabase chỉ gửi tới email thành viên project.
+2. **Thêm `SUPABASE_SERVICE_ROLE_KEY` vào `apps/api/.env`** (thiếu thì Xóa tài khoản trả 503). Không gửi khóa qua chat.
+3. **Đổi mật khẩu ứng dụng Gmail** dùng cho SMTP Supabase (đã lộ trong chat) và dán cái mới vào Authentication → Emails → SMTP Settings. Trước khi ra mắt: chuyển SMTP sang Resend + tên miền riêng.
+4. Quyết định có chuyển project dev từ Tokyo sang Singapore (production bắt buộc Singapore).
+5. **Đăng ký Apple Developer + Google Play** (cần cho đăng nhập Apple/Google, mua trong app, push thật trên máy).
+6. Xác minh giá các gói trong seed.
 
 **Việc kỹ thuật tiếp theo (gợi ý thứ tự)**
-1. **App mobile:** ~~design system từ mockup~~ → ~~đăng nhập email OTP~~ → ~~Trang chủ (`GET /home`)~~ → ~~Danh sách / Thêm / Chi tiết subscription~~ → ~~Lịch~~ → ~~đăng ký push token~~ → ~~Phương thức thanh toán~~ → ~~Quản lý Trial~~ → ~~Cài đặt~~ → ~~Đánh giá tháng~~ → ~~Phân tích~~ → ~~Ngân sách~~ → màn Thông báo (lịch sử nhắc + cài mốc nhắc) → thông báo cục bộ dự phòng → rà soát UI Android.
-2. Ghi nguồn tỷ giá "ExchangeRate-API" nơi hiện số đã quy đổi (bắt buộc) — Trang chủ app đã có; các màn sau cũng phải có.
-3. Giai đoạn 3: Subca Plus (RevenueCat), chia tiền nhóm (API + VietQR), admin v1.
+1. **App mobile:** màn Thông báo (lịch sử nhắc + cài mốc nhắc) → thông báo cục bộ dự phòng → cache TanStack Query xuống máy (MMKV) → rà soát UI Android (nút back, bàn phím, cỡ chữ lớn) → thử nhận push thật.
+2. Dọn dữ liệu mẫu trong tài khoản dev `khanhnvd07@gmail.com` khi chủ dự án yêu cầu (subscription có ghi chú `[dữ liệu mẫu]`, 2 phương thức mẫu, ngân sách 800.000đ).
+3. EAS Build (eas.json, development / preview) → TestFlight nội bộ khi có tài khoản Apple.
+4. Giai đoạn 3: Subca Plus (RevenueCat), chia tiền nhóm (API + VietQR), admin v1.
 
 ---
 

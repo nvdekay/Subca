@@ -11,7 +11,7 @@ Subca là app quản lý subscription cá nhân cho người trẻ Việt Nam: n
 
 ```
 apps/api       NestJS 12 trên Fastify + Prisma 7.10 → Supabase Postgres; BullMQ 6 + Redis; ESM ("type": "module")
-apps/mobile    React Native + Expo SDK 57 (Expo Router) + NativeWind 4 + TanStack Query — đã có đăng nhập email OTP + Trang chủ
+apps/mobile    React Native + Expo SDK 57 (Expo Router) + NativeWind 4 + TanStack Query — đủ các màn lõi (xem checklist)
 apps/admin     Next.js 16 + Tailwind 4 — mới khởi tạo
 packages/shared  zod schema + kiểu DTO + logic dùng chung (tiền, ngày gia hạn, tháng) — build ra dist/
 design/        mockup HTML    docs/  checklist + kiến trúc
@@ -45,6 +45,15 @@ pnpm --filter @subca/api fx:sync                      # cập nhật tỷ giá n
 - **Module Nest dùng chung** (`PrismaModule`, `AuthModule`, `PlanModule`, `FxModule`, `PushModule`) là `@Global()`.
 - Comment/tên biến theo phong cách hiện có; comment tiếng Việt giải thích "tại sao".
 
+## App mobile (`apps/mobile`)
+
+- **Cấu trúc:** route trong `src/app` (`(auth)` = chưa đăng nhập, `(app)` = đã đăng nhập, `(app)/(tabs)` = 4 tab + nút "+"); logic theo tính năng trong `src/features/<tên>/` (`queries.ts` = hook TanStack Query + mutation); UI dùng chung trong `src/components/ui` (Text, Button, Card, Pill, Chip, Segmented, Sheet, ChoiceSheet, DateField, ToggleRow, Ring…); token màu `src/theme/tokens.json`.
+- **Quy ước:** chữ luôn dùng `Text` của app với prop `weight` (không `font-bold`); ghép class bằng `cn()`; màn cuộn bọc `Screen` (`tabBar` cho tab, `modal` cho màn dạng sheet, `keyboard` cho form) + `TopBar`; tiền hiển thị bằng `formatAmount` (VND "260.000đ", USD "$20.00"), ngày `formatDate` / `formatShortDate` (tách chuỗi, không qua `Date`).
+- **Dữ liệu:** gọi API qua `api()` trong `src/lib/api.ts` (tự gắn token, làm mới khi `TOKEN_EXPIRED`); đổi subscription thì `invalidateAfterChange` làm mới home / danh sách / lịch / đánh giá / phân tích. Nơi hiện số đã quy đổi phải có dòng ghi nguồn ExchangeRate-API.
+- **Sản phẩm:** đã bỏ danh mục; phương thức thanh toán tạo ngay trong form. Bám mockup nhưng đừng thêm lại phần đã bỏ.
+- **Kiểm tra trên simulator (không bấm được):** chèn tạm `useEffect(() => router.push(...))` / tự điền + tự submit vào code, `xcrun simctl terminate/launch booted app.subca`, chụp `xcrun simctl io booted screenshot`, rồi **khôi phục file gốc** (sao lưu + `cmp`). Cuộn: tạm gắn `ref` vào ScrollView của `Screen` rồi `scrollTo`. Kiểm tra DB bằng script `pg` tạm trong `apps/api` (xóa sau khi chạy).
+- Route mới cần Metro đang chạy để sinh lại `.expo/types/router.d.ts` trước khi `tsc` nhận đường dẫn.
+
 ## Test (3 tầng)
 
 | Tầng     | File                             | Chạy             | Ghi chú                                                                                                                   |
@@ -77,5 +86,6 @@ Test khai báo provider bằng tay **không bắt được lỗi nối module** 
 
 ## Môi trường hiện tại
 
-- Supabase **dev** project `lvnjhgmjmgxonbmsvtag`, khu vực **Tokyo** (`ap-northeast-1`). Production phải chọn **Singapore**. 3 migration đã chạy; đã seed; có tỷ giá thật.
+- Supabase **dev** project `lvnjhgmjmgxonbmsvtag`, khu vực **Tokyo** (`ap-northeast-1`). Production phải chọn **Singapore**. 3 migration đã chạy; đã seed; có tỷ giá thật. Auth: email OTP 6 số, SMTP Gmail (dev). Supabase CLI đã `supabase login` → sửa cấu hình Auth qua Management API (token trong Keychain "Supabase CLI").
+- Expo: tài khoản `nvdeekay`, EAS project `@nvdeekay/subca` (projectId trong `app.json`).
 - ExchangeRate-API (nguồn tỷ giá): **bắt buộc ghi nguồn** trong app/admin nơi hiện số đã quy đổi, không phân phối lại dữ liệu.
