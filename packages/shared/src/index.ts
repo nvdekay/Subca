@@ -5,3 +5,4 @@ export * from './api/subscription.js';
 export * from './api/catalog.js';
 export * from './api/account.js';
 export * from './api/push.js';
+export * from './api/insights.js';
