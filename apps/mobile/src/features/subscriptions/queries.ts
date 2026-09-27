@@ -60,6 +60,7 @@ function invalidateAfterChange(queryClient: QueryClient, id?: string) {
   queryClient.invalidateQueries({ queryKey: ['home'] });
   queryClient.invalidateQueries({ queryKey: subscriptionKeys.list });
   queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
+  queryClient.invalidateQueries({ queryKey: ['calendar'] });
   if (id) queryClient.invalidateQueries({ queryKey: subscriptionKeys.detail(id) });
 }
 
