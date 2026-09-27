@@ -142,7 +142,6 @@ function DetailBody({ sub }: { sub: SubscriptionDetailDto }) {
           value={sub.paymentMethod ? paymentMethodLabel(sub.paymentMethod) : 'Chưa chọn'}
         />
         <InfoRow icon="cal" label="Ngày bắt đầu" value={formatDate(sub.startDate)} />
-        <InfoRow icon="tag" label="Danh mục" value={sub.category?.name ?? 'Chưa chọn'} />
         <InfoRow
           icon="repeat"
           label="Chu kỳ"

@@ -28,7 +28,7 @@ import { formatAmount, perInterval } from '@/lib/format';
 import { colors, shadow } from '@/theme';
 import { PaymentMethodSheet } from '@/features/payments/payment-method-sheet';
 import { paymentMethodLabel } from './labels';
-import { useCatalog, useCategories, usePaymentMethods } from './queries';
+import { useCatalog, usePaymentMethods } from './queries';
 
 /** Dịch vụ hay dùng ở VN, hiện sẵn ở ô "Chọn nhanh" (theo logoKey trong thư viện). */
 const QUICK_PICK = [
@@ -78,7 +78,6 @@ export type FormValues = {
   isTrial: boolean;
   autoRenew: boolean;
   paymentMethodId: string | null;
-  categoryId: string | null;
   /** null = theo cài đặt chung. */
   reminder: number | null;
   notes: string;
@@ -111,7 +110,6 @@ export function emptyValues(): FormValues {
     isTrial: false,
     autoRenew: true,
     paymentMethodId: null,
-    categoryId: null,
     reminder: 3,
     notes: '',
   };
@@ -131,7 +129,6 @@ export function valuesFrom(sub: SubscriptionDetailDto): FormValues {
     isTrial: sub.status === 'TRIAL',
     autoRenew: sub.autoRenew,
     paymentMethodId: sub.paymentMethodId,
-    categoryId: sub.categoryId,
     reminder: sub.reminderOffsets[0] ?? null,
     notes: sub.notes ?? '',
   };
@@ -176,7 +173,6 @@ function toCreateInput(v: FormValues): { input?: CreateSubscriptionInput; errors
     isTrial: v.isTrial,
     autoRenew: v.autoRenew,
     paymentMethodId: v.paymentMethodId,
-    categoryId: v.categoryId,
     reminderOffsets: v.reminder == null ? [] : [v.reminder],
     notes: v.notes.trim() || null,
   };
@@ -227,7 +223,6 @@ export function SubscriptionForm({
   const [errors, setErrors] = useState<Errors>({});
   const [pickerOpen, setPickerOpen] = useState(false);
   const catalog = useCatalog();
-  const categories = useCategories();
   const paymentMethods = usePaymentMethods();
 
   const set = <K extends keyof FormValues>(key: K, value: FormValues[K]) => {
@@ -266,7 +261,6 @@ export function SubscriptionForm({
       service,
       customName: '',
       servicePlanId: null,
-      categoryId: service.categoryId ?? old.categoryId,
     }));
     setErrors((e) => ({ ...e, name: undefined }));
     // Dịch vụ chỉ có 1 gói thì điền luôn giá.
@@ -467,25 +461,6 @@ export function SubscriptionForm({
           />
         </View>
       </View>
-
-      {/* ── Danh mục ── */}
-      {categories.data && categories.data.length > 0 ? (
-        <View className="mb-4">
-          <Text weight="semibold" className="mb-[7px] ml-1 text-[13px] leading-[18px] text-ink-2">
-            Danh mục
-          </Text>
-          <View className="flex-row flex-wrap gap-2">
-            {categories.data.map((c) => (
-              <Chip
-                key={c.id}
-                label={c.name}
-                selected={v.categoryId === c.id}
-                onPress={() => set('categoryId', v.categoryId === c.id ? null : c.id)}
-              />
-            ))}
-          </View>
-        </View>
-      ) : null}
 
       {/* ── Nhắc nhở ── */}
       <View className="mb-4">

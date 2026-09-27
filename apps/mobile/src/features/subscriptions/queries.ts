@@ -1,6 +1,5 @@
 import type {
   CatalogServiceDto,
-  CategoryDto,
   CreateSubscriptionInput,
   PaymentMethodDto,
   SubscriptionDetailDto,
@@ -36,14 +35,6 @@ export function useCatalog() {
   return useQuery({
     queryKey: ['catalog', 'services'],
     queryFn: () => api<CatalogServiceDto[]>('/catalog/services'),
-    staleTime: 60 * 60 * 1000,
-  });
-}
-
-export function useCategories() {
-  return useQuery({
-    queryKey: ['catalog', 'categories'],
-    queryFn: () => api<CategoryDto[]>('/catalog/categories'),
     staleTime: 60 * 60 * 1000,
   });
 }
