@@ -26,7 +26,7 @@
 6. **Sửa template email Supabase** (Authentication → Emails: *Magic Link* và *Confirm signup*) thêm `{{ .Token }}` để email có mã OTP cho app, và đặt *Email OTP Length* = **6** (app chỉ nhận đúng 6 số; Supabase không hỗ trợ dưới 6). SMTP mặc định của Supabase chỉ gửi tới email thành viên project.
 
 **Việc kỹ thuật tiếp theo (gợi ý thứ tự)**
-1. **App mobile:** ~~design system từ mockup~~ → ~~đăng nhập email OTP~~ → ~~Trang chủ (`GET /home`)~~ → ~~Danh sách / Thêm / Chi tiết subscription~~ → ~~Lịch~~ → ~~đăng ký push token~~ → ~~Phương thức thanh toán~~ → ~~Quản lý Trial~~ → ~~Cài đặt~~ → ~~Đánh giá tháng~~ → ~~Phân tích~~ → màn Ngân sách → Thông báo.
+1. **App mobile:** ~~design system từ mockup~~ → ~~đăng nhập email OTP~~ → ~~Trang chủ (`GET /home`)~~ → ~~Danh sách / Thêm / Chi tiết subscription~~ → ~~Lịch~~ → ~~đăng ký push token~~ → ~~Phương thức thanh toán~~ → ~~Quản lý Trial~~ → ~~Cài đặt~~ → ~~Đánh giá tháng~~ → ~~Phân tích~~ → ~~Ngân sách~~ → màn Thông báo (lịch sử nhắc + cài mốc nhắc) → thông báo cục bộ dự phòng → rà soát UI Android.
 2. Ghi nguồn tỷ giá "ExchangeRate-API" nơi hiện số đã quy đổi (bắt buộc) — Trang chủ app đã có; các màn sau cũng phải có.
 3. Giai đoạn 3: Subca Plus (RevenueCat), chia tiền nhóm (API + VietQR), admin v1.
 
@@ -226,7 +226,7 @@
 
 - [x] Đánh giá hằng tháng (Giữ / Xem lại / Hủy, gợi ý tiết kiệm) — màn trong app, cập nhật giao diện ngay khi bấm (optimistic) _("Gợi ý từ Subca" để dành cho gói Plus, chưa làm)_
   - [x] API `GET /reviews`, `PUT/DELETE /reviews/:subscriptionId` (đồng bộ trạng thái REVIEW/ACTIVE, tổng tiết kiệm)
-- [ ] Ngân sách (hạn mức, cảnh báo vượt, mô phỏng "nếu hủy thì tiết kiệm bao nhiêu") _(đặt/bỏ hạn mức trong Cài đặt + thẻ ở Trang chủ đã có; màn Ngân sách + mô phỏng chưa làm)_
+- [x] Ngân sách (hạn mức, cảnh báo vượt, mô phỏng "nếu hủy thì tiết kiệm bao nhiêu") — màn Ngân sách (đồng hồ, cảnh báo, mô phỏng chọn sẵn các gói đánh dấu Hủy ở Đánh giá tháng), mở từ thẻ ngân sách ở Trang chủ / Cài đặt
   - [x] API `GET/PUT/DELETE /me/budget`; tình trạng ngân sách (đã chi, %, vượt) trả trong `/home`
 - [x] Phân tích (xu hướng, dự tính năm, chi phí mỗi lần dùng, top đắt nhất, theo phương thức thanh toán)
   - [x] API `GET /analytics` (xu hướng 6 tháng là ước tính từ các gói còn hoạt động mỗi tháng; chi phí mỗi lần dùng theo mức độ sử dụng người dùng chọn)
