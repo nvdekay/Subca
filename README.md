@@ -17,9 +17,10 @@ docs/        SUBCA-CHECKLIST.md — kế hoạch triển khai
 
 ## Bắt đầu
 
-Yêu cầu: Node ≥ 22 (khuyến nghị 24), pnpm 11.
+Yêu cầu: Node ≥ 22 (khuyến nghị 24), pnpm 11, Docker (OrbStack hoặc Docker Desktop).
 
 ```bash
+docker compose up -d         # Redis cho hàng đợi nhắc nhở (BullMQ)
 pnpm install                 # cài toàn bộ + tự sinh Prisma Client
 cp apps/api/.env.example apps/api/.env   # điền chuỗi kết nối Supabase
 pnpm build                   # build shared → api → admin
@@ -78,6 +79,15 @@ Migration hiện có:
 | PATCH              | `/me`                              | Đổi tên hiển thị                                                                                                                                           |
 | PATCH              | `/me/settings`                     | Tiền tệ, múi giờ, ngôn ngữ, giờ nhắc, bật/tắt thông báo                                                                                                    |
 | GET · PUT · DELETE | `/me/budget`                       | Ngân sách subscription hằng tháng                                                                                                                          |
+| POST · DELETE      | `/push-tokens`                     | Đăng ký / hủy thiết bị nhận thông báo (Expo push token)                                                                                                    |
+
+### Nhắc nhở (BullMQ + Expo Push)
+
+- Mỗi 5 phút, API chạy một lượt: (1) đẩy kỳ gia hạn đã qua (ghi lịch sử trừ tiền, trial hết hạn → ACTIVE hoặc CANCELLED nếu tắt tự gia hạn), (2) sinh lượt nhắc sẽ đến hạn trong 26 giờ tới theo giờ nhắc và múi giờ từng người, (3) đưa lượt nhắc vào hàng đợi BullMQ dưới dạng job hẹn giờ.
+- Mốc nhắc: mốc riêng của gói (`reminderOffsets`) hoặc quy tắc chung (`reminder_rules`, mặc định 30 ngày cho gói năm, 7 ngày, 1 ngày; trial 1 ngày). Gói Free chỉ 1 mốc.
+- Không gửi trùng: lượt nhắc có khóa unique, job BullMQ dùng ID của lượt nhắc. Worker kiểm tra lại trước khi gửi (gói đã hủy, đổi ngày, tắt thông báo → bỏ); lỗi mạng thử lại 3 lần; máy đã gỡ app → xóa token.
+- App đăng ký thiết bị bằng `POST /push-tokens` sau khi đăng nhập, gọi `DELETE /push-tokens` khi đăng xuất.
+- Biến môi trường: `REDIS_URL`, `REMINDERS_ENABLED`, `EXPO_ACCESS_TOKEN` (tùy chọn). Production dùng Redis cùng khu vực với API, `maxmemory-policy noeviction`.
 
 ### Tỷ giá
 
@@ -89,7 +99,7 @@ Migration hiện có:
 
 Schema đầu vào dùng chung ở `packages/shared/src/api` (app dùng lại cho form). Lỗi dữ liệu trả `400 VALIDATION_ERROR` kèm `issues` theo từng trường; vượt giới hạn gói Free trả `403 PLAN_LIMIT_REACHED`.
 
-Test tích hợp trên database thật (Supabase dev, tự tạo và dọn dữ liệu tạm): `pnpm --filter @subca/api test:int`.
+Test tích hợp trên hạ tầng thật (Supabase dev + Redis từ `docker compose`, tự tạo và dọn dữ liệu tạm): `pnpm --filter @subca/api test:int`.
 
 ## Quy ước dữ liệu
 

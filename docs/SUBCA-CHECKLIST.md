@@ -6,7 +6,7 @@
 
 ### Hiện trạng (27/09/2026)
 
-- **Xong:** mockup app + admin; bộ tính ngày gia hạn (38 test + đối chiếu ngẫu nhiên); seed 53 dịch vụ lên Supabase dev; xác thực phía API (guard JWT + `/me` + chặn tài khoản khóa); API subscription, thư viện dịch vụ, Trang chủ, phương thức thanh toán, cài đặt, ngân sách; job tỷ giá hằng ngày; monorepo (Expo SDK 57, NestJS 12 + Fastify, Next.js 16, Prisma 7.10, TypeScript 6.0); schema Prisma v1 (26 bảng); migration + RLS + trigger auth **đã chạy trên Supabase dev**; API kết nối DB qua pooler (`/health` → `db: up`); CI GitHub Actions.
+- **Xong:** mockup app + admin; bộ tính ngày gia hạn (38 test + đối chiếu ngẫu nhiên); seed 53 dịch vụ lên Supabase dev; xác thực phía API (guard JWT + `/me` + chặn tài khoản khóa); API subscription, thư viện dịch vụ, Trang chủ, phương thức thanh toán, cài đặt, ngân sách; job tỷ giá hằng ngày; nhắc nhở BullMQ + Expo Push (Redis qua docker compose); monorepo (Expo SDK 57, NestJS 12 + Fastify, Next.js 16, Prisma 7.10, TypeScript 6.0); schema Prisma v1 (26 bảng); migration + RLS + trigger auth **đã chạy trên Supabase dev**; API kết nối DB qua pooler (`/health` → `db: up`); CI GitHub Actions.
 - **Đang ở:** Giai đoạn 0 (chuẩn bị).
 - **Việc tiếp theo:**
   1. **Đổi mật khẩu database Supabase** (đã lộ trong chat) và cập nhật `apps/api/.env`
@@ -14,7 +14,7 @@
   3. Đăng ký Apple Developer / Google Play (khâu chờ lâu)
   4. Xác minh giá gói trong seed
   5. Giai đoạn 1: đăng nhập trong app (Apple / Google / email OTP) — phía API đã xong
-  6. Job sinh và gửi nhắc nhở (BullMQ + Expo Push) — cần chọn Redis cho dev (Docker/OrbStack hay Upstash)
+  6. Phía API tiếp theo: kiểm tra push receipt, API lịch gia hạn / đánh giá tháng / phân tích, xóa tài khoản
 
 ---
 
@@ -63,11 +63,11 @@
 - [ ] Build & phát hành: **EAS Build / Submit / Update** (development build, không dùng Expo Go cho bản thật)
 
 **Backend & hạ tầng**
-- [ ] **Push:** Expo Push Service (gửi cho cả iOS và Android qua 1 API); sau có thể chuyển sang FCM/APNs trực tiếp
+- [x] **Push:** Expo Push Service (gửi cho cả iOS và Android qua 1 API); sau có thể chuyển sang FCM/APNs trực tiếp
 - [x] **Backend:** NestJS 12 **chạy trên Fastify** (thay Express mặc định) + Prisma 7.10 với `@prisma/adapter-pg` (kết nối tới Postgres của Supabase)
   - Đã cân nhắc Go: không chọn, vì ở quy mô Subca phần xử lý của backend chỉ tốn vài ms trên tổng 50–100 ms người dùng chờ; giữ TypeScript để mobile, backend và admin dùng chung kiểu dữ liệu, zod và logic
   - Xem lại khi có phần xử lý nặng (ví dụ đọc hàng triệu email hóa đơn): có thể tách riêng service đó sang Go
-- [ ] **Tác vụ nền:** BullMQ + Redis
+- [x] **Tác vụ nền:** BullMQ 6 + Redis (dev: `docker compose`, OrbStack; production: Redis cùng khu vực với API, giá cố định — không dùng Upstash tính theo số lệnh)
 - [ ] **Đăng nhập:** **Supabase Auth** (Apple, Google, email OTP); NestJS xác minh JWT của Supabase ở mọi request
 - [x] **Database:** **Supabase** (PostgreSQL 17), gói Pro cho production (gói Free tự tạm dừng khi không hoạt động, không có backup hằng ngày)
   - Project dev hiện ở **Tokyo (`ap-northeast-1`)**; project production phải chọn **Singapore (`ap-southeast-1`)**
@@ -182,10 +182,13 @@
 - [ ] **Trang chủ:** tổng tiền theo tháng, số đang hoạt động, sắp gia hạn, trial, cảnh báo
   - [x] API `GET /home` (1 request cho cả màn): tổng tháng/năm quy đổi tiền tệ, trial, sắp gia hạn 7 ngày, có thể tiết kiệm, ngân sách, 5 khoản sắp tới, `missingRates`
 - [ ] **Nhắc nhở:**
-  - [ ] Đăng ký push token
-  - [ ] Cron mỗi 15 phút sinh các nhắc đến hạn
-  - [ ] Hàng đợi BullMQ → **Expo Push Service** (`expo-server-sdk`), xử lý phản hồi lỗi (token hết hạn → xóa)
-  - [ ] Khóa duy nhất `(subscription_id, type, due_date)` để không gửi trùng
+  - [x] Đăng ký push token (`POST/DELETE /push-tokens`, token chuyển sang tài khoản mới khi máy đổi tài khoản)
+  - [x] Lượt chạy mỗi 5 phút: đẩy kỳ gia hạn đã qua (ghi lịch sử trừ tiền, trial → ACTIVE/CANCELLED), sinh lượt nhắc 26 giờ tới theo múi giờ + giờ nhắc từng người, đưa vào hàng đợi
+  - [x] Hàng đợi BullMQ → **Expo Push Service** (`expo-server-sdk`): kiểm tra lại trước khi gửi, thử lại 3 lần khi lỗi mạng, xóa token khi máy đã gỡ app, hết lần thử → FAILED
+  - [x] Khóa duy nhất `(subscription_id, kind, offset_days, due_date)` + jobId = ID lượt nhắc → không gửi trùng
+  - [x] Redis dev bằng `docker compose` (OrbStack), `noeviction` + AOF
+  - [ ] Kiểm tra **push receipt** của Expo sau ~15 phút (xác nhận đã tới máy, xóa token lỗi) và ghi `opened_at` khi người dùng bấm thông báo
+  - [ ] Trang admin theo dõi hàng đợi (Bull Board) và thống kê lượt nhắc
   - [ ] Thông báo cục bộ làm dự phòng (`expo-notifications`): app lấy danh sách nhắc 30 ngày tới từ server và tự lên lịch (iOS giới hạn 64 thông báo chờ → chỉ lên lịch các mốc gần nhất)
   - [ ] Xin quyền thông báo đúng lúc (sau khi thêm subscription đầu tiên, không hỏi ngay khi mở app); Android 13+ cần quyền `POST_NOTIFICATIONS`
   - [ ] Màn Thông báo + cài đặt mốc nhắc (30 / 7 / 1 ngày, ngày gia hạn, trial, gia hạn năm)
