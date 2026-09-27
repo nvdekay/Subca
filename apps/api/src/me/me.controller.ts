@@ -37,6 +37,13 @@ export class MeController {
     return this.me.getMe(user);
   }
 
+  /** Xóa vĩnh viễn tài khoản và toàn bộ dữ liệu. */
+  @Delete()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteAccount(@CurrentUser() user: AuthUser): Promise<void> {
+    return this.account.deleteAccount(user.id);
+  }
+
   @Patch()
   updateProfile(
     @CurrentUser() user: AuthUser,

@@ -6,6 +6,8 @@ import {
   todayInTimeZone,
   type CreateSubscription,
 } from '@subca/shared';
+import { AccountStatusService } from '../../src/auth/account-status.service.js';
+import { SupabaseAdminClient } from '../../src/auth/supabase-admin.js';
 import { FxService } from '../../src/fx/fx.service.js';
 import { PrismaClient } from '../../src/generated/prisma/client.js';
 import { HomeService } from '../../src/home/home.service.js';
@@ -26,7 +28,14 @@ describe('Home + phương thức thanh toán + cài đặt trên database thật
   const subs = new SubscriptionsService(db, plan);
   const home = new HomeService(db, fx, plan);
   const methods = new PaymentMethodsService(db, fx);
-  const account = new AccountService(db);
+  const account = new AccountService(
+    db,
+    new SupabaseAdminClient(
+      process.env['SUPABASE_URL'] ?? 'http://localhost',
+      undefined,
+    ),
+    new AccountStatusService(db),
+  );
   const userId = randomUUID();
   /** Quy đổi theo tỷ giá thật đang có trong DB (job fx-sync); null nếu chưa có. */
   const usdInVnd = async (amount: bigint) =>

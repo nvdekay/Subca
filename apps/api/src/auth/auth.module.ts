@@ -1,12 +1,15 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { createRemoteJWKSet } from 'jose';
 import type { Env } from '../config/env.js';
 import { AccountStatusService } from './account-status.service.js';
 import { AuthGuard } from './auth.guard.js';
+import { SupabaseAdminClient } from './supabase-admin.js';
 import { SupabaseJwtVerifier } from './supabase-jwt.verifier.js';
 
+/** Toàn cục: guard, xác minh token, trạng thái tài khoản và Supabase Admin dùng ở nhiều module. */
+@Global()
 @Module({
   providers: [
     {
@@ -28,8 +31,17 @@ import { SupabaseJwtVerifier } from './supabase-jwt.verifier.js';
       },
     },
     AccountStatusService,
+    {
+      provide: SupabaseAdminClient,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService<Env, true>) =>
+        new SupabaseAdminClient(
+          config.get('SUPABASE_URL', { infer: true }),
+          config.get('SUPABASE_SERVICE_ROLE_KEY', { infer: true }),
+        ),
+    },
     { provide: APP_GUARD, useClass: AuthGuard },
   ],
-  exports: [SupabaseJwtVerifier, AccountStatusService],
+  exports: [SupabaseJwtVerifier, AccountStatusService, SupabaseAdminClient],
 })
 export class AuthModule {}

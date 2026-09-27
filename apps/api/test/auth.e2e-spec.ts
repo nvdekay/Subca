@@ -7,6 +7,7 @@ import {
 import { Test } from '@nestjs/testing';
 import { AccountStatusService } from '../src/auth/account-status.service.js';
 import { AuthGuard } from '../src/auth/auth.guard.js';
+import { SupabaseAdminClient } from '../src/auth/supabase-admin.js';
 import type { AuthUser } from '../src/auth/auth.types.js';
 import { CurrentUser } from '../src/auth/current-user.decorator.js';
 import { SupabaseJwtVerifier } from '../src/auth/supabase-jwt.verifier.js';
@@ -45,6 +46,10 @@ describe('Xác thực (e2e, Fastify)', () => {
       providers: [
         MeService,
         AccountService,
+        {
+          provide: SupabaseAdminClient,
+          useValue: new SupabaseAdminClient('http://localhost', undefined),
+        },
         { provide: PrismaService, useValue: prisma },
         { provide: SupabaseJwtVerifier, useValue: auth.verifier },
         { provide: AccountStatusService, useValue: accountStatus },

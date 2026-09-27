@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import type {
   BudgetDto,
   CurrencyCode,
@@ -8,12 +13,43 @@ import type {
   UpsertBudget,
 } from '@subca/shared';
 import type { Budget, UserSettings } from '../generated/prisma/client.js';
+import { AccountStatusService } from '../auth/account-status.service.js';
+import { SupabaseAdminClient } from '../auth/supabase-admin.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 /** Sửa hồ sơ, cài đặt và ngân sách của người dùng hiện tại. */
 @Injectable()
 export class AccountService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(AccountService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly supabaseAdmin: SupabaseAdminClient,
+    private readonly accountStatus: AccountStatusService,
+  ) {}
+
+  /**
+   * Xóa vĩnh viễn tài khoản (Apple bắt buộc có trong app). Xóa tài khoản đăng nhập trên Supabase;
+   * trigger on_auth_user_deleted xóa profile và toàn bộ dữ liệu liên quan (cascade).
+   * Lưu ý: gói Subca Plus mua qua App Store / Google Play phải được người dùng hủy ở store.
+   */
+  async deleteAccount(userId: string): Promise<void> {
+    if (!this.supabaseAdmin.configured) {
+      throw new ServiceUnavailableException({
+        statusCode: 503,
+        code: 'ACCOUNT_DELETION_UNAVAILABLE',
+        message:
+          'Chưa cấu hình xóa tài khoản trên máy chủ. Vui lòng liên hệ hỗ trợ.',
+      });
+    }
+    const existed = await this.supabaseAdmin.deleteUser(userId);
+    // Phòng khi tài khoản auth đã mất mà profile còn (trigger không chạy): xóa trực tiếp
+    await this.prisma.profile.deleteMany({ where: { id: userId } });
+    this.accountStatus.invalidate(userId);
+    this.logger.log(
+      `Đã xóa tài khoản ${userId}${existed ? '' : ' (tài khoản auth đã không còn)'}`,
+    );
+  }
 
   async updateProfile(
     userId: string,
