@@ -7,3 +7,5 @@ apps/api/src/generated/
 apps/api/prisma/migrations/
 docs/
 apps/admin/next-env.d.ts
+# Expo ghi đè file này mỗi lần `expo start`
+apps/mobile/expo-env.d.ts
