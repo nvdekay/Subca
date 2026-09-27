@@ -5,6 +5,7 @@ import * as Notifications from 'expo-notifications';
 import { Alert, Platform } from 'react-native';
 import { api } from '@/lib/api';
 import { secureStorage } from '@/lib/storage';
+import { syncLocalFallback } from './local-fallback';
 
 const TOKEN_KEY = 'push.token';
 const ANDROID_CHANNEL = 'reminders';
@@ -44,6 +45,12 @@ function askPolitely(): Promise<boolean> {
  * Lỗi không làm hỏng luồng chính: thông báo là tính năng phụ trợ.
  */
 export async function registerForPush({ ask }: { ask: boolean }): Promise<void> {
+  const hasToken = await tryRegister(ask);
+  await syncLocalFallback(hasToken);
+}
+
+/** true nếu đã đăng ký push token với API thành công. */
+async function tryRegister(ask: boolean): Promise<boolean> {
   try {
     if (Platform.OS === 'android') {
       await Notifications.setNotificationChannelAsync(ANDROID_CHANNEL, {
@@ -53,12 +60,12 @@ export async function registerForPush({ ask }: { ask: boolean }): Promise<void> 
     }
     let { status, canAskAgain } = await Notifications.getPermissionsAsync();
     if (status !== 'granted') {
-      if (!ask || !canAskAgain || !(await askPolitely())) return;
+      if (!ask || !canAskAgain || !(await askPolitely())) return false;
       ({ status } = await Notifications.requestPermissionsAsync());
-      if (status !== 'granted') return;
+      if (status !== 'granted') return false;
     }
     const id = projectId();
-    if (!id) return;
+    if (!id) return false;
     const { data: token } = await Notifications.getExpoPushTokenAsync({ projectId: id });
 
     const body: RegisterPushToken = {
@@ -70,13 +77,16 @@ export async function registerForPush({ ask }: { ask: boolean }): Promise<void> 
     // Gửi mỗi lần mở app: API upsert theo token nên rẻ, và chuyển token sang tài khoản mới nếu máy đổi người dùng.
     await api('/push-tokens', { method: 'POST', body: JSON.stringify(body) });
     secureStorage.set(TOKEN_KEY, token);
+    return true;
   } catch (error) {
     console.warn('Không đăng ký được push token', error);
+    return false;
   }
 }
 
 /** Gọi TRƯỚC khi đăng xuất (lúc còn token đăng nhập) để máy này thôi nhận nhắc của tài khoản cũ. */
 export async function unregisterPush(): Promise<void> {
+  await syncLocalFallback(true); // hủy các thông báo cục bộ của tài khoản cũ
   const token = secureStorage.getString(TOKEN_KEY);
   if (!token) return;
   try {

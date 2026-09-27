@@ -54,6 +54,7 @@ function invalidateAfterChange(queryClient: QueryClient, id?: string) {
   queryClient.invalidateQueries({ queryKey: ['calendar'] });
   queryClient.invalidateQueries({ queryKey: ['reviews'] });
   queryClient.invalidateQueries({ queryKey: ['analytics'] });
+  queryClient.invalidateQueries({ queryKey: ['reminders'] });
   if (id) queryClient.invalidateQueries({ queryKey: subscriptionKeys.detail(id) });
 }
 
