@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Pill } from '@/components/ui/pill';
 import { Text } from '@/components/ui/text';
 import { useMe } from '@/features/auth/use-me';
+import { unregisterPush } from '@/features/notifications/push';
 import { supabase } from '@/lib/supabase';
 import { colors } from '@/theme';
 
@@ -23,6 +24,8 @@ export default function Profile() {
         style: 'destructive',
         onPress: async () => {
           setSigningOut(true);
+          // Gỡ push token trước (cần còn đăng nhập), rồi mới đăng xuất.
+          await unregisterPush();
           // Phiên đổi → _layout tự quay về màn chào; cache được xóa trong SessionProvider.
           await supabase.auth.signOut();
           setSigningOut(false);

@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Screen, TopBar } from '@/components/screen';
+import { registerForPush } from '@/features/notifications/push';
 import { useCreateSubscription } from '@/features/subscriptions/queries';
 import { alertSaveError } from '@/features/subscriptions/save-error';
 import { emptyValues, SubscriptionForm } from '@/features/subscriptions/subscription-form';
@@ -18,8 +19,11 @@ export default function AddSubscription() {
         submitting={create.isPending}
         onSubmitCreate={(input) =>
           create.mutate(input, {
-            onSuccess: (created) =>
-              router.replace({ pathname: '/subscriptions/[id]', params: { id: created.id } }),
+            onSuccess: (created) => {
+              router.replace({ pathname: '/subscriptions/[id]', params: { id: created.id } });
+              // Xin quyền thông báo đúng lúc: ngay sau khi có thứ để nhắc (chỉ hỏi nếu chưa từng hỏi).
+              registerForPush({ ask: true });
+            },
             onError: alertSaveError,
           })
         }

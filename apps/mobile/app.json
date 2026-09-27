@@ -36,11 +36,24 @@
           "imageWidth": 76
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "color": "#2F3A31"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3e7c3cae-bb6c-4a13-bf46-c9446a873c15"
+      }
+    },
+    "owner": "nvdeekay"
   }
 }
