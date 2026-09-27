@@ -2,19 +2,32 @@
 
 > Cập nhật: 27/09/2026 · Đánh dấu `[x]` khi xong.
 > File liên quan: `design/subca-mobile-mockup.html` (app), `design/subca-admin-dashboard.html` (admin).
-> Repo: https://github.com/nvdekay/Subca (nhánh `main`, CI xanh).
+> Repo: https://github.com/nvdekay/Subca (nhánh `main`, CI xanh). Tài liệu kỹ thuật: `docs/ARCHITECTURE.md`, hướng dẫn cho Claude: `CLAUDE.md`.
 
 ### Hiện trạng (27/09/2026)
 
-- **Xong:** mockup app + admin; bộ tính ngày gia hạn (38 test + đối chiếu ngẫu nhiên); seed 53 dịch vụ lên Supabase dev; xác thực phía API (guard JWT + `/me` + chặn tài khoản khóa); API subscription, thư viện dịch vụ, Trang chủ, phương thức thanh toán, cài đặt, ngân sách; job tỷ giá hằng ngày; nhắc nhở BullMQ + Expo Push (Redis qua docker compose) + push receipt; API lịch, đánh giá tháng, phân tích, xóa tài khoản; monorepo (Expo SDK 57, NestJS 12 + Fastify, Next.js 16, Prisma 7.10, TypeScript 6.0); schema Prisma v1 (26 bảng); migration + RLS + trigger auth **đã chạy trên Supabase dev**; API kết nối DB qua pooler (`/health` → `db: up`); CI GitHub Actions.
-- **Đang ở:** Giai đoạn 0 (chuẩn bị).
-- **Việc tiếp theo:**
-  1. **Đổi mật khẩu database Supabase** (đã lộ trong chat) và cập nhật `apps/api/.env`
-  2. Quyết định có chuyển project dev sang Singapore không (hiện ở Tokyo)
-  3. Đăng ký Apple Developer / Google Play (khâu chờ lâu)
-  4. Xác minh giá gói trong seed
-  5. Giai đoạn 1: đăng nhập trong app (Apple / Google / email OTP) — phía API đã xong
-  6. API Giai đoạn 1–2 đã đủ cho các màn trong mockup (trừ Plus/RevenueCat và chia tiền nhóm ở Giai đoạn 3) → chuyển sang app mobile
+**Đang ở:** Giai đoạn 1. **Backend (API) cho các màn Giai đoạn 1–2 đã xong**; app mobile và admin mới chỉ khởi tạo khung.
+
+**Đã xong**
+- Mockup app (16 màn) + admin (12 trang) trong `design/`.
+- Monorepo: Expo SDK 57, NestJS 12 + Fastify, Next.js 16, Prisma 7.10, TypeScript 6.0, pnpm 11 + Turborepo; CI GitHub Actions (có Redis cho smoke test).
+- Supabase dev (Tokyo): 26 bảng, RLS mọi bảng, trigger đăng ký / xóa tài khoản, 3 migration đã chạy, seed 11 danh mục + 53 dịch vụ, tỷ giá thật.
+- `packages/shared`: tiền (BigInt, quy đổi), bộ tính ngày gia hạn (38 test + đối chiếu ngẫu nhiên), schema zod + DTO cho mọi API.
+- API: xác thực JWT Supabase (+ chặn tài khoản khóa), `/me` (+ cài đặt, ngân sách, xóa tài khoản), thư viện dịch vụ, subscription CRUD (giới hạn gói Free), `/home`, phương thức thanh toán, lịch, đánh giá tháng, phân tích, push token, nhắc nhở BullMQ + Expo Push + push receipt, job tỷ giá hằng ngày.
+- Test: shared 51 · API 71 unit + 36 e2e (CI) · 27 tích hợp trên Supabase + Redis thật (`test:int`).
+- Tài liệu: `README.md`, `CLAUDE.md` (hướng dẫn cho phiên Claude mới), `docs/ARCHITECTURE.md`.
+
+**Việc của chủ dự án (đang chờ)**
+1. **Đổi mật khẩu database Supabase** (đã lộ trong chat) rồi sửa `DATABASE_URL` / `DIRECT_URL` trong `apps/api/.env`.
+2. **Thêm `SUPABASE_SERVICE_ROLE_KEY` vào `apps/api/.env`** (thiếu thì `DELETE /me` trả 503). Không gửi khóa qua chat.
+3. Quyết định có chuyển project dev từ Tokyo sang Singapore (production bắt buộc Singapore).
+4. **Đăng ký Apple Developer + Google Play** (khâu chờ lâu; cần cho đăng nhập Apple/Google, mua trong app, push thật).
+5. Xác minh giá các gói trong seed.
+
+**Việc kỹ thuật tiếp theo (gợi ý thứ tự)**
+1. **App mobile:** design system từ mockup (màu, font, thẻ, bottom nav) → đăng nhập email OTP (Supabase) → Trang chủ (`GET /home`) → Danh sách / Thêm / Chi tiết subscription → Lịch → đăng ký push token.
+2. Ghi nguồn tỷ giá "ExchangeRate-API" nơi hiện số đã quy đổi (bắt buộc).
+3. Giai đoạn 3: Subca Plus (RevenueCat), chia tiền nhóm (API + VietQR), admin v1.
 
 ---
 

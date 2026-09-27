@@ -2,6 +2,12 @@
 
 Ứng dụng quản lý subscription cá nhân: nhắc gia hạn, theo dõi trial, phân tích chi tiêu, chia tiền gói gia đình.
 
+## Tài liệu
+
+- [`docs/SUBCA-CHECKLIST.md`](docs/SUBCA-CHECKLIST.md) — kế hoạch, tiến độ, việc tiếp theo (xem phần **Hiện trạng** ở đầu file)
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — kiến trúc và các quyết định kỹ thuật đã chốt
+- [`CLAUDE.md`](CLAUDE.md) — quy ước code, test, commit và các bẫy đã gặp (Claude Code tự đọc khi mở phiên)
+
 ## Cấu trúc
 
 ```
@@ -12,7 +18,7 @@ apps/
 packages/
   shared/    Enum, schema zod, xử lý tiền dùng chung cho mobile / API / admin
 design/      Mockup HTML (app + admin)
-docs/        SUBCA-CHECKLIST.md — kế hoạch triển khai
+docs/        SUBCA-CHECKLIST.md (kế hoạch, tiến độ) · ARCHITECTURE.md (quyết định kỹ thuật)
 ```
 
 ## Bắt đầu
