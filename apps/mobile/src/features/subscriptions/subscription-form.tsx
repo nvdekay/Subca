@@ -11,6 +11,7 @@ import {
   type SubscriptionDetailDto,
   type UpdateSubscriptionInput,
 } from '@subca/shared';
+import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { ServiceLogo } from '@/components/service-logo';
@@ -235,6 +236,16 @@ export function SubscriptionForm({
     if (key === 'customName' && errors.name) setErrors((e) => ({ ...e, name: undefined }));
   };
 
+  // Thêm mới: chọn sẵn phương thức mặc định cho tới khi người dùng tự chọn (tính ra, không ghi đè state).
+  const [pmTouched, setPmTouched] = useState(mode === 'edit');
+  const defaultPmId =
+    mode === 'create' ? (paymentMethods.data?.find((m) => m.isDefault)?.id ?? null) : null;
+  const paymentMethodId = pmTouched ? v.paymentMethodId : (v.paymentMethodId ?? defaultPmId);
+  const pickPaymentMethod = (id: string | null) => {
+    setPmTouched(true);
+    set('paymentMethodId', id);
+  };
+
   const selectedService = useMemo(
     () => catalog.data?.find((s) => s.id === v.service?.id) ?? null,
     [catalog.data, v.service],
@@ -279,7 +290,7 @@ export function SubscriptionForm({
 
   function submit() {
     if (mode === 'create') {
-      const { input, errors: e } = toCreateInput(v);
+      const { input, errors: e } = toCreateInput({ ...v, paymentMethodId });
       setErrors(e);
       if (input) onSubmitCreate?.(input);
     } else {
@@ -436,22 +447,27 @@ export function SubscriptionForm({
           <View className="flex-row flex-wrap gap-2">
             <Chip
               label="Chưa chọn"
-              selected={v.paymentMethodId === null}
-              onPress={() => set('paymentMethodId', null)}
+              selected={paymentMethodId === null}
+              onPress={() => pickPaymentMethod(null)}
             />
             {paymentMethods.data.map((pm) => (
               <Chip
                 key={pm.id}
                 label={paymentMethodLabel(pm)}
-                selected={v.paymentMethodId === pm.id}
-                onPress={() => set('paymentMethodId', pm.id)}
+                selected={paymentMethodId === pm.id}
+                onPress={() => pickPaymentMethod(pm.id)}
               />
             ))}
           </View>
         ) : (
-          <Text className="ml-1 text-[13px] leading-[19px] text-ink-3">
-            Chưa có phương thức thanh toán nào. Màn quản lý thẻ / ví sẽ có ở bản sau.
-          </Text>
+          <Button
+            title="Thêm thẻ / ví"
+            variant="soft"
+            size="sm"
+            icon="plus"
+            className="self-start"
+            onPress={() => router.push('/payments')}
+          />
         )}
       </View>
 
