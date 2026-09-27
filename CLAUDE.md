@@ -11,7 +11,7 @@ Subca là app quản lý subscription cá nhân cho người trẻ Việt Nam: n
 
 ```
 apps/api       NestJS 12 trên Fastify + Prisma 7.10 → Supabase Postgres; BullMQ 6 + Redis; ESM ("type": "module")
-apps/mobile    React Native + Expo SDK 57 (Expo Router) — mới có màn tạm, chưa làm tính năng
+apps/mobile    React Native + Expo SDK 57 (Expo Router) + NativeWind 4 + TanStack Query — đã có đăng nhập email OTP + Trang chủ
 apps/admin     Next.js 16 + Tailwind 4 — mới khởi tạo
 packages/shared  zod schema + kiểu DTO + logic dùng chung (tiền, ngày gia hạn, tháng) — build ra dist/
 design/        mockup HTML    docs/  checklist + kiến trúc
@@ -70,6 +70,8 @@ Test khai báo provider bằng tay **không bắt được lỗi nối module** 
 - **BullMQ 6** không kèm ioredis: dùng `createRedisConnection()` (ioredis instance, `maxRetriesPerRequest: null`).
 - Docker Hub hay lỗi mạng; máy có sẵn `redis:7-alpine`.
 - macOS không có lệnh `timeout`.
+- **Mobile:** `expo start` ghi đè `apps/mobile/expo-env.d.ts` (file được commit có chủ đích để CI typecheck) → khôi phục bằng `git checkout`. Font tùy chỉnh: đổi độ đậm bằng prop `weight` của `Text` (đổi fontFamily), không dùng class `font-bold`. Chạy trên simulator: `npx expo run:ios --no-bundler` (chỉ khi thêm thư viện native) rồi `npx expo start --dev-client`; mở app **sau** khi Metro chạy. Cấu hình ở `apps/mobile/.env.local` (mẫu `.env.example`).
+- **Email OTP** do Supabase Auth gửi qua SMTP riêng (dev: Gmail); template ở `design/email/otp-code.html`, cách áp lại xem `docs/ARCHITECTURE.md`.
 - **Prettier tự căn lại bảng Markdown** → khi sửa README/checklist bằng script, tìm dòng theo nội dung, đừng khớp nguyên văn bảng. `docs/` không bị Prettier format.
 - Seed danh mục hệ thống dùng ID cố định (UUID v5 từ slug) vì Postgres coi `NULL` khác nhau trong unique `(user_id, slug)`.
 

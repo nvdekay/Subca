@@ -23,10 +23,11 @@
 3. Quyết định có chuyển project dev từ Tokyo sang Singapore (production bắt buộc Singapore).
 4. **Đăng ký Apple Developer + Google Play** (khâu chờ lâu; cần cho đăng nhập Apple/Google, mua trong app, push thật).
 5. Xác minh giá các gói trong seed.
+6. **Sửa template email Supabase** (Authentication → Emails: *Magic Link* và *Confirm signup*) thêm `{{ .Token }}` để email có mã OTP cho app, và đặt *Email OTP Length* = **6** (app chỉ nhận đúng 6 số; Supabase không hỗ trợ dưới 6). SMTP mặc định của Supabase chỉ gửi tới email thành viên project.
 
 **Việc kỹ thuật tiếp theo (gợi ý thứ tự)**
-1. **App mobile:** design system từ mockup (màu, font, thẻ, bottom nav) → đăng nhập email OTP (Supabase) → Trang chủ (`GET /home`) → Danh sách / Thêm / Chi tiết subscription → Lịch → đăng ký push token.
-2. Ghi nguồn tỷ giá "ExchangeRate-API" nơi hiện số đã quy đổi (bắt buộc).
+1. **App mobile:** ~~design system từ mockup~~ → ~~đăng nhập email OTP~~ → ~~Trang chủ (`GET /home`)~~ (đã code, chờ thử đăng nhập thật) → Danh sách / Thêm / Chi tiết subscription → Lịch → đăng ký push token.
+2. Ghi nguồn tỷ giá "ExchangeRate-API" nơi hiện số đã quy đổi (bắt buộc) — Trang chủ app đã có; các màn sau cũng phải có.
 3. Giai đoạn 3: Subca Plus (RevenueCat), chia tiền nhóm (API + VietQR), admin v1.
 
 ---
@@ -61,15 +62,15 @@
 **Mobile**
 - [x] **React Native + Expo** (SDK 57, React Native 0.86, New Architecture), TypeScript chế độ strict
 - [x] Điều hướng: **Expo Router** (điều hướng theo file, deep link sẵn)
-- [ ] Gọi API + cache: **TanStack Query** (có lưu cache xuống máy)
+- [ ] Gọi API + cache: **TanStack Query** (có lưu cache xuống máy) _(TanStack Query đã dùng; chưa lưu cache xuống máy)_
 - [ ] State cục bộ: **Zustand**
 - [ ] Form: **react-hook-form + zod** (dùng chung schema với backend)
-- [ ] Giao diện: **NativeWind** (Tailwind cho React Native) + **Reanimated** + Gesture Handler _(Reanimated, Gesture Handler đã có sẵn từ template; NativeWind chưa cài)_
+- [x] Giao diện: **NativeWind** 4.2 (Tailwind 3, token trong `apps/mobile/src/theme/tokens.json`) + **Reanimated** + Gesture Handler
 - [ ] Danh sách dài: **FlashList**
 - [ ] Biểu đồ: **Victory Native** (vẽ bằng Skia)
-- [ ] Ảnh/logo: **expo-image** (có cache); logo dịch vụ dạng SVG (`react-native-svg`) _(expo-image đã có; react-native-svg chưa cài)_
-- [ ] Lưu dữ liệu trên máy: **MMKV** (nhanh) cho cache/cài đặt, **expo-secure-store** cho token
-- [ ] Đăng nhập: `@supabase/supabase-js` + `expo-apple-authentication` + `@react-native-google-signin/google-signin`
+- [x] Ảnh/logo: **expo-image** (có cache); logo dịch vụ dạng SVG (`react-native-svg`), sinh từ Simple Icons bằng `pnpm --filter @subca/mobile logos:generate`
+- [ ] Lưu dữ liệu trên máy: **MMKV** (nhanh) cho cache/cài đặt, **expo-secure-store** cho token _(phiên đăng nhập: MMKV mã hóa AES-256, khóa trong SecureStore — vì SecureStore giới hạn ~2 KB; cache chưa làm)_
+- [ ] Đăng nhập: `@supabase/supabase-js` + `expo-apple-authentication` + `@react-native-google-signin/google-signin` _(supabase-js + email OTP đã làm; Apple/Google chờ tài khoản store)_
 - [ ] Mua trong app: **RevenueCat** (`react-native-purchases`)
 - [ ] Thông báo: **expo-notifications** (push + thông báo cục bộ)
 - [ ] Widget / Live Activity (giai đoạn sau): viết Swift/Kotlin qua **Expo Modules** / `expo-apple-targets`
@@ -178,8 +179,8 @@
   - [ ] Sign in with Apple (bắt buộc trên iOS khi có Google): `expo-apple-authentication` → `signInWithIdToken`
   - [ ] Google: `@react-native-google-signin/google-signin` → `signInWithIdToken`
   - [ ] Android: Sign in with Apple qua luồng OAuth web của Supabase (để người dùng đổi máy vẫn đăng nhập được)
-  - [ ] Email OTP (SMTP riêng qua Resend; SMTP mặc định của Supabase bị giới hạn số email)
-  - [ ] Lưu phiên bằng `expo-secure-store`, tự làm mới token
+  - [ ] Email OTP (SMTP riêng qua Resend; SMTP mặc định của Supabase bị giới hạn số email) _(app: màn chào → nhập email → nhập mã đã xong; còn SMTP Resend + template email có `{{ .Token }}`)_
+  - [x] Lưu phiên (MMKV mã hóa, khóa trong `expo-secure-store`), tự làm mới token khi app mở; API client: `TOKEN_EXPIRED` → làm mới rồi gọi lại 1 lần, `ACCOUNT_BANNED`/token hỏng → đăng xuất
   - [x] NestJS: guard toàn cục xác minh JWT Supabase (JWKS ES256, kiểm issuer/audience/role/hạn), `@Public()`, `@CurrentUser()`, lỗi 401 có `code` (`TOKEN_EXPIRED` / `INVALID_TOKEN` / `UNAUTHENTICATED`)
   - [x] `GET /me`: hồ sơ + cài đặt + gói FREE/PLUS + giới hạn Free; chặn tài khoản bị khóa (403); ghi `last_active_at` tối đa 1 lần/giờ
   - [ ] Test đầu-cuối với token Supabase thật (cần user thử + publishable key)
@@ -194,6 +195,7 @@
   - [ ] Màn Chi tiết (lịch sử, mức độ sử dụng, hướng dẫn hủy, lưu trữ)
 - [ ] **Trang chủ:** tổng tiền theo tháng, số đang hoạt động, sắp gia hạn, trial, cảnh báo
   - [x] API `GET /home` (1 request cho cả màn): tổng tháng/năm quy đổi tiền tệ, trial, sắp gia hạn 7 ngày, có thể tiết kiệm, ngân sách, 5 khoản sắp tới, `missingRates`
+  - [x] Màn Trang chủ trong app (thẻ tổng, 4 ô thống kê, ngân sách, sắp gia hạn, trial, kéo để làm mới, ghi nguồn tỷ giá) _(chưa có: % so với tháng trước, chia tiền nhóm, lối tắt, banner Plus)_
 - [ ] **Nhắc nhở:**
   - [x] Đăng ký push token (`POST/DELETE /push-tokens`, token chuyển sang tài khoản mới khi máy đổi tài khoản)
   - [x] Lượt chạy mỗi 5 phút: đẩy kỳ gia hạn đã qua (ghi lịch sử trừ tiền, trial → ACTIVE/CANCELLED), sinh lượt nhắc 26 giờ tới theo múi giờ + giờ nhắc từng người, đưa vào hàng đợi
