@@ -1,0 +1,28 @@
+# Dịch vụ chạy trên máy dev (OrbStack / Docker Desktop).
+# Bật:  docker compose up -d      Tắt:  docker compose down
+services:
+  redis:
+    # Redis cho hàng đợi BullMQ (gửi nhắc nhở). Production dùng Redis cùng khu vực với API.
+    image: redis:7-alpine
+    container_name: subca-redis
+    command:
+      - redis-server
+      # BullMQ bắt buộc: không được tự xóa key khi đầy bộ nhớ
+      - --maxmemory-policy
+      - noeviction
+      # Lưu dữ liệu xuống đĩa để job không mất khi khởi động lại container
+      - --appendonly
+      - 'yes'
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  redis-data:

@@ -16,3 +16,5 @@ allowBuilds:
   esbuild: true
   sharp: false
   unrs-resolver: false
+  # Phần tăng tốc native (không bắt buộc) của msgpackr, BullMQ dùng bản JS nếu không có
+  msgpackr-extract: false
