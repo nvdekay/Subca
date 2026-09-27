@@ -45,6 +45,18 @@ export function formatMoney(amountMinor: bigint, currency: CurrencyCode, locale 
   }).format(value);
 }
 
+/**
+ * Cách hiển thị tiền thống nhất trong app và nội dung push: VND "260.000đ" (kiểu người Việt quen đọc),
+ * ngoại tệ theo en-US "$19.99" / "€9.99" thay vì "19,99 US$".
+ */
+export function formatAmountVi(amountMinor: bigint, currency: CurrencyCode): string {
+  if (currency === 'VND') {
+    // Đổi sang Number trước khi format: Intl của Hermes chưa chắc nhận BigInt; số VND còn xa giới hạn 2^53.
+    return `${new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 0 }).format(Number(amountMinor))}đ`;
+  }
+  return formatMoney(amountMinor, currency, 'en-US');
+}
+
 /** Chia đều số tiền cho n người; phần lẻ dồn vào những người đầu tiên để tổng luôn khớp. */
 export function splitEvenly(totalMinor: bigint, parts: number): bigint[] {
   if (!Number.isInteger(parts) || parts < 1) throw new Error('Số phần phải là số nguyên ≥ 1');

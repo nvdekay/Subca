@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatMoney, splitEvenly, toMinor } from './money.js';
+import { formatAmountVi, formatMoney, splitEvenly, toMinor } from './money.js';
 
 describe('toMinor', () => {
   it('đổi VND (không có phần thập phân)', () => {
@@ -50,5 +50,13 @@ describe('convertMinor', () => {
     expect(convertMinor(123n, 'VND', 'VND', 0)).toBe(123n);
     expect(() => convertMinor(1n, 'USD', 'VND', 0)).toThrow();
     expect(() => convertMinor(1n, 'USD', 'VND', Number.NaN)).toThrow();
+  });
+});
+
+describe('formatAmountVi', () => {
+  it('VND kiểu Việt, ngoại tệ kiểu en-US', () => {
+    expect(formatAmountVi(260000n, 'VND')).toBe('260.000đ');
+    expect(formatAmountVi(1999n, 'USD')).toBe('$19.99');
+    expect(formatAmountVi(1200n, 'JPY')).toBe('¥1,200');
   });
 });

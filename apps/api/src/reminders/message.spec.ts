@@ -17,7 +17,7 @@ describe('buildReminderMessage', () => {
     const m = buildReminderMessage(base);
     expect(m.title).toBe('Netflix gia hạn sau 3 ngày');
     expect(m.body).toMatch(
-      /^260\.000\s₫ sẽ được trừ từ Visa •• 4821 vào 30\/09\.$/,
+      /^260\.000đ sẽ được trừ từ Visa •• 4821 vào 30\/09\.$/,
     );
   });
   it('ngày mai / hôm nay, không có phương thức thanh toán', () => {
@@ -43,7 +43,7 @@ describe('buildReminderMessage', () => {
     });
     expect(m.title).toBe('Notion AI hết dùng thử sau 2 ngày');
     expect(m.body).toMatch(
-      /^Từ 29\/09 bạn sẽ bị trừ 250\.000\s₫\/tháng\. Hủy trước nếu không dùng nữa\.$/,
+      /^Từ 29\/09 bạn sẽ bị trừ 250\.000đ\/tháng\. Hủy trước nếu không dùng nữa\.$/,
     );
   });
   it('USD và chu kỳ nhiều tháng', () => {

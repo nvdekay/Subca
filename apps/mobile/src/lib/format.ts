@@ -1,13 +1,11 @@
-import { formatMoney, type CurrencyCode, type IntervalUnit } from '@subca/shared';
+import { formatAmountVi, type CurrencyCode, type IntervalUnit } from '@subca/shared';
 
 // Đổi sang Number trước khi format: Intl của Hermes chưa chắc nhận BigInt; số VND còn rất xa giới hạn 2^53.
 const vndNumber = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 0 });
 
-/** Tiền đầy đủ: VND theo kiểu mockup "260.000đ"; ngoại tệ theo cách quen đọc ("$19.99", không phải "19,99 US$"). */
+/** Tiền đầy đủ: "260.000đ", "$19.99" (dùng chung cách hiển thị với nội dung push ở server). */
 export function formatAmount(amountMinor: string | bigint, currency: CurrencyCode): string {
-  const minor = BigInt(amountMinor);
-  if (currency === 'VND') return `${vndNumber.format(Number(minor))}đ`;
-  return formatMoney(minor, currency, 'en-US');
+  return formatAmountVi(BigInt(amountMinor), currency);
 }
 
 /** Tách số và ký hiệu để hiện số lớn, ký hiệu nhỏ (thẻ tổng chi phí ở Trang chủ). */

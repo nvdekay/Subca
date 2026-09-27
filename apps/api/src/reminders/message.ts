@@ -1,4 +1,4 @@
-import { formatMoney, type CurrencyCode, type IsoDate } from '@subca/shared';
+import { formatAmountVi, type CurrencyCode, type IsoDate } from '@subca/shared';
 import type { IntervalUnit, ReminderKind } from '../generated/prisma/client.js';
 
 export interface ReminderMessageInput {
@@ -34,7 +34,7 @@ export function buildReminderMessage(m: ReminderMessageInput): {
   title: string;
   body: string;
 } {
-  const money = formatMoney(m.amountMinor, m.currency);
+  const money = formatAmountVi(m.amountMinor, m.currency);
   const cycle =
     m.intervalCount === 1
       ? PER[m.intervalUnit]
