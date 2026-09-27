@@ -26,7 +26,7 @@
 6. **Sửa template email Supabase** (Authentication → Emails: *Magic Link* và *Confirm signup*) thêm `{{ .Token }}` để email có mã OTP cho app, và đặt *Email OTP Length* = **6** (app chỉ nhận đúng 6 số; Supabase không hỗ trợ dưới 6). SMTP mặc định của Supabase chỉ gửi tới email thành viên project.
 
 **Việc kỹ thuật tiếp theo (gợi ý thứ tự)**
-1. **App mobile:** ~~design system từ mockup~~ → ~~đăng nhập email OTP~~ → ~~Trang chủ (`GET /home`)~~ → ~~Danh sách / Thêm / Chi tiết subscription~~ → ~~Lịch~~ → ~~đăng ký push token~~ → màn Phương thức thanh toán → Quản lý Trial → Cài đặt.
+1. **App mobile:** ~~design system từ mockup~~ → ~~đăng nhập email OTP~~ → ~~Trang chủ (`GET /home`)~~ → ~~Danh sách / Thêm / Chi tiết subscription~~ → ~~Lịch~~ → ~~đăng ký push token~~ → ~~Phương thức thanh toán~~ → ~~Quản lý Trial~~ → ~~Cài đặt~~ → Đánh giá tháng → Phân tích → màn Ngân sách → Thông báo.
 2. Ghi nguồn tỷ giá "ExchangeRate-API" nơi hiện số đã quy đổi (bắt buộc) — Trang chủ app đã có; các màn sau cũng phải có.
 3. Giai đoạn 3: Subca Plus (RevenueCat), chia tiền nhóm (API + VietQR), admin v1.
 
@@ -211,10 +211,10 @@
 - [x] **Lịch gia hạn** (lịch tháng, bấm ngày để lọc)
   - [x] API `GET /calendar?month=` (gộp theo ngày, ngày hết trial, tổng tháng quy đổi)
   - [x] Màn Lịch trong app (ngày có gia hạn tô màu, từ 500K màu đào, chấm màu thương hiệu, tổng tháng, danh sách theo ngày)
-- [ ] **Quản lý Trial** (đếm ngày, Giữ / Nhắc tôi / Hủy)
-- [ ] **Cài đặt:** hồ sơ, tiền tệ, múi giờ, giờ nhắc, ngôn ngữ
+- [x] **Quản lý Trial** (đếm ngày, Giữ / Nhắc tôi / Hủy) — màn trong app, dùng lại API subscription
+- [ ] **Cài đặt:** hồ sơ, tiền tệ, múi giờ, giờ nhắc, ngôn ngữ _(app đã có: tên, tiền tệ chính, múi giờ, bật/tắt + giờ nhắc, ngân sách, đăng xuất; chưa có: ngôn ngữ)_
   - [x] API `PATCH /me`, `PATCH /me/settings` (kiểm tra múi giờ hợp lệ)
-- [ ] **Xóa tài khoản** trong app (Apple bắt buộc): backend xóa dữ liệu rồi gọi `auth.admin.deleteUser` của Supabase
+- [ ] **Xóa tài khoản** trong app (Apple bắt buộc): backend xóa dữ liệu rồi gọi `auth.admin.deleteUser` của Supabase _(nút trong Cài đặt đã có, xác nhận trước khi xóa; chờ service role key để chạy thật)_
   - [x] API `DELETE /me` (gọi Supabase Admin, trigger xóa toàn bộ dữ liệu) — **cần thêm `SUPABASE_SERVICE_ROLE_KEY` vào `apps/api/.env`**, thiếu thì trả 503
 - [ ] Gắn Sentry + PostHog (sự kiện onboarding, thêm subscription, bật nhắc)
 - [ ] Build TestFlight nội bộ + Google Play Internal testing (EAS Build + EAS Submit)
@@ -226,11 +226,11 @@
 
 - [ ] Đánh giá hằng tháng (Giữ / Xem lại / Hủy, gợi ý tiết kiệm)
   - [x] API `GET /reviews`, `PUT/DELETE /reviews/:subscriptionId` (đồng bộ trạng thái REVIEW/ACTIVE, tổng tiết kiệm)
-- [ ] Ngân sách (hạn mức, cảnh báo vượt, mô phỏng "nếu hủy thì tiết kiệm bao nhiêu")
+- [ ] Ngân sách (hạn mức, cảnh báo vượt, mô phỏng "nếu hủy thì tiết kiệm bao nhiêu") _(đặt/bỏ hạn mức trong Cài đặt + thẻ ở Trang chủ đã có; màn Ngân sách + mô phỏng chưa làm)_
   - [x] API `GET/PUT/DELETE /me/budget`; tình trạng ngân sách (đã chi, %, vượt) trả trong `/home`
 - [ ] Phân tích (theo danh mục, xu hướng, dự tính năm, chi phí mỗi lần dùng, top đắt nhất, theo phương thức thanh toán)
   - [x] API `GET /analytics` (xu hướng 6 tháng là ước tính từ các gói còn hoạt động mỗi tháng; chi phí mỗi lần dùng theo mức độ sử dụng người dùng chọn)
-- [ ] Phương thức thanh toán (chỉ lưu nhãn + 4 số cuối)
+- [x] Phương thức thanh toán (chỉ lưu nhãn + 4 số cuối) — màn trong app: thẻ gradient, xem gói theo thẻ, thêm/sửa/xóa, mặc định
   - [x] API `/payment-methods`: chỉ nhận 4 số cuối, luôn đúng 1 phương thức mặc định (transaction), lưu trữ thì gỡ khỏi subscription, kèm số subscription và tổng tháng quy đổi
 - [ ] Xuất dữ liệu CSV / PDF (tác vụ nền → gửi qua email)
 - [x] Tỷ giá tự cập nhật hằng ngày (job 07:30 giờ VN + cập nhật khi khởi động nếu cũ): nguồn chính ExchangeRate-API (Open Access), dự phòng fawazahmed0/currency-api; kiểm tra khoảng hợp lý trước khi lưu; lưu 12 cặp VND/USD/EUR/JPY; lệnh `fx:sync` — đã nạp tỷ giá thật vào Supabase dev
