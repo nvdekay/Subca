@@ -11,6 +11,9 @@ import { MeModule } from './me/me.module.js';
 import { PaymentMethodsModule } from './payment-methods/payment-methods.module.js';
 import { PlanModule } from './plan/plan.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { PushModule } from './push/push.module.js';
+import { QueueModule } from './queue/queue.module.js';
+import { RemindersModule } from './reminders/reminders.module.js';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module.js';
 
 @Module({
@@ -30,6 +33,9 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module.js';
     SubscriptionsModule,
     HomeModule,
     PaymentMethodsModule,
+    QueueModule,
+    PushModule,
+    RemindersModule,
   ],
   controllers: [HealthController],
 })
