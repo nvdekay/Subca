@@ -79,7 +79,13 @@ Migration hiện có:
 | PATCH              | `/me/settings`                     | Tiền tệ, múi giờ, ngôn ngữ, giờ nhắc, bật/tắt thông báo                                                                                                    |
 | GET · PUT · DELETE | `/me/budget`                       | Ngân sách subscription hằng tháng                                                                                                                          |
 
-Quy đổi tiền tệ dùng bảng `exchange_rates` (tỷ giá mới nhất tính đến hôm nay). Khoản nào thiếu tỷ giá **không** được cộng vào tổng và được liệt kê trong `missingRates`.
+### Tỷ giá
+
+- Quy đổi tiền tệ dùng bảng `exchange_rates` (tỷ giá mới nhất tính đến hôm nay). Khoản nào thiếu tỷ giá **không** được cộng vào tổng và được liệt kê trong `missingRates`.
+- Job trong API cập nhật tỷ giá **mỗi ngày lúc 00:30 UTC (07:30 giờ Việt Nam)**; khi khởi động nếu tỷ giá cũ hơn 1 ngày thì cập nhật ngay. Lưu mọi cặp giữa VND, USD, EUR, JPY. Tắt bằng `FX_SYNC_ENABLED=false`.
+- Chạy tay: `pnpm --filter @subca/api fx:sync`.
+- Nguồn chính: [ExchangeRate-API](https://www.exchangerate-api.com) (gói Open Access, không cần key). Dự phòng: [fawazahmed0/currency-api](https://github.com/fawazahmed0/exchange-api).
+- **Điều khoản ExchangeRate-API:** được dùng thương mại để quy đổi, nhưng **bắt buộc ghi nguồn** nơi hiển thị số đã quy đổi (VD dòng nhỏ "Tỷ giá: ExchangeRate-API" có link trong app), **không được phân phối lại** dữ liệu tỷ giá, và chỉ gọi tối đa 1 lần/ngày.
 
 Schema đầu vào dùng chung ở `packages/shared/src/api` (app dùng lại cho form). Lỗi dữ liệu trả `400 VALIDATION_ERROR` kèm `issues` theo từng trường; vượt giới hạn gói Free trả `403 PLAN_LIMIT_REACHED`.
 

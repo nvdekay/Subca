@@ -6,7 +6,7 @@
 
 ### Hiện trạng (27/09/2026)
 
-- **Xong:** mockup app + admin; bộ tính ngày gia hạn (38 test + đối chiếu ngẫu nhiên); seed 53 dịch vụ lên Supabase dev; xác thực phía API (guard JWT + `/me` + chặn tài khoản khóa); API subscription, thư viện dịch vụ, Trang chủ, phương thức thanh toán, cài đặt, ngân sách; monorepo (Expo SDK 57, NestJS 12 + Fastify, Next.js 16, Prisma 7.10, TypeScript 6.0); schema Prisma v1 (26 bảng); migration + RLS + trigger auth **đã chạy trên Supabase dev**; API kết nối DB qua pooler (`/health` → `db: up`); CI GitHub Actions.
+- **Xong:** mockup app + admin; bộ tính ngày gia hạn (38 test + đối chiếu ngẫu nhiên); seed 53 dịch vụ lên Supabase dev; xác thực phía API (guard JWT + `/me` + chặn tài khoản khóa); API subscription, thư viện dịch vụ, Trang chủ, phương thức thanh toán, cài đặt, ngân sách; job tỷ giá hằng ngày; monorepo (Expo SDK 57, NestJS 12 + Fastify, Next.js 16, Prisma 7.10, TypeScript 6.0); schema Prisma v1 (26 bảng); migration + RLS + trigger auth **đã chạy trên Supabase dev**; API kết nối DB qua pooler (`/health` → `db: up`); CI GitHub Actions.
 - **Đang ở:** Giai đoạn 0 (chuẩn bị).
 - **Việc tiếp theo:**
   1. **Đổi mật khẩu database Supabase** (đã lộ trong chat) và cập nhật `apps/api/.env`
@@ -14,7 +14,7 @@
   3. Đăng ký Apple Developer / Google Play (khâu chờ lâu)
   4. Xác minh giá gói trong seed
   5. Giai đoạn 1: đăng nhập trong app (Apple / Google / email OTP) — phía API đã xong
-  6. Job cập nhật tỷ giá hằng ngày + job sinh và gửi nhắc nhở (BullMQ + Expo Push)
+  6. Job sinh và gửi nhắc nhở (BullMQ + Expo Push) — cần chọn Redis cho dev (Docker/OrbStack hay Upstash)
 
 ---
 
@@ -209,7 +209,9 @@
 - [ ] Phương thức thanh toán (chỉ lưu nhãn + 4 số cuối)
   - [x] API `/payment-methods`: chỉ nhận 4 số cuối, luôn đúng 1 phương thức mặc định (transaction), lưu trữ thì gỡ khỏi subscription, kèm số subscription và tổng tháng quy đổi
 - [ ] Xuất dữ liệu CSV / PDF (tác vụ nền → gửi qua email)
-- [ ] Tỷ giá tự cập nhật hằng ngày cho gói trả bằng USD **(quan trọng: bảng `exchange_rates` đang trống → gói USD chưa được cộng vào tổng, API trả `missingRates`)**
+- [x] Tỷ giá tự cập nhật hằng ngày (job 07:30 giờ VN + cập nhật khi khởi động nếu cũ): nguồn chính ExchangeRate-API (Open Access), dự phòng fawazahmed0/currency-api; kiểm tra khoảng hợp lý trước khi lưu; lưu 12 cặp VND/USD/EUR/JPY; lệnh `fx:sync` — đã nạp tỷ giá thật vào Supabase dev
+- [ ] **App + admin: hiển thị ghi nguồn "Tỷ giá: ExchangeRate-API" (có link) ở nơi hiện số đã quy đổi** — bắt buộc theo điều khoản; không phân phối lại dữ liệu tỷ giá
+- [ ] Khi chạy nhiều instance API: chỉ bật `FX_SYNC_ENABLED` ở 1 instance (chạy trùng vẫn an toàn nhưng tốn request)
   - [x] Quy đổi tiền tệ khi tính tổng (`FxService`, `convertMinor`), không đoán khi thiếu tỷ giá
 - [ ] **Beta kín 100–300 người**
   - [ ] Đo tỷ lệ thêm được ≥ 3 subscription ngày đầu
