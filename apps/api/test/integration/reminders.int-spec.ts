@@ -37,6 +37,7 @@ describe('Nhắc nhở: DB + Redis + BullMQ thật', () => {
   });
   const sent: ExpoPushMessage[] = [];
   const sender = new ReminderSender(db, {
+    getReceipts: async () => ({}),
     send: async (messages) => {
       sent.push(...messages);
       return messages.map((_, i) => ({

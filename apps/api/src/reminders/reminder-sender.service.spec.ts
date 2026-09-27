@@ -61,6 +61,7 @@ function setup(
     pushToken: { deleteMany: vi.fn().mockResolvedValue({ count: 0 }) },
   };
   const push: PushSender = {
+    getReceipts: vi.fn().mockResolvedValue({}),
     send: vi.fn(async () => {
       if (tickets instanceof Error) throw tickets;
       return tickets;

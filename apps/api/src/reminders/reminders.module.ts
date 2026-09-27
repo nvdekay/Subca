@@ -1,6 +1,8 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
+import { ReceiptChecker } from './receipt-checker.service.js';
 import { ReminderSender } from './reminder-sender.service.js';
+import { RemindersController } from './reminders.controller.js';
 import { REMINDERS_QUEUE } from './reminders.constants.js';
 import { RemindersProcessor } from './reminders.processor.js';
 import { RemindersScheduler } from './reminders.scheduler.js';
@@ -18,6 +20,12 @@ import { RemindersScheduler } from './reminders.scheduler.js';
       },
     }),
   ],
-  providers: [RemindersScheduler, ReminderSender, RemindersProcessor],
+  controllers: [RemindersController],
+  providers: [
+    RemindersScheduler,
+    ReminderSender,
+    RemindersProcessor,
+    ReceiptChecker,
+  ],
 })
 export class RemindersModule {}

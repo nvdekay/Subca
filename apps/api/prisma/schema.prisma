@@ -451,21 +451,23 @@ model ReminderRule {
 
 /// Từng lần nhắc đã được sinh ra. Khóa unique đảm bảo cron chạy lại không gửi trùng.
 model Reminder {
-  id             String         @id @default(uuid(7)) @db.Uuid
-  userId         String         @map("user_id") @db.Uuid
-  subscriptionId String         @map("subscription_id") @db.Uuid
-  kind           ReminderKind
-  offsetDays     Int            @map("offset_days") @db.SmallInt
+  id               String         @id @default(uuid(7)) @db.Uuid
+  userId           String         @map("user_id") @db.Uuid
+  subscriptionId   String         @map("subscription_id") @db.Uuid
+  kind             ReminderKind
+  offsetDays       Int            @map("offset_days") @db.SmallInt
   /// Ngày gia hạn / hết trial mà lần nhắc này hướng tới.
-  dueDate        DateTime       @map("due_date") @db.Date
+  dueDate          DateTime       @map("due_date") @db.Date
   /// Thời điểm gửi (đã tính theo múi giờ + giờ nhắc của người dùng).
-  scheduledAt    DateTime       @map("scheduled_at") @db.Timestamptz(6)
-  status         ReminderStatus @default(PENDING)
-  pushTicketId   String?        @map("push_ticket_id")
-  error          String?
-  sentAt         DateTime?      @map("sent_at") @db.Timestamptz(6)
-  openedAt       DateTime?      @map("opened_at") @db.Timestamptz(6)
-  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  scheduledAt      DateTime       @map("scheduled_at") @db.Timestamptz(6)
+  status           ReminderStatus @default(PENDING)
+  pushTicketId     String?        @map("push_ticket_id")
+  error            String?
+  sentAt           DateTime?      @map("sent_at") @db.Timestamptz(6)
+  openedAt         DateTime?      @map("opened_at") @db.Timestamptz(6)
+  /// Đã kiểm tra push receipt của Expo (xác nhận thông báo tới được máy).
+  receiptCheckedAt DateTime?      @map("receipt_checked_at") @db.Timestamptz(6)
+  createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
 
   user         Profile      @relation(fields: [userId], references: [id], onDelete: Cascade)
   subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
@@ -473,6 +475,7 @@ model Reminder {
   @@unique([subscriptionId, kind, offsetDays, dueDate])
   @@index([status, scheduledAt])
   @@index([userId, scheduledAt])
+  @@index([status, sentAt])
   @@map("reminders")
 }
 

@@ -1,12 +1,15 @@
 import {
   Expo,
   type ExpoPushMessage,
+  type ExpoPushReceipt,
   type ExpoPushTicket,
 } from 'expo-server-sdk';
 
 /** Gửi thông báo push. Tách interface để test không phải gọi Expo thật. */
 export interface PushSender {
   send(messages: ExpoPushMessage[]): Promise<ExpoPushTicket[]>;
+  /** Biên nhận của các ticket; ticket chưa có biên nhận thì không có trong kết quả. */
+  getReceipts(ticketIds: string[]): Promise<Record<string, ExpoPushReceipt>>;
 }
 
 export const PUSH_SENDER = Symbol('PUSH_SENDER');
@@ -25,6 +28,19 @@ export class ExpoPushSender implements PushSender {
       tickets.push(...(await this.expo.sendPushNotificationsAsync(chunk)));
     }
     return tickets;
+  }
+
+  async getReceipts(
+    ticketIds: string[],
+  ): Promise<Record<string, ExpoPushReceipt>> {
+    const receipts: Record<string, ExpoPushReceipt> = {};
+    for (const chunk of this.expo.chunkPushNotificationReceiptIds(ticketIds)) {
+      Object.assign(
+        receipts,
+        await this.expo.getPushNotificationReceiptsAsync(chunk),
+      );
+    }
+    return receipts;
   }
 }
 
