@@ -26,7 +26,7 @@
 6. Xác minh giá các gói trong seed.
 
 **Việc kỹ thuật tiếp theo (gợi ý thứ tự)**
-1. **App mobile:** màn Thông báo (lịch sử nhắc + cài mốc nhắc) → thông báo cục bộ dự phòng → cache TanStack Query xuống máy (MMKV) → rà soát UI Android (nút back, bàn phím, cỡ chữ lớn) → thử nhận push thật.
+1. **App mobile:** ~~màn Thông báo~~ → ~~thông báo cục bộ dự phòng~~ → ~~cache xuống máy~~ → rà soát UI Android (cần Android Studio + emulator trên máy dev) → thử nhận push thật (cần máy thật + tài khoản Apple / EAS build Android).
 2. Dọn dữ liệu mẫu trong tài khoản dev `khanhnvd07@gmail.com` khi chủ dự án yêu cầu (subscription có ghi chú `[dữ liệu mẫu]`, 2 phương thức mẫu, ngân sách 800.000đ).
 3. EAS Build (eas.json, development / preview) → TestFlight nội bộ khi có tài khoản Apple.
 4. Giai đoạn 3: Subca Plus (RevenueCat), chia tiền nhóm (API + VietQR), admin v1.
@@ -63,7 +63,7 @@
 **Mobile**
 - [x] **React Native + Expo** (SDK 57, React Native 0.86, New Architecture), TypeScript chế độ strict
 - [x] Điều hướng: **Expo Router** (điều hướng theo file, deep link sẵn)
-- [ ] Gọi API + cache: **TanStack Query** (có lưu cache xuống máy) _(TanStack Query đã dùng; chưa lưu cache xuống máy)_
+- [x] Gọi API + cache: **TanStack Query** (có lưu cache xuống máy — MMKV mã hóa, giữ 1 ngày)
 - [ ] State cục bộ: **Zustand**
 - [ ] Form: **react-hook-form + zod** (dùng chung schema với backend)
 - [x] Giao diện: **NativeWind** 4.2 (Tailwind 3, token trong `apps/mobile/src/theme/tokens.json`) + **Reanimated** + Gesture Handler
@@ -73,7 +73,7 @@
 - [ ] Lưu dữ liệu trên máy: **MMKV** (nhanh) cho cache/cài đặt, **expo-secure-store** cho token _(phiên đăng nhập: MMKV mã hóa AES-256, khóa trong SecureStore — vì SecureStore giới hạn ~2 KB; cache chưa làm)_
 - [ ] Đăng nhập: `@supabase/supabase-js` + `expo-apple-authentication` + `@react-native-google-signin/google-signin` _(supabase-js + email OTP đã làm; Apple/Google chờ tài khoản store)_
 - [ ] Mua trong app: **RevenueCat** (`react-native-purchases`)
-- [ ] Thông báo: **expo-notifications** (push + thông báo cục bộ) _(push đã làm; thông báo cục bộ dự phòng chưa làm)_
+- [x] Thông báo: **expo-notifications** (push + thông báo cục bộ dự phòng)
 - [ ] Widget / Live Activity (giai đoạn sau): viết Swift/Kotlin qua **Expo Modules** / `expo-apple-targets`
 - [ ] Build & phát hành: **EAS Build / Submit / Update** (development build, không dùng Expo Go cho bản thật) _(đã tạo EAS project `@nvdeekay/subca`; chưa cấu hình eas.json / build)_
 
@@ -99,7 +99,7 @@
 ## C2. Hiệu năng & trải nghiệm (áp dụng từ đầu)
 
 - [ ] **Cập nhật giao diện ngay (optimistic update)** với TanStack Query: Thêm, Sửa, Hủy, Đã nhận tiền… đổi màn hình liền, server xử lý phía sau, lỗi thì hoàn tác
-- [ ] **Lưu cache xuống máy** (TanStack Query persist + MMKV): mở app hiện ngay dữ liệu lần trước rồi mới làm mới
+- [x] **Lưu cache xuống máy** (TanStack Query persist + MMKV): mở app hiện ngay dữ liệu lần trước rồi mới làm mới — đã thử tắt API vẫn hiện Trang chủ; xóa khi đăng xuất
 - [ ] Hàng đợi thao tác khi mất mạng (TanStack Query mutation persist), có mạng thì gửi lại
 - [ ] Danh sách dùng **FlashList**; animation chạy trên UI thread bằng **Reanimated** (không animate bằng state React)
 - [ ] Logo dịch vụ đóng gói sẵn dạng SVG trong app; ảnh từ mạng qua `expo-image` (cache đĩa)
@@ -205,10 +205,10 @@
   - [x] Redis dev bằng `docker compose` (OrbStack), `noeviction` + AOF
   - [x] Kiểm tra **push receipt** của Expo mỗi 15 phút (xác nhận đã tới máy, xóa token lỗi) và `POST /reminders/:id/opened` ghi `opened_at` khi người dùng bấm thông báo
   - [ ] Trang admin theo dõi hàng đợi (Bull Board) và thống kê lượt nhắc
-  - [ ] Thông báo cục bộ làm dự phòng (`expo-notifications`): app lấy danh sách nhắc 30 ngày tới từ server và tự lên lịch (iOS giới hạn 64 thông báo chờ → chỉ lên lịch các mốc gần nhất)
+  - [x] Thông báo cục bộ làm dự phòng (`expo-notifications`): app lấy danh sách nhắc 30 ngày tới từ `GET /reminders` và tự lên lịch tối đa 50 lượt — **chỉ khi máy không có push token** (tránh nhận trùng); mở app là đồng bộ lại, đăng xuất thì hủy
   - [x] Xin quyền thông báo đúng lúc (sau khi thêm subscription đầu tiên, có hộp thoại giải thích trước hộp thoại hệ thống); Android 13+ cần quyền `POST_NOTIFICATIONS` (expo-notifications tự khai báo)
   - [x] App đăng ký push token mỗi lần mở (nếu đã cho phép), gỡ token trước khi đăng xuất; bấm thông báo → ghi `opened` + mở màn Chi tiết _(chưa thử nhận push thật trên máy)_
-  - [ ] Màn Thông báo + cài đặt mốc nhắc (30 / 7 / 1 ngày, ngày gia hạn, trial, gia hạn năm)
+  - [x] Màn Thông báo + cài đặt mốc nhắc (30 / 7 / 3 / 1 ngày, ngày gia hạn, trial 3 / 1 ngày, gia hạn năm) — API `GET /reminders`, `GET/PUT /reminders/rules`; nội dung push dùng chung định dạng tiền với app (`formatAmountVi`)
 - [x] **Lịch gia hạn** (lịch tháng, bấm ngày để lọc)
   - [x] API `GET /calendar?month=` (gộp theo ngày, ngày hết trial, tổng tháng quy đổi)
   - [x] Màn Lịch trong app (ngày có gia hạn tô màu, từ 500K màu đào, chấm màu thương hiệu, tổng tháng, danh sách theo ngày)
