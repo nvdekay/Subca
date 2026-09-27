@@ -1,6 +1,6 @@
 /** Hợp đồng API cho hồ sơ, cài đặt, ngân sách, phương thức thanh toán và Trang chủ. */
 import { z } from 'zod';
-import { PaymentMethodType } from '../enums.js';
+import { FREE_LIMITS, PaymentMethodType } from '../enums.js';
 import { CurrencyCode } from '../money.js';
 import type { SubscriptionDto } from './subscription.js';
 import { MinorAmountString } from './subscription.js';
@@ -15,6 +15,26 @@ function isValidTimeZone(tz: string): boolean {
 }
 
 // ─────────────── Hồ sơ & cài đặt ───────────────
+
+/** Phản hồi `GET /me` như app nhận được (ngày giờ đã thành chuỗi ISO sau khi qua JSON). */
+export interface MeDto {
+  id: string;
+  email: string | null;
+  displayName: string | null;
+  avatarUrl: string | null;
+  referralCode: string;
+  createdAt: string;
+  settings: Omit<SettingsDto, 'marketingOptIn'> | null;
+  plan: {
+    tier: 'FREE' | 'PLUS';
+    product: string | null;
+    status: string | null;
+    expiresAt: string | null;
+    willRenew: boolean | null;
+  };
+  /** Giới hạn gói Free; null khi đang có Plus. */
+  limits: typeof FREE_LIMITS | null;
+}
 
 export const UpdateProfileSchema = z
   .object({
