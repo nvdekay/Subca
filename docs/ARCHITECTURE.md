@@ -60,6 +60,18 @@ Mỗi 5 phút:
 - `FREE_LIMITS` (shared): 8 subscription đang theo dõi (ACTIVE/TRIAL/REVIEW), 1 mốc nhắc, 1 nhóm. Plus = có `entitlements` còn hiệu lực (`activeEntitlementWhere`).
 - Giá dự kiến: Plus tháng 29.000đ, năm 199.000đ, trọn đời 399.000đ; dùng thử 7 ngày.
 
+## Email đăng nhập (Supabase Auth)
+
+- App đăng nhập bằng **mã OTP 6 số** qua email (`signInWithOtp` → `verifyOtp`), không dùng link. Supabase chỉ cho OTP dài 6–10 số.
+- Template "Confirm sign up" và "Magic Link" dùng chung `design/email/otp-code.html` (bảng + style inline, màu theo mockup). Sửa file rồi áp lại bằng Management API (cần `supabase login`):
+  ```bash
+  TOKEN=$(security find-generic-password -s "Supabase CLI" -w); TOKEN=$(echo "${TOKEN#go-keyring-base64:}" | base64 -d)
+  python3 -c "import json,re;h=re.sub(r'<!--.*?-->\s*','',open('design/email/otp-code.html').read(),flags=re.S);print(json.dumps({'mailer_templates_confirmation_content':h,'mailer_templates_magic_link_content':h}))" \
+    | curl -X PATCH -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" --data @- \
+      https://api.supabase.com/v1/projects/<project_ref>/config/auth
+  ```
+- Supabase bắt buộc SMTP riêng mới cho sửa template. Dev đang dùng **Gmail SMTP** (mật khẩu ứng dụng, ~500 email/ngày); trước khi ra mắt chuyển sang **Resend + tên miền riêng** (chỉ đổi form SMTP, app không đổi). Giới hạn gửi: 30 email/giờ, gửi lại cùng email sau 60 giây (app có đếm ngược).
+
 ## Hạn chế đã biết
 
 - Xu hướng 6 tháng trong `/analytics` là **ước tính** (lịch sử trừ tiền mới bắt đầu ghi).

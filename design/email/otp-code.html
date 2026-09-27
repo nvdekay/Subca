@@ -1,0 +1,95 @@
+<!doctype html>
+<!--
+  Template email mã đăng nhập (Supabase Auth: "Confirm sign up" + "Magic Link").
+  Màu theo design/subca-mobile-mockup.html. Viết kiểu email: bảng + style inline, không SVG / không CSS ngoài
+  (Gmail bỏ thẻ <style> ở nhiều nơi và không hiện SVG). {{ .Token }} do Supabase thay bằng mã 6 số.
+  Áp lên Supabase: xem docs/ARCHITECTURE.md, mục Email đăng nhập.
+-->
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta name="supported-color-schemes" content="light" />
+    <title>Mã đăng nhập Subca</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body style="margin:0;padding:0;background-color:#F8F7F3;">
+    <!-- Dòng xem trước trong hộp thư (ẩn trong nội dung) -->
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#F8F7F3;">
+      Mã đăng nhập Subca của bạn là {{ .Token }} · hiệu lực 60 phút.
+    </div>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#F8F7F3" style="background-color:#F8F7F3;">
+      <tr>
+        <td align="center" style="padding:32px 16px 40px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;font-family:'Be Vietnam Pro',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#2F3A31;">
+
+            <!-- Logo chữ Subca -->
+            <tr>
+              <td style="padding:0 4px 20px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td width="38" height="38" align="center" valign="middle" bgcolor="#2F3A31" style="width:38px;height:38px;background-color:#2F3A31;border-radius:12px;color:#99CDD8;font-size:20px;font-weight:700;line-height:38px;">&#8644;</td>
+                    <td style="padding-left:10px;font-size:22px;font-weight:800;letter-spacing:-0.6px;color:#2F3A31;">Subca</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Thẻ chính -->
+            <tr>
+              <td bgcolor="#FFFFFF" style="background-color:#FFFFFF;border-radius:26px;padding:28px 24px 26px;box-shadow:0 1px 2px rgba(47,58,49,0.04),0 4px 14px rgba(47,58,49,0.05);">
+                <h1 style="margin:0 0 8px;font-size:24px;line-height:30px;font-weight:800;letter-spacing:-0.6px;color:#2F3A31;">Mã đăng nhập của bạn</h1>
+                <p style="margin:0 0 22px;font-size:15px;line-height:23px;color:#4F5B51;">Nhập mã dưới đây vào app Subca để tiếp tục. Không cần mật khẩu.</p>
+
+                <!-- Mã OTP: thẻ gradient như thẻ tổng chi phí ở Trang chủ -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td align="center" bgcolor="#C9E6E0" style="background-color:#C9E6E0;background-image:linear-gradient(145deg,#A9D6DF 0%,#C9E6E0 55%,#DAEBE3 100%);border-radius:22px;padding:22px 12px 20px;">
+                      <div style="font-size:13px;line-height:18px;font-weight:600;color:#34504A;letter-spacing:0.2px;">MÃ XÁC NHẬN</div>
+                      <div style="margin-top:8px;font-size:40px;line-height:48px;font-weight:800;letter-spacing:10px;color:#1F3530;font-variant-numeric:tabular-nums;padding-left:10px;">{{ .Token }}</div>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Hạn dùng -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top:16px;">
+                  <tr>
+                    <td bgcolor="#FDE8D3" style="background-color:#FDE8D3;border-radius:999px;padding:5px 12px;font-size:12.5px;line-height:17px;font-weight:600;color:#8A4B1E;">&#9203; Hết hạn sau 60 phút</td>
+                  </tr>
+                </table>
+
+                <p style="margin:22px 0 0;font-size:14px;line-height:21px;color:#4F5B51;">Nếu bạn không yêu cầu mã này, cứ bỏ qua email. Tài khoản của bạn vẫn an toàn.</p>
+              </td>
+            </tr>
+
+            <!-- Lưu ý bảo mật -->
+            <tr>
+              <td style="padding:14px 0 0;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td bgcolor="#DAEBE3" style="background-color:#DAEBE3;border-radius:20px;padding:14px 16px;font-size:13px;line-height:19px;color:#2E5B45;">
+                      <strong>Subca không bao giờ hỏi mã này.</strong> Đừng chia sẻ mã cho bất kỳ ai, kể cả người tự xưng là nhân viên Subca.
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Chân trang -->
+            <tr>
+              <td align="center" style="padding:24px 8px 0;font-size:12px;line-height:18px;color:#657166;">
+                Subca · Mọi subscription, gọn trong một nơi.<br />
+                Bạn nhận email này vì vừa đăng nhập Subca bằng địa chỉ này.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
