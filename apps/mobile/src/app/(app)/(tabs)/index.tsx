@@ -149,6 +149,7 @@ function TrackedContent({ data, tracked }: { data: HomeDto; tracked: number }) {
           icon="hourglass"
           value={String(data.trialCount)}
           label="Trial đang chạy"
+          href="/trials"
         />
       </View>
       <View className="mt-3 flex-row gap-3">
