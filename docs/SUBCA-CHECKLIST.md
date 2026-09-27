@@ -6,7 +6,7 @@
 
 ### Hiện trạng (27/09/2026)
 
-- **Xong:** mockup app + admin; bộ tính ngày gia hạn (38 test + đối chiếu ngẫu nhiên); seed 53 dịch vụ lên Supabase dev; xác thực phía API (guard JWT + `/me` + chặn tài khoản khóa); API subscription + thư viện dịch vụ; monorepo (Expo SDK 57, NestJS 12 + Fastify, Next.js 16, Prisma 7.10, TypeScript 6.0); schema Prisma v1 (26 bảng); migration + RLS + trigger auth **đã chạy trên Supabase dev**; API kết nối DB qua pooler (`/health` → `db: up`); CI GitHub Actions.
+- **Xong:** mockup app + admin; bộ tính ngày gia hạn (38 test + đối chiếu ngẫu nhiên); seed 53 dịch vụ lên Supabase dev; xác thực phía API (guard JWT + `/me` + chặn tài khoản khóa); API subscription, thư viện dịch vụ, Trang chủ, phương thức thanh toán, cài đặt, ngân sách; monorepo (Expo SDK 57, NestJS 12 + Fastify, Next.js 16, Prisma 7.10, TypeScript 6.0); schema Prisma v1 (26 bảng); migration + RLS + trigger auth **đã chạy trên Supabase dev**; API kết nối DB qua pooler (`/health` → `db: up`); CI GitHub Actions.
 - **Đang ở:** Giai đoạn 0 (chuẩn bị).
 - **Việc tiếp theo:**
   1. **Đổi mật khẩu database Supabase** (đã lộ trong chat) và cập nhật `apps/api/.env`
@@ -14,7 +14,7 @@
   3. Đăng ký Apple Developer / Google Play (khâu chờ lâu)
   4. Xác minh giá gói trong seed
   5. Giai đoạn 1: đăng nhập trong app (Apple / Google / email OTP) — phía API đã xong
-  6. API tiếp theo: `GET /home` (tổng tháng, sắp gia hạn, trial) + phương thức thanh toán + cài đặt
+  6. Job cập nhật tỷ giá hằng ngày + job sinh và gửi nhắc nhở (BullMQ + Expo Push)
 
 ---
 
@@ -180,6 +180,7 @@
   - [ ] Màn Danh sách (tìm kiếm, 5 bộ lọc)
   - [ ] Màn Chi tiết (lịch sử, mức độ sử dụng, hướng dẫn hủy, lưu trữ)
 - [ ] **Trang chủ:** tổng tiền theo tháng, số đang hoạt động, sắp gia hạn, trial, cảnh báo
+  - [x] API `GET /home` (1 request cho cả màn): tổng tháng/năm quy đổi tiền tệ, trial, sắp gia hạn 7 ngày, có thể tiết kiệm, ngân sách, 5 khoản sắp tới, `missingRates`
 - [ ] **Nhắc nhở:**
   - [ ] Đăng ký push token
   - [ ] Cron mỗi 15 phút sinh các nhắc đến hạn
@@ -191,6 +192,7 @@
 - [ ] **Lịch gia hạn** (lịch tháng, bấm ngày để lọc)
 - [ ] **Quản lý Trial** (đếm ngày, Giữ / Nhắc tôi / Hủy)
 - [ ] **Cài đặt:** hồ sơ, tiền tệ, múi giờ, giờ nhắc, ngôn ngữ
+  - [x] API `PATCH /me`, `PATCH /me/settings` (kiểm tra múi giờ hợp lệ)
 - [ ] **Xóa tài khoản** trong app (Apple bắt buộc): backend xóa dữ liệu rồi gọi `auth.admin.deleteUser` của Supabase
 - [ ] Gắn Sentry + PostHog (sự kiện onboarding, thêm subscription, bật nhắc)
 - [ ] Build TestFlight nội bộ + Google Play Internal testing (EAS Build + EAS Submit)
@@ -202,10 +204,13 @@
 
 - [ ] Đánh giá hằng tháng (Giữ / Xem lại / Hủy, gợi ý tiết kiệm)
 - [ ] Ngân sách (hạn mức, cảnh báo vượt, mô phỏng "nếu hủy thì tiết kiệm bao nhiêu")
+  - [x] API `GET/PUT/DELETE /me/budget`; tình trạng ngân sách (đã chi, %, vượt) trả trong `/home`
 - [ ] Phân tích (theo danh mục, xu hướng, dự tính năm, chi phí mỗi lần dùng, top đắt nhất, theo phương thức thanh toán)
 - [ ] Phương thức thanh toán (chỉ lưu nhãn + 4 số cuối)
+  - [x] API `/payment-methods`: chỉ nhận 4 số cuối, luôn đúng 1 phương thức mặc định (transaction), lưu trữ thì gỡ khỏi subscription, kèm số subscription và tổng tháng quy đổi
 - [ ] Xuất dữ liệu CSV / PDF (tác vụ nền → gửi qua email)
-- [ ] Tỷ giá tự cập nhật hằng ngày cho gói trả bằng USD
+- [ ] Tỷ giá tự cập nhật hằng ngày cho gói trả bằng USD **(quan trọng: bảng `exchange_rates` đang trống → gói USD chưa được cộng vào tổng, API trả `missingRates`)**
+  - [x] Quy đổi tiền tệ khi tính tổng (`FxService`, `convertMinor`), không đoán khi thiếu tỷ giá
 - [ ] **Beta kín 100–300 người**
   - [ ] Đo tỷ lệ thêm được ≥ 3 subscription ngày đầu
   - [ ] Đo tỷ lệ còn dùng sau 7 và 30 ngày

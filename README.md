@@ -61,17 +61,25 @@ Migration hiện có:
 
 ## API hiện có
 
-| Method | Đường dẫn                          | Mô tả                                                                  |
-| ------ | ---------------------------------- | ---------------------------------------------------------------------- |
-| GET    | `/health`                          | Kiểm tra API + database (công khai)                                    |
-| GET    | `/me`                              | Hồ sơ, cài đặt, gói hiện tại                                           |
-| GET    | `/catalog/categories`              | Danh mục hệ thống + danh mục người dùng                                |
-| GET    | `/catalog/services?q=&categoryId=` | Thư viện dịch vụ kèm gói giá                                           |
-| GET    | `/subscriptions?status=&q=`        | Danh sách, sắp theo kỳ gia hạn gần nhất, kèm `trackedCount` và `limit` |
-| GET    | `/subscriptions/:id`               | Chi tiết                                                               |
-| POST   | `/subscriptions`                   | Thêm; server tự tính kỳ gia hạn tiếp theo theo múi giờ người dùng      |
-| PATCH  | `/subscriptions/:id`               | Sửa một phần, hủy (`status: CANCELLED`) hoặc mở lại                    |
-| DELETE | `/subscriptions/:id`               | Lưu trữ (xóa mềm)                                                      |
+| Method             | Đường dẫn                          | Mô tả                                                                                                                                                      |
+| ------------------ | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET                | `/health`                          | Kiểm tra API + database (công khai)                                                                                                                        |
+| GET                | `/me`                              | Hồ sơ, cài đặt, gói hiện tại                                                                                                                               |
+| GET                | `/catalog/categories`              | Danh mục hệ thống + danh mục người dùng                                                                                                                    |
+| GET                | `/catalog/services?q=&categoryId=` | Thư viện dịch vụ kèm gói giá                                                                                                                               |
+| GET                | `/subscriptions?status=&q=`        | Danh sách, sắp theo kỳ gia hạn gần nhất, kèm `trackedCount` và `limit`                                                                                     |
+| GET                | `/subscriptions/:id`               | Chi tiết                                                                                                                                                   |
+| POST               | `/subscriptions`                   | Thêm; server tự tính kỳ gia hạn tiếp theo theo múi giờ người dùng                                                                                          |
+| PATCH              | `/subscriptions/:id`               | Sửa một phần, hủy (`status: CANCELLED`) hoặc mở lại                                                                                                        |
+| DELETE             | `/subscriptions/:id`               | Lưu trữ (xóa mềm)                                                                                                                                          |
+| GET                | `/home`                            | Toàn bộ số liệu Trang chủ: tổng tháng/năm (đã quy đổi tiền tệ), số đang hoạt động, trial, sắp gia hạn 7 ngày, có thể tiết kiệm, ngân sách, 5 khoản sắp tới |
+| GET · POST         | `/payment-methods`                 | Danh sách (kèm số subscription và tổng tháng) · thêm (chỉ nhận 4 số cuối thẻ)                                                                              |
+| PATCH · DELETE     | `/payment-methods/:id`             | Sửa / đặt mặc định · lưu trữ (gỡ khỏi các subscription)                                                                                                    |
+| PATCH              | `/me`                              | Đổi tên hiển thị                                                                                                                                           |
+| PATCH              | `/me/settings`                     | Tiền tệ, múi giờ, ngôn ngữ, giờ nhắc, bật/tắt thông báo                                                                                                    |
+| GET · PUT · DELETE | `/me/budget`                       | Ngân sách subscription hằng tháng                                                                                                                          |
+
+Quy đổi tiền tệ dùng bảng `exchange_rates` (tỷ giá mới nhất tính đến hôm nay). Khoản nào thiếu tỷ giá **không** được cộng vào tổng và được liệt kê trong `missingRates`.
 
 Schema đầu vào dùng chung ở `packages/shared/src/api` (app dùng lại cho form). Lỗi dữ liệu trả `400 VALIDATION_ERROR` kèm `issues` theo từng trường; vượt giới hạn gói Free trả `403 PLAN_LIMIT_REACHED`.
 
