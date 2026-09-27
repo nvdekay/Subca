@@ -11,6 +11,7 @@ import type { AuthUser } from '../src/auth/auth.types.js';
 import { CurrentUser } from '../src/auth/current-user.decorator.js';
 import { SupabaseJwtVerifier } from '../src/auth/supabase-jwt.verifier.js';
 import { HealthController } from '../src/health/health.controller.js';
+import { AccountService } from '../src/me/account.service.js';
 import { MeController } from '../src/me/me.controller.js';
 import { MeService } from '../src/me/me.service.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
@@ -43,6 +44,7 @@ describe('Xác thực (e2e, Fastify)', () => {
       controllers: [HealthController, MeController, WhoAmIController],
       providers: [
         MeService,
+        AccountService,
         { provide: PrismaService, useValue: prisma },
         { provide: SupabaseJwtVerifier, useValue: auth.verifier },
         { provide: AccountStatusService, useValue: accountStatus },
