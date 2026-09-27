@@ -164,15 +164,13 @@ function TrackedContent({ data, tracked }: { data: HomeDto; tracked: number }) {
           icon="sparkle"
           value={data.plan === 'PLUS' ? 'Plus' : `${tracked}/${FREE_LIMITS.maxSubscriptions}`}
           label={data.plan === 'PLUS' ? 'Không giới hạn subscription' : 'Subscription gói Free'}
+          href="/subscriptions"
         />
       </View>
 
       {data.budget ? <BudgetCard budget={data.budget} currency={data.currency} /> : null}
 
-      <SectionHead
-        title="Sắp gia hạn"
-        action={data.upcoming.length > 0 ? { label: 'Xem lịch', href: '/calendar' } : undefined}
-      />
+      <SectionHead title="Sắp gia hạn" action={{ label: 'Xem tất cả', href: '/subscriptions' }} />
       {data.upcoming.length > 0 ? (
         <View className="gap-[10px]">
           {data.upcoming.map((sub) => (
