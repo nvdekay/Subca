@@ -15,6 +15,7 @@ import { AccountService } from '../src/me/account.service.js';
 import { MeController } from '../src/me/me.controller.js';
 import { MeService } from '../src/me/me.service.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
+import { ReminderFeedService } from '../src/reminders/reminder-feed.service.js';
 import { RemindersController } from '../src/reminders/reminders.controller.js';
 import { createTestAuth, TEST_USER_ID } from './helpers/jwt.js';
 
@@ -34,6 +35,16 @@ describe('Lịch, đánh giá, phân tích, xóa tài khoản, mở thông báo 
   };
   const SUB = '0198a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b';
 
+  const feed = {
+    feed: vi.fn().mockResolvedValue({
+      history: [],
+      upcoming: [],
+      notificationsEnabled: true,
+    }),
+    rules: vi.fn().mockResolvedValue([]),
+    replaceRules: vi.fn().mockResolvedValue([]),
+  };
+
   beforeAll(async () => {
     const auth = await createTestAuth();
     token = await auth.sign();
@@ -43,6 +54,7 @@ describe('Lịch, đánh giá, phân tích, xóa tài khoản, mở thông báo 
         { provide: CalendarService, useValue: calendar },
         { provide: ReviewsService, useValue: reviews },
         { provide: AnalyticsService, useValue: analytics },
+        { provide: ReminderFeedService, useValue: feed },
         { provide: AccountService, useValue: account },
         { provide: MeService, useValue: { getMe: vi.fn() } },
         { provide: PrismaService, useValue: prisma },
@@ -134,6 +146,31 @@ describe('Lịch, đánh giá, phân tích, xóa tài khoản, mở thông báo 
     expect(prisma.reminder.updateMany).toHaveBeenCalledWith({
       where: { id: SUB, userId: TEST_USER_ID, openedAt: null },
       data: { openedAt: expect.any(Date) },
+    });
+  });
+
+  it('GET /reminders và quy tắc nhắc: kiểm tra đầu vào trước khi gọi service', async () => {
+    expect((await call('GET', '/reminders')).statusCode).toBe(200);
+    expect(feed.feed).toHaveBeenLastCalledWith(TEST_USER_ID);
+
+    const dup = { kind: 'RENEWAL', offsetDays: 1, enabled: true };
+    expect(
+      (await call('PUT', '/reminders/rules', { rules: [dup, dup] })).statusCode,
+    ).toBe(400);
+    expect(
+      (
+        await call('PUT', '/reminders/rules', {
+          rules: [{ ...dup, offsetDays: 120 }],
+        })
+      ).statusCode,
+    ).toBe(400);
+    expect(feed.replaceRules).not.toHaveBeenCalled();
+
+    expect(
+      (await call('PUT', '/reminders/rules', { rules: [dup] })).statusCode,
+    ).toBe(200);
+    expect(feed.replaceRules).toHaveBeenCalledWith(TEST_USER_ID, {
+      rules: [{ ...dup, minInterval: null }],
     });
   });
 });

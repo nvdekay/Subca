@@ -89,6 +89,8 @@ Migration hiện có:
 | GET                | `/reviews?period=YYYY-MM`   | Đánh giá hằng tháng: danh sách gói, quyết định, số tiền có thể tiết kiệm                                                                                   |
 | PUT · DELETE       | `/reviews/:subscriptionId`  | Đặt / bỏ quyết định Giữ · Xem lại · Hủy (Xem lại → gói chuyển REVIEW, Giữ → ACTIVE)                                                                        |
 | GET                | `/analytics`                | Phân tích: theo danh mục, theo phương thức thanh toán, top đắt nhất, chi phí mỗi lần dùng, xu hướng 6 tháng (ước tính)                                     |
+| GET                | `/reminders`                | Màn Thông báo: nhắc đã gửi 30 ngày qua + nhắc sẽ gửi 30 ngày tới (cùng nội dung push)                                                                      |
+| GET · PUT          | `/reminders/rules`          | Quy tắc nhắc chung (mốc trước gia hạn / hết trial), PUT thay cả danh sách                                                                                  |
 | POST               | `/reminders/:id/opened`     | Ghi nhận người dùng đã bấm thông báo nhắc                                                                                                                  |
 | DELETE             | `/me`                       | Xóa vĩnh viễn tài khoản và toàn bộ dữ liệu (cần `SUPABASE_SERVICE_ROLE_KEY`, thiếu → 503)                                                                  |
 
