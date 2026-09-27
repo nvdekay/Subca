@@ -80,6 +80,12 @@ Migration hiện có:
 | PATCH              | `/me/settings`                     | Tiền tệ, múi giờ, ngôn ngữ, giờ nhắc, bật/tắt thông báo                                                                                                    |
 | GET · PUT · DELETE | `/me/budget`                       | Ngân sách subscription hằng tháng                                                                                                                          |
 | POST · DELETE      | `/push-tokens`                     | Đăng ký / hủy thiết bị nhận thông báo (Expo push token)                                                                                                    |
+| GET                | `/calendar?month=YYYY-MM`          | Lịch gia hạn theo tháng (gộp theo ngày, đánh dấu ngày hết trial, tổng tiền trong tháng)                                                                    |
+| GET                | `/reviews?period=YYYY-MM`          | Đánh giá hằng tháng: danh sách gói, quyết định, số tiền có thể tiết kiệm                                                                                   |
+| PUT · DELETE       | `/reviews/:subscriptionId`         | Đặt / bỏ quyết định Giữ · Xem lại · Hủy (Xem lại → gói chuyển REVIEW, Giữ → ACTIVE)                                                                        |
+| GET                | `/analytics`                       | Phân tích: theo danh mục, theo phương thức thanh toán, top đắt nhất, chi phí mỗi lần dùng, xu hướng 6 tháng (ước tính)                                     |
+| POST               | `/reminders/:id/opened`            | Ghi nhận người dùng đã bấm thông báo nhắc                                                                                                                  |
+| DELETE             | `/me`                              | Xóa vĩnh viễn tài khoản và toàn bộ dữ liệu (cần `SUPABASE_SERVICE_ROLE_KEY`, thiếu → 503)                                                                  |
 
 ### Nhắc nhở (BullMQ + Expo Push)
 
@@ -87,6 +93,7 @@ Migration hiện có:
 - Mốc nhắc: mốc riêng của gói (`reminderOffsets`) hoặc quy tắc chung (`reminder_rules`, mặc định 30 ngày cho gói năm, 7 ngày, 1 ngày; trial 1 ngày). Gói Free chỉ 1 mốc.
 - Không gửi trùng: lượt nhắc có khóa unique, job BullMQ dùng ID của lượt nhắc. Worker kiểm tra lại trước khi gửi (gói đã hủy, đổi ngày, tắt thông báo → bỏ); lỗi mạng thử lại 3 lần; máy đã gỡ app → xóa token.
 - App đăng ký thiết bị bằng `POST /push-tokens` sau khi đăng nhập, gọi `DELETE /push-tokens` khi đăng xuất.
+- Mỗi 15 phút kiểm tra push receipt của Expo (thông báo có tới máy không); máy đã gỡ app → xóa token; mọi máy lỗi → lượt nhắc FAILED.
 - Biến môi trường: `REDIS_URL`, `REMINDERS_ENABLED`, `EXPO_ACCESS_TOKEN` (tùy chọn). Production dùng Redis cùng khu vực với API, `maxmemory-policy noeviction`.
 
 ### Tỷ giá
@@ -98,6 +105,8 @@ Migration hiện có:
 - **Điều khoản ExchangeRate-API:** được dùng thương mại để quy đổi, nhưng **bắt buộc ghi nguồn** nơi hiển thị số đã quy đổi (VD dòng nhỏ "Tỷ giá: ExchangeRate-API" có link trong app), **không được phân phối lại** dữ liệu tỷ giá, và chỉ gọi tối đa 1 lần/ngày.
 
 Schema đầu vào dùng chung ở `packages/shared/src/api` (app dùng lại cho form). Lỗi dữ liệu trả `400 VALIDATION_ERROR` kèm `issues` theo từng trường; vượt giới hạn gói Free trả `403 PLAN_LIMIT_REACHED`.
+
+CI chạy thêm smoke test khởi động toàn bộ API (kèm Redis) để bắt lỗi nối module.
 
 Test tích hợp trên hạ tầng thật (Supabase dev + Redis từ `docker compose`, tự tạo và dọn dữ liệu tạm): `pnpm --filter @subca/api test:int`.
 

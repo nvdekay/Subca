@@ -6,7 +6,7 @@
 
 ### Hiện trạng (27/09/2026)
 
-- **Xong:** mockup app + admin; bộ tính ngày gia hạn (38 test + đối chiếu ngẫu nhiên); seed 53 dịch vụ lên Supabase dev; xác thực phía API (guard JWT + `/me` + chặn tài khoản khóa); API subscription, thư viện dịch vụ, Trang chủ, phương thức thanh toán, cài đặt, ngân sách; job tỷ giá hằng ngày; nhắc nhở BullMQ + Expo Push (Redis qua docker compose); monorepo (Expo SDK 57, NestJS 12 + Fastify, Next.js 16, Prisma 7.10, TypeScript 6.0); schema Prisma v1 (26 bảng); migration + RLS + trigger auth **đã chạy trên Supabase dev**; API kết nối DB qua pooler (`/health` → `db: up`); CI GitHub Actions.
+- **Xong:** mockup app + admin; bộ tính ngày gia hạn (38 test + đối chiếu ngẫu nhiên); seed 53 dịch vụ lên Supabase dev; xác thực phía API (guard JWT + `/me` + chặn tài khoản khóa); API subscription, thư viện dịch vụ, Trang chủ, phương thức thanh toán, cài đặt, ngân sách; job tỷ giá hằng ngày; nhắc nhở BullMQ + Expo Push (Redis qua docker compose) + push receipt; API lịch, đánh giá tháng, phân tích, xóa tài khoản; monorepo (Expo SDK 57, NestJS 12 + Fastify, Next.js 16, Prisma 7.10, TypeScript 6.0); schema Prisma v1 (26 bảng); migration + RLS + trigger auth **đã chạy trên Supabase dev**; API kết nối DB qua pooler (`/health` → `db: up`); CI GitHub Actions.
 - **Đang ở:** Giai đoạn 0 (chuẩn bị).
 - **Việc tiếp theo:**
   1. **Đổi mật khẩu database Supabase** (đã lộ trong chat) và cập nhật `apps/api/.env`
@@ -14,7 +14,7 @@
   3. Đăng ký Apple Developer / Google Play (khâu chờ lâu)
   4. Xác minh giá gói trong seed
   5. Giai đoạn 1: đăng nhập trong app (Apple / Google / email OTP) — phía API đã xong
-  6. Phía API tiếp theo: kiểm tra push receipt, API lịch gia hạn / đánh giá tháng / phân tích, xóa tài khoản
+  6. API Giai đoạn 1–2 đã đủ cho các màn trong mockup (trừ Plus/RevenueCat và chia tiền nhóm ở Giai đoạn 3) → chuyển sang app mobile
 
 ---
 
@@ -187,16 +187,18 @@
   - [x] Hàng đợi BullMQ → **Expo Push Service** (`expo-server-sdk`): kiểm tra lại trước khi gửi, thử lại 3 lần khi lỗi mạng, xóa token khi máy đã gỡ app, hết lần thử → FAILED
   - [x] Khóa duy nhất `(subscription_id, kind, offset_days, due_date)` + jobId = ID lượt nhắc → không gửi trùng
   - [x] Redis dev bằng `docker compose` (OrbStack), `noeviction` + AOF
-  - [ ] Kiểm tra **push receipt** của Expo sau ~15 phút (xác nhận đã tới máy, xóa token lỗi) và ghi `opened_at` khi người dùng bấm thông báo
+  - [x] Kiểm tra **push receipt** của Expo mỗi 15 phút (xác nhận đã tới máy, xóa token lỗi) và `POST /reminders/:id/opened` ghi `opened_at` khi người dùng bấm thông báo
   - [ ] Trang admin theo dõi hàng đợi (Bull Board) và thống kê lượt nhắc
   - [ ] Thông báo cục bộ làm dự phòng (`expo-notifications`): app lấy danh sách nhắc 30 ngày tới từ server và tự lên lịch (iOS giới hạn 64 thông báo chờ → chỉ lên lịch các mốc gần nhất)
   - [ ] Xin quyền thông báo đúng lúc (sau khi thêm subscription đầu tiên, không hỏi ngay khi mở app); Android 13+ cần quyền `POST_NOTIFICATIONS`
   - [ ] Màn Thông báo + cài đặt mốc nhắc (30 / 7 / 1 ngày, ngày gia hạn, trial, gia hạn năm)
 - [ ] **Lịch gia hạn** (lịch tháng, bấm ngày để lọc)
+  - [x] API `GET /calendar?month=` (gộp theo ngày, ngày hết trial, tổng tháng quy đổi)
 - [ ] **Quản lý Trial** (đếm ngày, Giữ / Nhắc tôi / Hủy)
 - [ ] **Cài đặt:** hồ sơ, tiền tệ, múi giờ, giờ nhắc, ngôn ngữ
   - [x] API `PATCH /me`, `PATCH /me/settings` (kiểm tra múi giờ hợp lệ)
 - [ ] **Xóa tài khoản** trong app (Apple bắt buộc): backend xóa dữ liệu rồi gọi `auth.admin.deleteUser` của Supabase
+  - [x] API `DELETE /me` (gọi Supabase Admin, trigger xóa toàn bộ dữ liệu) — **cần thêm `SUPABASE_SERVICE_ROLE_KEY` vào `apps/api/.env`**, thiếu thì trả 503
 - [ ] Gắn Sentry + PostHog (sự kiện onboarding, thêm subscription, bật nhắc)
 - [ ] Build TestFlight nội bộ + Google Play Internal testing (EAS Build + EAS Submit)
 - [ ] Rà soát UI trên cả 2 nền tảng: nút back Android, safe area, bàn phím che ô nhập, cỡ chữ lớn (accessibility)
@@ -206,9 +208,11 @@
 ## F. Giai đoạn 2: Hoàn thiện giá trị (tuần 9–12)
 
 - [ ] Đánh giá hằng tháng (Giữ / Xem lại / Hủy, gợi ý tiết kiệm)
+  - [x] API `GET /reviews`, `PUT/DELETE /reviews/:subscriptionId` (đồng bộ trạng thái REVIEW/ACTIVE, tổng tiết kiệm)
 - [ ] Ngân sách (hạn mức, cảnh báo vượt, mô phỏng "nếu hủy thì tiết kiệm bao nhiêu")
   - [x] API `GET/PUT/DELETE /me/budget`; tình trạng ngân sách (đã chi, %, vượt) trả trong `/home`
 - [ ] Phân tích (theo danh mục, xu hướng, dự tính năm, chi phí mỗi lần dùng, top đắt nhất, theo phương thức thanh toán)
+  - [x] API `GET /analytics` (xu hướng 6 tháng là ước tính từ các gói còn hoạt động mỗi tháng; chi phí mỗi lần dùng theo mức độ sử dụng người dùng chọn)
 - [ ] Phương thức thanh toán (chỉ lưu nhãn + 4 số cuối)
   - [x] API `/payment-methods`: chỉ nhận 4 số cuối, luôn đúng 1 phương thức mặc định (transaction), lưu trữ thì gỡ khỏi subscription, kèm số subscription và tổng tháng quy đổi
 - [ ] Xuất dữ liệu CSV / PDF (tác vụ nền → gửi qua email)
