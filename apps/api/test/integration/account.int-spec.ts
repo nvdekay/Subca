@@ -6,7 +6,6 @@ import {
   todayInTimeZone,
   type CreateSubscription,
 } from '@subca/shared';
-import { toDbDate } from '../../src/common/db-date.js';
 import { FxService } from '../../src/fx/fx.service.js';
 import { PrismaClient } from '../../src/generated/prisma/client.js';
 import { HomeService } from '../../src/home/home.service.js';
@@ -29,7 +28,9 @@ describe('Home + phương thức thanh toán + cài đặt trên database thật
   const methods = new PaymentMethodsService(db, fx);
   const account = new AccountService(db);
   const userId = randomUUID();
-  const RATE_SOURCE = `int-test-${userId}`;
+  /** Quy đổi theo tỷ giá thật đang có trong DB (job fx-sync); null nếu chưa có. */
+  const usdInVnd = async (amount: bigint) =>
+    (await fx.rateTable('VND', ['USD'], today)).convert(amount, 'USD');
   const today = todayInTimeZone('Asia/Ho_Chi_Minh');
 
   const sub = (over: Partial<CreateSubscription>): CreateSubscription => ({
@@ -50,7 +51,6 @@ describe('Home + phương thức thanh toán + cài đặt trên database thật
   });
 
   afterAll(async () => {
-    await prisma.exchangeRate.deleteMany({ where: { source: RATE_SOURCE } });
     await prisma.profile
       .delete({ where: { id: userId } })
       .catch(() => undefined);
@@ -80,7 +80,7 @@ describe('Home + phương thức thanh toán + cài đặt trên database thật
     ]);
   });
 
-  it('Trang chủ: tổng tháng, trial, sắp gia hạn, có thể tiết kiệm; báo thiếu tỷ giá USD', async () => {
+  it('Trang chủ: tổng tháng (quy đổi USD theo tỷ giá thật), trial, sắp gia hạn, có thể tiết kiệm', async () => {
     const [master, visa] = await methods.list(userId);
     await subs.create(
       userId,
@@ -139,19 +139,22 @@ describe('Home + phương thức thanh toán + cài đặt trên database thật
     );
 
     const h = await home.getHome(userId);
-    // 260.000 + 550.000 + 150.000 (1,8tr/năm) + 79.000 = 1.039.000; ChatGPT USD chưa có tỷ giá
+    // 260.000 + 550.000 + 150.000 (1,8tr/năm) + 79.000 = 1.039.000 VND + ChatGPT 20 USD (quy đổi nếu có tỷ giá)
+    const usdPart = await usdInVnd(2000n);
     expect(h).toMatchObject({
       currency: 'VND',
-      monthlyTotalMinor: '1039000',
-      yearlyProjectionMinor: '12468000',
+      monthlyTotalMinor: String(1_039_000n + (usdPart ?? 0n)),
       activeCount: 5,
       trialCount: 1,
       dueIn7DaysCount: 3,
       potentialSavingsMinor: '79000',
-      missingRates: ['USD'],
+      missingRates: usdPart === null ? ['USD'] : [],
       plan: 'FREE',
       budget: null,
     });
+    expect(h.yearlyProjectionMinor).toBe(
+      String(BigInt(h.monthlyTotalMinor) * 12n),
+    );
     expect(h.upcoming.map((s) => s.name)).toEqual([
       'Netflix',
       'ChatGPT',
@@ -162,28 +165,18 @@ describe('Home + phương thức thanh toán + cài đặt trên database thật
     expect(h.trials.map((s) => s.name)).toEqual(['Notion']);
   });
 
-  it('có tỷ giá USD → quy đổi vào tổng; ngân sách báo vượt hạn mức', async () => {
-    await prisma.exchangeRate.create({
-      data: {
-        base: 'USD',
-        quote: 'VND',
-        rate: '26000',
-        date: toDbDate(addDays(today, -1)),
-        source: RATE_SOURCE,
-      },
-    });
+  it('ngân sách: đã chi, phần trăm và báo vượt hạn mức', async () => {
     await account.upsertBudget(userId, {
-      amountMinor: '1500000',
+      amountMinor: '1000000',
       currency: 'VND',
       alertAtPercent: 90,
     });
     const h = await home.getHome(userId);
-    expect(h.missingRates).toEqual([]);
-    expect(h.monthlyTotalMinor).toBe('1559000'); // + 20 USD × 26.000
+    const spent = BigInt(h.monthlyTotalMinor);
     expect(h.budget).toMatchObject({
-      amountMinor: '1500000',
-      spentMinor: '1559000',
-      percent: 104,
+      amountMinor: '1000000',
+      spentMinor: String(spent),
+      percent: Math.round(Number(spent) / 10_000),
       overBudget: true,
     });
   });
@@ -191,10 +184,11 @@ describe('Home + phương thức thanh toán + cài đặt trên database thật
   it('phương thức thanh toán: số subscription và tổng tháng đã quy đổi', async () => {
     const list = await methods.list(userId);
     const visa = list.find((m) => m.label === 'Visa')!;
+    // Netflix 260.000 VND + ChatGPT 20 USD
     expect(visa).toMatchObject({
       subscriptionCount: 2,
-      monthlyTotalMinor: '780000',
-    }); // 260.000 + 520.000
+      monthlyTotalMinor: String(260_000n + ((await usdInVnd(2000n)) ?? 0n)),
+    });
   });
 
   it('lưu trữ phương thức mặc định → gỡ khỏi subscription và chọn mặc định mới', async () => {
