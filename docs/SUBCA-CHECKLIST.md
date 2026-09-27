@@ -230,7 +230,7 @@
   - [x] API `GET/PUT/DELETE /me/budget`; tình trạng ngân sách (đã chi, %, vượt) trả trong `/home`
 - [ ] Phân tích (theo danh mục, xu hướng, dự tính năm, chi phí mỗi lần dùng, top đắt nhất, theo phương thức thanh toán)
   - [x] API `GET /analytics` (xu hướng 6 tháng là ước tính từ các gói còn hoạt động mỗi tháng; chi phí mỗi lần dùng theo mức độ sử dụng người dùng chọn)
-- [x] Phương thức thanh toán (chỉ lưu nhãn + 4 số cuối) — màn trong app: thẻ gradient, xem gói theo thẻ, thêm/sửa/xóa, mặc định
+- [x] Phương thức thanh toán (chỉ lưu nhãn + 4 số cuối) — chọn / tạo nhanh ngay trong form subscription (chip "+ Thêm"); màn quản lý phụ trong Cài đặt: thẻ gradient, xem gói theo thẻ, sửa/xóa, mặc định
   - [x] API `/payment-methods`: chỉ nhận 4 số cuối, luôn đúng 1 phương thức mặc định (transaction), lưu trữ thì gỡ khỏi subscription, kèm số subscription và tổng tháng quy đổi
 - [ ] Xuất dữ liệu CSV / PDF (tác vụ nền → gửi qua email)
 - [x] Tỷ giá tự cập nhật hằng ngày (job 07:30 giờ VN + cập nhật khi khởi động nếu cũ): nguồn chính ExchangeRate-API (Open Access), dự phòng fawazahmed0/currency-api; kiểm tra khoảng hợp lý trước khi lưu; lưu 12 cặp VND/USD/EUR/JPY; lệnh `fx:sync` — đã nạp tỷ giá thật vào Supabase dev

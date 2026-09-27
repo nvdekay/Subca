@@ -11,7 +11,6 @@ import {
   type SubscriptionDetailDto,
   type UpdateSubscriptionInput,
 } from '@subca/shared';
-import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { ServiceLogo } from '@/components/service-logo';
@@ -27,6 +26,7 @@ import { Text } from '@/components/ui/text';
 import { ToggleRow } from '@/components/ui/toggle-row';
 import { formatAmount, perInterval } from '@/lib/format';
 import { colors, shadow } from '@/theme';
+import { PaymentMethodSheet } from '@/features/payments/payment-method-sheet';
 import { paymentMethodLabel } from './labels';
 import { useCatalog, useCategories, usePaymentMethods } from './queries';
 
@@ -241,6 +241,8 @@ export function SubscriptionForm({
   const defaultPmId =
     mode === 'create' ? (paymentMethods.data?.find((m) => m.isDefault)?.id ?? null) : null;
   const paymentMethodId = pmTouched ? v.paymentMethodId : (v.paymentMethodId ?? defaultPmId);
+  // key để dựng lại sheet (reset ô nhập) mỗi lần mở; null = đang đóng.
+  const [pmSheetKey, setPmSheetKey] = useState<number | null>(null);
   const pickPaymentMethod = (id: string | null) => {
     setPmTouched(true);
     set('paymentMethodId', id);
@@ -443,32 +445,27 @@ export function SubscriptionForm({
         <Text weight="semibold" className="mb-[7px] ml-1 text-[13px] leading-[18px] text-ink-2">
           Thanh toán bằng
         </Text>
-        {paymentMethods.data && paymentMethods.data.length > 0 ? (
-          <View className="flex-row flex-wrap gap-2">
-            <Chip
-              label="Chưa chọn"
-              selected={paymentMethodId === null}
-              onPress={() => pickPaymentMethod(null)}
-            />
-            {paymentMethods.data.map((pm) => (
-              <Chip
-                key={pm.id}
-                label={paymentMethodLabel(pm)}
-                selected={paymentMethodId === pm.id}
-                onPress={() => pickPaymentMethod(pm.id)}
-              />
-            ))}
-          </View>
-        ) : (
-          <Button
-            title="Thêm thẻ / ví"
-            variant="soft"
-            size="sm"
-            icon="plus"
-            className="self-start"
-            onPress={() => router.push('/payments')}
+        {/* Tạo thẻ / ví ngay tại đây, không phải rời form (màn quản lý đầy đủ nằm trong Cài đặt). */}
+        <View className="flex-row flex-wrap gap-2">
+          <Chip
+            label="Chưa chọn"
+            selected={paymentMethodId === null}
+            onPress={() => pickPaymentMethod(null)}
           />
-        )}
+          {(paymentMethods.data ?? []).map((pm) => (
+            <Chip
+              key={pm.id}
+              label={paymentMethodLabel(pm)}
+              selected={paymentMethodId === pm.id}
+              onPress={() => pickPaymentMethod(pm.id)}
+            />
+          ))}
+          <Chip
+            label="Thêm"
+            left={<Icon name="plus" size={15} color={colors['ink-2']} strokeWidth={2.2} />}
+            onPress={() => setPmSheetKey(Date.now())}
+          />
+        </View>
       </View>
 
       {/* ── Danh mục ── */}
@@ -537,6 +534,16 @@ export function SubscriptionForm({
         loading={submitting}
         onPress={submit}
       />
+
+      {pmSheetKey !== null ? (
+        <PaymentMethodSheet
+          key={pmSheetKey}
+          visible
+          method={null}
+          onClose={() => setPmSheetKey(null)}
+          onSaved={(saved) => pickPaymentMethod(saved.id)}
+        />
+      ) : null}
 
       <ServicePicker
         visible={pickerOpen}

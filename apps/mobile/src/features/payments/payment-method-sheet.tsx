@@ -35,10 +35,13 @@ export function PaymentMethodSheet({
   visible,
   method,
   onClose,
+  onSaved,
 }: {
   visible: boolean;
   method: PaymentMethodDto | null;
   onClose: () => void;
+  /** Gọi sau khi lưu thành công (VD form subscription tự chọn phương thức vừa tạo). */
+  onSaved?: (saved: PaymentMethodDto) => void;
 }) {
   // Sheet được dựng lại theo `key` mỗi lần mở, nên state khởi tạo từ `method` là đủ.
   const [type, setType] = useState<PaymentMethodType>(method?.type ?? 'CARD');
@@ -67,7 +70,10 @@ export function PaymentMethodSheet({
       return;
     }
     save.mutate(parsed.data, {
-      onSuccess: onClose,
+      onSuccess: (saved) => {
+        onSaved?.(saved);
+        onClose();
+      },
       onError: (e) => setError(e.message),
     });
   }
