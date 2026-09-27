@@ -19,15 +19,23 @@ export type IconName =
   | 'card'
   | 'list'
   | 'alert'
+  | 'edit'
+  | 'flag'
+  | 'help'
+  | 'archive'
   | 'sparkle'
   | 'user'
+  | 'coin'
+  | 'tag'
   | 'logout'
   | 'repeat'
   | 'trend'
   | 'target'
   | 'check'
+  | 'more'
   | 'settings'
-  | 'users';
+  | 'users'
+  | 'link';
 
 export const ICONS: Record<IconName, IconElement[]> = {
   home: [
@@ -95,6 +103,21 @@ export const ICONS: Record<IconName, IconElement[]> = {
     },
     { t: 'path', p: { d: 'M12 9v4M12 17h.01' } },
   ],
+  edit: [
+    { t: 'path', p: { d: 'M12 20h9' } },
+    { t: 'path', p: { d: 'M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z' } },
+  ],
+  flag: [
+    { t: 'path', p: { d: 'M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7' } },
+  ],
+  help: [
+    { t: 'circle', p: { cx: '12', cy: '12', r: '9' } },
+    { t: 'path', p: { d: 'M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01' } },
+  ],
+  archive: [
+    { t: 'rect', p: { x: '2.5', y: '3.5', width: '19', height: '5', rx: '1.5' } },
+    { t: 'path', p: { d: 'M4 8.5V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8.5M10 12.5h4' } },
+  ],
   sparkle: [
     { t: 'path', p: { d: 'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9Z' } },
     { t: 'path', p: { d: 'M19 17v4M17 19h4' } },
@@ -102,6 +125,22 @@ export const ICONS: Record<IconName, IconElement[]> = {
   user: [
     { t: 'circle', p: { cx: '12', cy: '8', r: '4' } },
     { t: 'path', p: { d: 'M4 21a8 8 0 0 1 16 0' } },
+  ],
+  coin: [
+    { t: 'circle', p: { cx: '12', cy: '12', r: '9' } },
+    {
+      t: 'path',
+      p: {
+        d: 'M14.8 9.2A2.5 2.5 0 0 0 12.5 8h-1a2 2 0 0 0 0 4h1a2 2 0 0 1 0 4h-1a2.5 2.5 0 0 1-2.3-1.2M12 6.5V8M12 16v1.5',
+      },
+    },
+  ],
+  tag: [
+    {
+      t: 'path',
+      p: { d: 'M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z' },
+    },
+    { t: 'circle', p: { cx: '7.5', cy: '7.5', r: '1.2' } },
   ],
   logout: [
     { t: 'path', p: { d: 'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9' } },
@@ -121,6 +160,11 @@ export const ICONS: Record<IconName, IconElement[]> = {
     { t: 'circle', p: { cx: '12', cy: '12', r: '1' } },
   ],
   check: [{ t: 'path', p: { d: 'M20 6 9 17l-5-5' } }],
+  more: [
+    { t: 'circle', p: { cx: '5', cy: '12', r: '1', fill: 'currentColor' } },
+    { t: 'circle', p: { cx: '12', cy: '12', r: '1', fill: 'currentColor' } },
+    { t: 'circle', p: { cx: '19', cy: '12', r: '1', fill: 'currentColor' } },
+  ],
   settings: [
     { t: 'circle', p: { cx: '12', cy: '12', r: '3' } },
     {
@@ -134,5 +178,9 @@ export const ICONS: Record<IconName, IconElement[]> = {
     { t: 'circle', p: { cx: '9', cy: '8', r: '4' } },
     { t: 'path', p: { d: 'M2 21a7 7 0 0 1 14 0' } },
     { t: 'path', p: { d: 'M16 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3' } },
+  ],
+  link: [
+    { t: 'path', p: { d: 'M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7' } },
+    { t: 'path', p: { d: 'M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7' } },
   ],
 };

@@ -1,4 +1,5 @@
 import { View } from 'react-native';
+import { cn } from '@/lib/cn';
 import { Icon, type IconName } from './icon';
 import { Text } from './text';
 
@@ -12,11 +13,26 @@ const TONE: Record<PillTone, { box: string; text: string; color: string }> = {
   warn: { box: 'bg-coral', text: 'text-on-coral', color: '#7A2E17' },
 };
 
-export function Pill({ label, tone, icon }: { label: string; tone: PillTone; icon?: IconName }) {
+export function Pill({
+  label,
+  tone,
+  icon,
+  className,
+}: {
+  label: string;
+  tone: PillTone;
+  icon?: IconName;
+  /** Ghi đè nền, VD `bg-surface` khi đặt trên thẻ màu (mockup: pill trắng ở màn Chi tiết). */
+  className?: string;
+}) {
   const t = TONE[tone];
   return (
     <View
-      className={`flex-row items-center gap-[5px] self-start rounded-full px-[10px] py-1 ${t.box}`}
+      className={cn(
+        'flex-row items-center gap-[5px] self-start rounded-full px-[10px] py-1',
+        t.box,
+        className,
+      )}
     >
       {icon ? <Icon name={icon} size={13} color={t.color} strokeWidth={2.2} /> : null}
       <Text weight="semibold" className={`text-[12px] leading-[17px] ${t.text}`}>

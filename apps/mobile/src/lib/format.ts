@@ -40,6 +40,12 @@ export function formatDate(iso: string): string {
   return `${d}/${m}/${y}`;
 }
 
+/** Như formatDate nhưng bỏ năm nếu là năm nay: "29/09" (dòng danh sách chật chỗ). */
+export function formatShortDate(iso: string, currentYear = new Date().getFullYear()): string {
+  const [y, m, d] = iso.split('-');
+  return Number(y) === currentYear ? `${d}/${m}` : `${d}/${m}/${y}`;
+}
+
 export function relativeDay(days: number): string {
   if (days < 0) return 'Đã qua';
   if (days === 0) return 'Hôm nay';
