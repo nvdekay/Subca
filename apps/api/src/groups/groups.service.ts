@@ -220,7 +220,7 @@ export class GroupsService {
 
     const profile = await this.prisma.profile.findUnique({
       where: { id: userId },
-      select: { displayName: true },
+      select: { displayName: true, email: true },
     });
     const otherNames = Array.from(
       { length: input.memberCount - 1 },
@@ -242,7 +242,7 @@ export class GroupsService {
           create: [
             {
               userId,
-              displayName: profile?.displayName ?? 'Bạn',
+              displayName: memberName(profile),
               role: 'OWNER',
               status: 'ACTIVE',
               joinedAt: new Date(),
@@ -437,9 +437,9 @@ export class GroupsService {
 
     const profile = await this.prisma.profile.findUnique({
       where: { id: userId },
-      select: { displayName: true },
+      select: { displayName: true, email: true },
     });
-    const displayName = profile?.displayName ?? 'Thành viên mới';
+    const displayName = memberName(profile);
     const emptySlot = members.find(
       (m) => m.userId === null && m.status === 'INVITED',
     );
@@ -780,6 +780,14 @@ export class GroupsService {
   private async today(userId: string): Promise<IsoDate> {
     return todayInTimeZone((await this.settings(userId)).timezone);
   }
+}
+
+/** Tên hiện cho người khác thấy: tên hồ sơ, không có thì lấy phần trước @ của email. */
+function memberName(
+  profile: { displayName: string | null; email: string | null } | null,
+): string {
+  const fromEmail = profile?.email?.split('@')[0];
+  return profile?.displayName?.trim() || fromEmail || 'Thành viên';
 }
 
 /** Thành viên còn trong nhóm: chủ nhóm trước, rồi theo thứ tự được mời (thứ tự này quyết định phần lẻ khi chia đều). */
