@@ -8,3 +8,4 @@ export * from './api/account.js';
 export * from './api/push.js';
 export * from './api/insights.js';
 export * from './api/group.js';
+export * from './api/admin.js';

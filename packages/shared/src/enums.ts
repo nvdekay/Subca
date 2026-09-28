@@ -46,6 +46,18 @@ export type GroupPaymentStatus = z.infer<typeof GroupPaymentStatus>;
 export const PlusProduct = z.enum(['PLUS_MONTHLY', 'PLUS_YEARLY', 'PLUS_LIFETIME']);
 export type PlusProduct = z.infer<typeof PlusProduct>;
 
+export const AdminRole = z.enum(['OWNER', 'ADMIN', 'SUPPORT', 'MARKETING', 'VIEWER']);
+export type AdminRole = z.infer<typeof AdminRole>;
+
+export const AuditActorType = z.enum(['ADMIN', 'SYSTEM']);
+export type AuditActorType = z.infer<typeof AuditActorType>;
+
+export const AuditSeverity = z.enum(['INFO', 'SENSITIVE', 'CRITICAL']);
+export type AuditSeverity = z.infer<typeof AuditSeverity>;
+
+export const PriceReportStatus = z.enum(['PENDING', 'APPROVED', 'REJECTED']);
+export type PriceReportStatus = z.infer<typeof PriceReportStatus>;
+
 /** Giới hạn gói Free (khớp paywall và trang Gói trong admin). */
 export const FREE_LIMITS = {
   maxSubscriptions: 8,
