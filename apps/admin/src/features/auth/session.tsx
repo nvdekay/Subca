@@ -11,7 +11,7 @@ interface AdminSession {
   /** Đang lấy phiên đăng nhập lần đầu. */
   loading: boolean;
   session: Session | null;
-  /** Phiên đã qua MFA (aal2) chưa — admin bắt buộc. */
+  /** Phiên đã qua xác thực hai bước (aal2) chưa — chỉ cần khi máy chủ bật ADMIN_REQUIRE_MFA. */
   mfaDone: boolean;
   /** Thông tin admin từ `/admin/me`; null khi chưa đăng nhập hoặc không có quyền. */
   me: AdminMeDto | null;
@@ -41,18 +41,18 @@ export function AdminSessionProvider({ children }: { children: ReactNode }) {
     return () => data.subscription.unsubscribe();
   }, [queryClient]);
 
-  // `aal2` nằm trong access token; đọc từ claim để biết đã qua MFA chưa
+  // `aal2` nằm trong access token; đọc từ claim để biết đã qua xác thực hai bước chưa
   const mfaDone = tokenAal(session?.access_token) === 'aal2';
 
   const meQuery = useQuery({
     queryKey: ['admin', 'me'],
     queryFn: () => api<AdminMeDto>('/admin/me'),
-    enabled: Boolean(session) && mfaDone,
+    enabled: Boolean(session),
     retry: false,
   });
 
   const value: AdminSession = {
-    loading: loading || (Boolean(session) && mfaDone && meQuery.isLoading),
+    loading: loading || (Boolean(session) && meQuery.isLoading),
     session,
     mfaDone,
     me: meQuery.data ?? null,

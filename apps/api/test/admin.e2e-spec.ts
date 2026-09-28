@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import {
   FastifyAdapter,
@@ -7,6 +8,7 @@ import { Test } from '@nestjs/testing';
 import { AdminCatalogService } from '../src/admin/admin-catalog.service.js';
 import { AdminOverviewService } from '../src/admin/admin-overview.service.js';
 import { AdminQueueService } from '../src/admin/admin-queue.service.js';
+import { AdminTeamService } from '../src/admin/admin-team.service.js';
 import { AdminUsersService } from '../src/admin/admin-users.service.js';
 import { AdminController } from '../src/admin/admin.controller.js';
 import { AdminGuard } from '../src/admin/admin.guard.js';
@@ -66,6 +68,15 @@ describe('Admin Console (e2e)', () => {
   const queue = {
     get: vi.fn().mockResolvedValue({ name: 'reminders', connected: true }),
   };
+  const team = {
+    list: vi.fn().mockResolvedValue({ items: [], canCreateAccounts: true }),
+    create: vi.fn().mockResolvedValue({ id: USER, email: 'moi@subca.app' }),
+    update: vi.fn().mockResolvedValue({ id: USER }),
+    setPassword: vi.fn().mockResolvedValue(undefined),
+    remove: vi.fn().mockResolvedValue(undefined),
+  };
+  /** Mặc định không bắt buộc MFA (admin đăng nhập bằng email + mật khẩu). */
+  let requireMfa = false;
 
   beforeAll(async () => {
     const auth = await createTestAuth();
@@ -80,6 +91,8 @@ describe('Admin Console (e2e)', () => {
         { provide: AdminUsersService, useValue: users },
         { provide: AdminCatalogService, useValue: catalog },
         { provide: AdminQueueService, useValue: queue },
+        { provide: AdminTeamService, useValue: team },
+        { provide: ConfigService, useValue: { get: () => requireMfa } },
         { provide: SupabaseJwtVerifier, useValue: auth.verifier },
         {
           provide: AccountStatusService,
@@ -101,6 +114,7 @@ describe('Admin Console (e2e)', () => {
 
   beforeEach(() => {
     prisma.adminUser.findUnique.mockResolvedValue(adminRow);
+    requireMfa = false;
   });
 
   const call = (
@@ -122,7 +136,13 @@ describe('Admin Console (e2e)', () => {
     ).toBe(401);
   });
 
-  it('phiên chưa qua MFA → 403 MFA_REQUIRED', async () => {
+  it('đăng nhập bằng mật khẩu (phiên aal1) vào được khi chưa bắt buộc MFA', async () => {
+    const res = await call('GET', '/admin/overview', undefined, tokenNoMfa);
+    expect(res.statusCode).toBe(200);
+  });
+
+  it('bật ADMIN_REQUIRE_MFA → phiên aal1 bị chặn', async () => {
+    requireMfa = true;
     const res = await call('GET', '/admin/overview', undefined, tokenNoMfa);
     expect(res.statusCode).toBe(403);
     expect(res.json()).toMatchObject({ code: 'MFA_REQUIRED' });
@@ -233,6 +253,37 @@ describe('Admin Console (e2e)', () => {
       decision: 'MAYBE',
     });
     expect(bad.statusCode).toBe(400);
+  });
+
+  it('nhân sự: chỉ OWNER thêm được admin, mật khẩu phải đủ mạnh', async () => {
+    const weak = await call('POST', '/admin/team', {
+      email: 'moi@subca.app',
+      name: 'Bạn mới',
+      role: 'SUPPORT',
+      password: 'yeu',
+    });
+    expect(weak.statusCode).toBe(400);
+
+    const ok = await call('POST', '/admin/team', {
+      email: 'moi@subca.app',
+      name: 'Bạn mới',
+      role: 'SUPPORT',
+      password: 'MatKhauManh123',
+    });
+    expect(ok.statusCode).toBe(201);
+
+    prisma.adminUser.findUnique.mockResolvedValue({
+      ...adminRow,
+      role: 'ADMIN',
+    } as never);
+    const denied = await call('POST', '/admin/team', {
+      email: 'khac@subca.app',
+      name: 'Khác',
+      role: 'VIEWER',
+      password: 'MatKhauManh123',
+    });
+    expect(denied.statusCode).toBe(403);
+    expect(denied.json()).toMatchObject({ code: 'ADMIN_FORBIDDEN' });
   });
 
   it('nhật ký thao tác lọc theo mức độ', async () => {

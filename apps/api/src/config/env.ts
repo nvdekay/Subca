@@ -17,6 +17,21 @@ const EnvSchema = z.object({
     .enum(['true', 'false'])
     .default('true')
     .transform((v) => v === 'true'),
+  /**
+   * Các origin được gọi API từ trình duyệt (Admin Console), cách nhau bằng dấu phẩy.
+   * App mobile là ứng dụng gốc nên không cần CORS.
+   */
+  CORS_ORIGINS: z
+    .string()
+    .default('http://localhost:3100,http://localhost:3101'),
+  /**
+   * Bắt buộc admin đăng nhập bằng phiên đã qua xác thực hai bước (TOTP).
+   * Mặc định tắt vì admin đăng nhập bằng email + mật khẩu; **bật khi lên production**.
+   */
+  ADMIN_REQUIRE_MFA: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
   // Tùy chọn: bật "Enhanced Push Security" trên Expo thì cần access token
   EXPO_ACCESS_TOKEN: z.string().optional(),
   // Tắt job cập nhật tỷ giá (VD khi chạy nhiều instance chỉ cần 1 nơi chạy, hoặc khi test)

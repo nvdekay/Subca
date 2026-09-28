@@ -6,9 +6,11 @@ import {
   SetMetadata,
   createParamDecorator,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { adminCan, type AdminPermission } from '@subca/shared';
 import type { AuthUser } from '../auth/auth.types.js';
+import type { Env } from '../config/env.js';
 import type { AdminUser } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
@@ -46,15 +48,17 @@ const ACTIVE_THROTTLE_MS = 60 * 60 * 1000;
 
 /**
  * Chặn mọi endpoint `/admin/*`:
- * 1. Phiên đăng nhập phải **đã qua MFA** (`aal2`) — admin bắt buộc bật TOTP.
- * 2. Tài khoản phải có trong `admin_users` và đang bật.
- * 3. Vai trò phải có quyền mà endpoint yêu cầu.
+ * 1. Tài khoản phải có trong `admin_users` và đang bật.
+ * 2. Vai trò phải có quyền mà endpoint yêu cầu.
+ * 3. Khi bật `ADMIN_REQUIRE_MFA`, phiên còn phải qua xác thực hai bước (`aal2`).
+ *    Mặc định tắt vì admin đăng nhập bằng email + mật khẩu.
  */
 @Injectable()
 export class AdminGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly prisma: PrismaService,
+    private readonly config: ConfigService<Env, true>,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -65,7 +69,10 @@ export class AdminGuard implements CanActivate {
     if (!user)
       throw forbidden('NOT_ADMIN', 'Không có quyền truy cập trang quản trị');
 
-    if (user.aal !== 'aal2') {
+    if (
+      this.config.get('ADMIN_REQUIRE_MFA', { infer: true }) &&
+      user.aal !== 'aal2'
+    ) {
       throw forbidden(
         'MFA_REQUIRED',
         'Trang quản trị bắt buộc xác thực hai bước. Bật và xác thực TOTP rồi thử lại.',

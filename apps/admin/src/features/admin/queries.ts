@@ -2,17 +2,22 @@
 
 import type {
   AdminOverviewDto,
+  AdminTeamDto,
+  AdminTeamMemberDto,
   AdminQueueDto,
   AdminServiceDto,
   AdminUserDetailDto,
   AdminUsersDto,
   AuditLogsDto,
   BanUser,
+  CreateAdmin,
   CreateService,
   GrantPlus,
   PriceReportDto,
   PriceReportsDto,
   ReviewPriceReport,
+  SetAdminPassword,
+  UpdateAdmin,
   UpdateService,
   UpsertServicePlan,
 } from '@subca/shared';
@@ -169,6 +174,56 @@ export function useReviewPriceReport() {
         body: JSON.stringify(input),
       }),
     onSuccess: () => invalidateCatalog(queryClient),
+  });
+}
+
+export function useTeam() {
+  return useQuery({
+    queryKey: ['admin', 'team'],
+    queryFn: () => api<AdminTeamDto>('/admin/team'),
+  });
+}
+
+function invalidateTeam(queryClient: QueryClient) {
+  queryClient.invalidateQueries({ queryKey: ['admin', 'team'] });
+  queryClient.invalidateQueries({ queryKey: ['admin', 'audit'] });
+}
+
+export function useCreateAdmin() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateAdmin) =>
+      api<AdminTeamMemberDto>('/admin/team', { method: 'POST', body: JSON.stringify(input) }),
+    onSuccess: () => invalidateTeam(queryClient),
+  });
+}
+
+export function useUpdateAdmin() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: UpdateAdmin }) =>
+      api<AdminTeamMemberDto>(`/admin/team/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(input),
+      }),
+    onSuccess: () => invalidateTeam(queryClient),
+  });
+}
+
+export function useSetAdminPassword() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: SetAdminPassword }) =>
+      api<void>(`/admin/team/${id}/password`, { method: 'POST', body: JSON.stringify(input) }),
+    onSuccess: () => invalidateTeam(queryClient),
+  });
+}
+
+export function useRemoveAdmin() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api<void>(`/admin/team/${id}`, { method: 'DELETE' }),
+    onSuccess: () => invalidateTeam(queryClient),
   });
 }
 

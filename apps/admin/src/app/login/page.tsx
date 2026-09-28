@@ -13,29 +13,31 @@ import {
 import { useAdminSession } from '@/features/auth/session';
 import { supabase } from '@/lib/supabase';
 
-type Step = 'email' | 'otp' | 'mfa-enroll' | 'mfa-verify';
+type Step = 'password' | 'mfa-enroll' | 'mfa-verify';
 
-/** Đăng nhập admin: mã OTP qua email (như app) rồi bắt buộc xác thực hai bước bằng TOTP. */
+/**
+ * Đăng nhập admin bằng email + mật khẩu (tài khoản do OWNER tạo ở trang Nhân sự).
+ * Nếu máy chủ bật `ADMIN_REQUIRE_MFA`, API trả `MFA_REQUIRED` và trang chuyển sang bước TOTP.
+ */
 export default function LoginPage() {
   const router = useRouter();
-  const { session, mfaDone, me, error: meError, signOut } = useAdminSession();
-  const [step, setStep] = useState<Step>('email');
+  const { session, me, error: meError, signOut } = useAdminSession();
+  const [step, setStep] = useState<Step>('password');
   const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
+  const [password, setPassword] = useState('');
   const [totpCode, setTotpCode] = useState('');
   const [enrollment, setEnrollment] = useState<TotpEnrollment | null>(null);
   const [factorId, setFactorId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Đã đăng nhập đủ (OTP + MFA) và là admin → vào thẳng Tổng quan
   useEffect(() => {
     if (me) router.replace('/overview');
   }, [me, router]);
 
-  // Có phiên nhưng chưa qua MFA → chuyển sang bước TOTP (đăng ký hoặc nhập mã)
+  // Máy chủ đòi xác thực hai bước → đăng ký hoặc nhập mã TOTP
   useEffect(() => {
-    if (!session || mfaDone) return;
+    if (!session || meError?.code !== 'MFA_REQUIRED') return;
     let cancelled = false;
     void (async () => {
       try {
@@ -59,30 +61,24 @@ export default function LoginPage() {
     return () => {
       cancelled = true;
     };
-  }, [session, mfaDone]);
+  }, [session, meError]);
 
-  const sendOtp = async () => {
+  const signIn = async () => {
     setBusy(true);
     setError(null);
-    const { error: otpError } = await supabase.auth.signInWithOtp({
+    const { error: signInError } = await supabase.auth.signInWithPassword({
       email: email.trim(),
-      options: { shouldCreateUser: false },
+      password,
     });
     setBusy(false);
-    if (otpError) setError(otpError.message);
-    else setStep('otp');
-  };
-
-  const verifyOtp = async () => {
-    setBusy(true);
-    setError(null);
-    const { error: otpError } = await supabase.auth.verifyOtp({
-      email: email.trim(),
-      token: code.trim(),
-      type: 'email',
-    });
-    setBusy(false);
-    if (otpError) setError(otpError.message);
+    setPassword('');
+    if (signInError) {
+      setError(
+        signInError.message === 'Invalid login credentials'
+          ? 'Email hoặc mật khẩu không đúng'
+          : signInError.message,
+      );
+    }
   };
 
   const submitTotp = async () => {
@@ -122,7 +118,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {meError ? (
+        {meError && meError.code !== 'MFA_REQUIRED' ? (
           <div className="mb-4 rounded-xl bg-crit-bg px-4 py-3 text-[13px] text-crit">
             {meError.message}
             <button className="mt-2 block font-semibold underline" onClick={() => void signOut()}>
@@ -131,66 +127,53 @@ export default function LoginPage() {
           </div>
         ) : null}
 
-        {step === 'email' ? (
+        {step === 'password' ? (
           <>
             <p className="mb-4 text-[13.5px] text-ink-2">
-              Nhập email quản trị, Subca gửi mã đăng nhập 6 số.
+              Đăng nhập bằng tài khoản quản trị. Quên mật khẩu thì nhờ một OWNER đặt lại ở trang
+              Nhân sự.
             </p>
-            <Input
-              label="Email"
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="ban@subca.app"
-              error={error}
-            />
-            <Button
-              variant="primary"
-              className="mt-4 w-full"
-              loading={busy}
-              disabled={!email.includes('@')}
-              onClick={() => void sendOtp()}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void signIn();
+              }}
             >
-              Gửi mã đăng nhập
-            </Button>
-          </>
-        ) : null}
-
-        {step === 'otp' ? (
-          <>
-            <p className="mb-4 text-[13.5px] text-ink-2">
-              Nhập mã 6 số vừa gửi tới <b>{email}</b>.
-            </p>
-            <Input
-              label="Mã đăng nhập"
-              inputMode="numeric"
-              maxLength={6}
-              value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-              placeholder="123456"
-              error={error}
-            />
-            <Button
-              variant="primary"
-              className="mt-4 w-full"
-              loading={busy}
-              disabled={code.length !== 6}
-              onClick={() => void verifyOtp()}
-            >
-              Đăng nhập
-            </Button>
-            <Button variant="ghost" className="mt-1 w-full" onClick={() => setStep('email')}>
-              Đổi email
-            </Button>
+              <Input
+                label="Email"
+                type="email"
+                autoComplete="username"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="ban@subca.app"
+              />
+              <Input
+                label="Mật khẩu"
+                type="password"
+                autoComplete="current-password"
+                className="mt-3"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                error={error}
+              />
+              <Button
+                type="submit"
+                variant="primary"
+                className="mt-4 w-full"
+                loading={busy}
+                disabled={!email.includes('@') || password.length === 0}
+              >
+                Đăng nhập
+              </Button>
+            </form>
           </>
         ) : null}
 
         {step === 'mfa-enroll' && enrollment ? (
           <>
             <p className="mb-3 text-[13.5px] text-ink-2">
-              Trang quản trị bắt buộc xác thực hai bước. Quét mã bằng Google Authenticator,
-              1Password hoặc app tương tự, rồi nhập mã 6 số.
+              Máy chủ đang bắt buộc xác thực hai bước. Quét mã bằng Google Authenticator, 1Password
+              hoặc app tương tự, rồi nhập mã 6 số.
             </p>
             {/* eslint-disable-next-line @next/next/no-img-element -- QR là data URL do Supabase sinh */}
             <img

@@ -17,6 +17,24 @@ async function bootstrap(): Promise<void> {
     AppModule,
     new FastifyAdapter({ logger: process.env['NODE_ENV'] !== 'test' }),
   );
+
+  // Admin Console chạy trong trình duyệt nên phải mở CORS cho đúng các origin của nó.
+  // Danh sách rỗng = không cho trình duyệt nào gọi (app mobile không cần CORS).
+  const origins = (
+    process.env['CORS_ORIGINS'] ?? 'http://localhost:3100,http://localhost:3101'
+  )
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+  if (origins.length > 0) {
+    app.enableCors({
+      origin: origins,
+      methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Authorization', 'Content-Type', 'Accept'],
+      maxAge: 600,
+    });
+  }
+
   app.enableShutdownHooks();
   await app.listen(Number(process.env['PORT'] ?? 3000), '0.0.0.0');
 }

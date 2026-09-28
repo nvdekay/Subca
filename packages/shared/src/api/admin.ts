@@ -20,6 +20,8 @@ export const ADMIN_PERMISSIONS = {
   manageCatalog: ['OWNER', 'ADMIN', 'MARKETING'],
   /** Xóa vĩnh viễn dữ liệu người dùng. */
   deleteUsers: ['OWNER', 'ADMIN'],
+  /** Thêm / sửa / gỡ tài khoản quản trị. */
+  manageTeam: ['OWNER'],
 } as const satisfies Record<string, readonly AdminRole[]>;
 
 export type AdminPermission = keyof typeof ADMIN_PERMISSIONS;
@@ -256,6 +258,56 @@ export const ReviewPriceReportSchema = z.object({
 });
 export type ReviewPriceReport = z.infer<typeof ReviewPriceReportSchema>;
 
+// ─────────────── Nhân sự & phân quyền ───────────────
+
+/** Mật khẩu admin: đủ dài và có đủ loại ký tự vì đây là cửa vào dữ liệu người dùng. */
+export const AdminPasswordSchema = z
+  .string()
+  .min(12, 'Mật khẩu ít nhất 12 ký tự')
+  .max(72, 'Mật khẩu tối đa 72 ký tự')
+  .refine((v) => /[a-z]/.test(v), 'Cần ít nhất một chữ thường')
+  .refine((v) => /[A-Z]/.test(v), 'Cần ít nhất một chữ hoa')
+  .refine((v) => /\d/.test(v), 'Cần ít nhất một chữ số');
+
+export const CreateAdminSchema = z.object({
+  email: z.email().max(160),
+  name: z.string().trim().min(1).max(80),
+  role: AdminRole.exclude(['OWNER']).default('VIEWER'),
+  password: AdminPasswordSchema,
+});
+export type CreateAdmin = z.output<typeof CreateAdminSchema>;
+
+export const UpdateAdminSchema = z
+  .object({
+    name: z.string().trim().min(1).max(80),
+    role: AdminRole,
+    isActive: z.boolean(),
+  })
+  .partial()
+  .refine((d) => Object.keys(d).length > 0, 'Không có trường nào để cập nhật');
+export type UpdateAdmin = z.infer<typeof UpdateAdminSchema>;
+
+export const SetAdminPasswordSchema = z.object({ password: AdminPasswordSchema });
+export type SetAdminPassword = z.infer<typeof SetAdminPasswordSchema>;
+
+export interface AdminTeamMemberDto {
+  id: string;
+  email: string;
+  name: string;
+  role: AdminRole;
+  isActive: boolean;
+  lastActiveAt: string | null;
+  createdAt: string;
+  /** Chính mình — giao diện chặn tự hạ quyền hoặc tự tắt tài khoản. */
+  isMe: boolean;
+}
+
+export interface AdminTeamDto {
+  items: AdminTeamMemberDto[];
+  /** Thiếu `SUPABASE_SERVICE_ROLE_KEY` thì không tạo được tài khoản mới / đổi mật khẩu. */
+  canCreateAccounts: boolean;
+}
+
 // ─────────────── Hàng đợi nhắc ───────────────
 
 export interface AdminQueueDto {
@@ -324,4 +376,8 @@ export const AUDIT_ACTIONS = {
   servicePlanUpsert: 'service_plan.upsert',
   priceReportApprove: 'price_report.approve',
   priceReportReject: 'price_report.reject',
+  adminCreate: 'admin.create',
+  adminUpdate: 'admin.update',
+  adminPassword: 'admin.password',
+  adminRemove: 'admin.remove',
 } as const;

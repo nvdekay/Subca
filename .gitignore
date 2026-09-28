@@ -32,3 +32,6 @@ apps/api/src/generated/
 .vscode/*
 !.vscode/extensions.json
 *.log
+
+# Thông tin đăng nhập admin sinh ra khi chạy scripts/create-admin.ts
+.admin-account.local

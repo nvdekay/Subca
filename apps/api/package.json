@@ -27,7 +27,8 @@
     "postinstall": "prisma generate",
     "prisma:seed": "prisma db seed",
     "test:int": "vitest run --config ./vitest.config.int.ts",
-    "fx:sync": "tsx scripts/fx-sync.ts"
+    "fx:sync": "tsx scripts/fx-sync.ts",
+    "admin:create": "tsx scripts/create-admin.ts"
   },
   "dependencies": {
     "@nestjs/bullmq": "^12.0.0",

@@ -13,6 +13,9 @@ import {
 } from '@nestjs/common';
 import {
   ADMIN_PERMISSIONS,
+  CreateAdminSchema,
+  SetAdminPasswordSchema,
+  UpdateAdminSchema,
   AdminServicesQuerySchema,
   AdminUsersQuerySchema,
   AuditLogsQuerySchema,
@@ -29,18 +32,23 @@ import {
   type AdminQueueDto,
   type AdminServiceDto,
   type AdminServicesQuery,
+  type AdminTeamDto,
+  type AdminTeamMemberDto,
   type AdminUserDetailDto,
   type AdminUsersDto,
   type AdminUsersQuery,
   type AuditLogsDto,
   type AuditLogsQuery,
   type BanUser,
+  type CreateAdmin,
   type CreateService,
   type GrantPlus,
   type PriceReportDto,
   type PriceReportsDto,
   type PriceReportsQuery,
   type ReviewPriceReport,
+  type SetAdminPassword,
+  type UpdateAdmin,
   type UpdateService,
   type UpsertServicePlan,
 } from '@subca/shared';
@@ -50,6 +58,7 @@ import type { AdminUser } from '../generated/prisma/client.js';
 import { AdminCatalogService } from './admin-catalog.service.js';
 import { AdminOverviewService } from './admin-overview.service.js';
 import { AdminQueueService } from './admin-queue.service.js';
+import { AdminTeamService } from './admin-team.service.js';
 import { AdminUsersService } from './admin-users.service.js';
 import {
   AdminGuard,
@@ -67,6 +76,7 @@ export class AdminController {
     private readonly users: AdminUsersService,
     private readonly catalog: AdminCatalogService,
     private readonly queue: AdminQueueService,
+    private readonly team: AdminTeamService,
   ) {}
 
   @Get('me')
@@ -228,6 +238,57 @@ export class AdminController {
     @ClientIp() ip: string | null,
   ): Promise<PriceReportDto> {
     return this.catalog.reviewPriceReport(admin, id, body, ip);
+  }
+
+  // ─────────────── Nhân sự & phân quyền ───────────────
+
+  @Get('team')
+  listTeam(@CurrentAdmin() admin: AdminUser): Promise<AdminTeamDto> {
+    return this.team.list(admin);
+  }
+
+  @Post('team')
+  @RequireAdmin('manageTeam')
+  createAdmin(
+    @CurrentAdmin() admin: AdminUser,
+    @Body(new ZodValidationPipe(CreateAdminSchema)) body: CreateAdmin,
+    @ClientIp() ip: string | null,
+  ): Promise<AdminTeamMemberDto> {
+    return this.team.create(admin, body, ip);
+  }
+
+  @Patch('team/:id')
+  @RequireAdmin('manageTeam')
+  updateAdmin(
+    @CurrentAdmin() admin: AdminUser,
+    @Param('id', uuidParam) id: string,
+    @Body(new ZodValidationPipe(UpdateAdminSchema)) body: UpdateAdmin,
+    @ClientIp() ip: string | null,
+  ): Promise<AdminTeamMemberDto> {
+    return this.team.update(admin, id, body, ip);
+  }
+
+  @Post('team/:id/password')
+  @RequireAdmin('manageTeam')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  setAdminPassword(
+    @CurrentAdmin() admin: AdminUser,
+    @Param('id', uuidParam) id: string,
+    @Body(new ZodValidationPipe(SetAdminPasswordSchema)) body: SetAdminPassword,
+    @ClientIp() ip: string | null,
+  ): Promise<void> {
+    return this.team.setPassword(admin, id, body, ip);
+  }
+
+  @Delete('team/:id')
+  @RequireAdmin('manageTeam')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  removeAdmin(
+    @CurrentAdmin() admin: AdminUser,
+    @Param('id', uuidParam) id: string,
+    @ClientIp() ip: string | null,
+  ): Promise<void> {
+    return this.team.remove(admin, id, ip);
   }
 
   // ─────────────── Nhật ký ───────────────

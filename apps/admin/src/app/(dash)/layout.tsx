@@ -15,6 +15,10 @@ const NAV: { group: string; items: { href: string; label: string; icon: IconName
     items: [{ href: '/catalog', label: 'Thư viện dịch vụ', icon: 'layers' }],
   },
   {
+    group: 'Quản trị',
+    items: [{ href: '/team', label: 'Nhân sự & phân quyền', icon: 'shield' }],
+  },
+  {
     group: 'Vận hành',
     items: [
       { href: '/queues', label: 'Hàng đợi nhắc', icon: 'server' },
@@ -25,14 +29,14 @@ const NAV: { group: string; items: { href: string; label: string; icon: IconName
 
 /** Khung các trang quản trị: chặn người chưa đăng nhập / chưa qua MFA / không phải admin. */
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  const { loading, session, mfaDone, me, error, signOut } = useAdminSession();
+  const { loading, session, me, error, signOut } = useAdminSession();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
     if (loading) return;
-    if (!session || !mfaDone || error) router.replace('/login');
-  }, [loading, session, mfaDone, error, router]);
+    if (!session || error) router.replace('/login');
+  }, [loading, session, error, router]);
 
   if (loading || !me) {
     return (
