@@ -54,7 +54,15 @@ export class GroupPaymentsService {
         message: 'Đây không phải khoản của bạn',
       });
     }
-    this.assertOpen(payment);
+    // Chỉ báo được một lần: bấm lại sẽ gửi push trùng cho chủ nhóm
+    if (payment.status !== 'PENDING') {
+      throw badRequest(
+        'PAYMENT_ALREADY_DONE',
+        payment.status === 'CLAIMED_PAID'
+          ? 'Bạn đã báo đã chuyển, đang chờ chủ nhóm xác nhận'
+          : 'Khoản này đã xong, không cần thao tác nữa',
+      );
+    }
     await this.prisma.groupPayment.update({
       where: { id: payment.id },
       data: { status: 'CLAIMED_PAID', claimedAt: new Date() },
