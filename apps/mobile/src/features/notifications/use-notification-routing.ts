@@ -26,11 +26,14 @@ export function useNotificationRouting() {
     const data = response.notification.request.content.data as {
       subscriptionId?: string;
       reminderId?: string;
+      groupId?: string;
     };
     if (data.reminderId) {
       api(`/reminders/${data.reminderId}/opened`, { method: 'POST' }).catch(() => undefined);
     }
-    if (data.subscriptionId) {
+    if (data.groupId) {
+      router.push({ pathname: '/groups/[id]', params: { id: data.groupId } });
+    } else if (data.subscriptionId) {
       router.push({ pathname: '/subscriptions/[id]', params: { id: data.subscriptionId } });
     }
   }, [response]);

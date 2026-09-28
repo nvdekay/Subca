@@ -35,7 +35,10 @@ export type IconName =
   | 'more'
   | 'settings'
   | 'users'
-  | 'link';
+  | 'link'
+  | 'copy'
+  | 'qr'
+  | 'minus';
 
 export const ICONS: Record<IconName, IconElement[]> = {
   home: [
@@ -183,4 +186,15 @@ export const ICONS: Record<IconName, IconElement[]> = {
     { t: 'path', p: { d: 'M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7' } },
     { t: 'path', p: { d: 'M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7' } },
   ],
+  copy: [
+    { t: 'rect', p: { x: '9', y: '9', width: '12', height: '12', rx: '2.5' } },
+    { t: 'path', p: { d: 'M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1' } },
+  ],
+  qr: [
+    { t: 'rect', p: { x: '3', y: '3', width: '7', height: '7', rx: '1.5' } },
+    { t: 'rect', p: { x: '14', y: '3', width: '7', height: '7', rx: '1.5' } },
+    { t: 'rect', p: { x: '3', y: '14', width: '7', height: '7', rx: '1.5' } },
+    { t: 'path', p: { d: 'M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3' } },
+  ],
+  minus: [{ t: 'path', p: { d: 'M5 12h14' } }],
 };

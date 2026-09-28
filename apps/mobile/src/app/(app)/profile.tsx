@@ -241,6 +241,13 @@ export default function Settings() {
           onPress={() => router.push('/trials')}
           divider
         />
+        <SetRow
+          icon="users"
+          bg={colors.stone}
+          title="Chia tiền nhóm"
+          onPress={() => router.push('/groups')}
+          divider
+        />
       </Group>
 
       <GroupLabel title="Khác" />

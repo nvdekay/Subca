@@ -1,9 +1,9 @@
 import type { AnalyticsDto, CurrencyCode } from '@subca/shared';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
 import { useState, type ReactNode } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, View } from 'react-native';
+import { FxAttribution } from '@/components/fx-attribution';
 import { Screen } from '@/components/screen';
 import { ServiceLogo } from '@/components/service-logo';
 import { Button } from '@/components/ui/button';
@@ -182,16 +182,7 @@ function AnalyticsBody({ data }: { data: AnalyticsDto }) {
         </View>
       </ChartCard>
 
-      <Pressable
-        accessibilityRole="link"
-        className="mt-6 items-center"
-        onPress={() => WebBrowser.openBrowserAsync('https://www.exchangerate-api.com')}
-      >
-        <Text className="text-[12px] leading-[17px] text-ink-3">
-          Số đã quy đổi theo tỷ giá{' '}
-          <Text className="text-[12px] text-sky-deep underline">Rates By Exchange Rate API</Text>
-        </Text>
-      </Pressable>
+      <FxAttribution label="Số đã quy đổi theo tỷ giá" />
     </>
   );
 }

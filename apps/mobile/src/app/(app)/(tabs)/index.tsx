@@ -1,8 +1,8 @@
 import { FREE_LIMITS, type HomeDto } from '@subca/shared';
 import { router, type Href } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
 import type { ReactNode } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, View } from 'react-native';
+import { FxAttribution } from '@/components/fx-attribution';
 import { Screen } from '@/components/screen';
 import { UpcomingRow } from '@/components/subscription-row';
 import { Button } from '@/components/ui/button';
@@ -171,6 +171,8 @@ function TrackedContent({ data, tracked }: { data: HomeDto; tracked: number }) {
 
       {data.budget ? <BudgetCard budget={data.budget} currency={data.currency} /> : null}
 
+      <GroupsEntry />
+
       <SectionHead title="Sắp gia hạn" action={{ label: 'Xem tất cả', href: '/subscriptions' }} />
       {data.upcoming.length > 0 ? (
         <View className="gap-[10px]">
@@ -220,6 +222,24 @@ function EmptyHome() {
         className="mt-2 self-stretch"
         onPress={() => router.push('/add')}
       />
+    </Card>
+  );
+}
+
+/** Lối vào Chia tiền nhóm; số liệu nhóm nằm ở màn riêng (/home chỉ lo subscription). */
+function GroupsEntry() {
+  return (
+    <Card className="mt-3 flex-row items-center gap-3" onPress={() => router.push('/groups')}>
+      <View className="h-10 w-10 items-center justify-center rounded-[14px] bg-mint">
+        <Icon name="users" size={20} color="#2E5B45" />
+      </View>
+      <View className="flex-1">
+        <Text weight="bold">Chia tiền nhóm</Text>
+        <Text className="text-[12.5px] leading-[18px] text-ink-3">
+          Chia gói gia đình, nhắc bạn bè chuyển tiền
+        </Text>
+      </View>
+      <Icon name="chev" size={18} color={colors['ink-3']} />
     </Card>
   );
 }
@@ -349,21 +369,5 @@ function SectionHead({ title, action }: { title: string; action?: { label: strin
         </Pressable>
       ) : null}
     </View>
-  );
-}
-
-/** Điều khoản ExchangeRate-API bắt buộc ghi nguồn ở nơi hiện số đã quy đổi. */
-function FxAttribution() {
-  return (
-    <Pressable
-      accessibilityRole="link"
-      className="mt-6 items-center"
-      onPress={() => WebBrowser.openBrowserAsync('https://www.exchangerate-api.com')}
-    >
-      <Text className="text-[12px] leading-[17px] text-ink-3">
-        Tổng đã quy đổi theo tỷ giá{' '}
-        <Text className="text-[12px] text-sky-deep underline">Rates By Exchange Rate API</Text>
-      </Text>
-    </Pressable>
   );
 }
