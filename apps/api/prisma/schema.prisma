@@ -918,7 +918,9 @@ model SubscriptionEvent {
   subscription Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
   service      Service?      @relation(fields: [serviceId], references: [id], onDelete: SetNull)
 
-  @@unique([sourceRef, eventType])
+  /// Một email (sourceRef) có thể sinh nhiều sự kiện nếu là hóa đơn gộp nhiều dịch vụ,
+  /// nên merchantKey nằm trong khóa chống trùng.
+  @@unique([sourceRef, eventType, merchantKey])
   @@index([userId, merchantKey, occurredAt])
   @@index([subscriptionId, occurredAt])
   @@map("subscription_events")

@@ -4,9 +4,10 @@ import {
   extractAmount,
   extractDate,
   extractInterval,
+  extractLineItems,
   toMinorFromRaw,
 } from './extract.js';
-import { parseEmail } from './parser.js';
+import { parseEmail, parseEmails } from './parser.js';
 
 const email = (over: Partial<EmailCandidate>): EmailCandidate => ({
   messageId: 'm1',
@@ -160,7 +161,7 @@ describe('parseEmail', () => {
       merchantKey: 'openai',
       amountMinor: 2000n,
       currency: 'USD',
-      serviceSlug: 'chatgpt',
+      serviceSlug: 'chatgpt-plus',
     });
   });
 
@@ -258,5 +259,126 @@ describe('parseEmail', () => {
         }),
       ),
     ).toBeNull();
+  });
+});
+
+describe('tách mục hàng trong hóa đơn', () => {
+  it('đọc từng dòng "tên dịch vụ + tiền", bỏ dòng tổng và thuế', () => {
+    const items = extractLineItems(
+      [
+        'Spotify Premium (Monthly)   59.000 ₫',
+        'iCloud+ 200GB               59.000 ₫',
+        'Subtotal                   118.000 ₫',
+        'Thuế VAT                     9.000 ₫',
+        'Tổng cộng                  127.000 ₫',
+      ].join('\n'),
+    );
+    expect(items).toEqual([
+      {
+        label: 'Spotify Premium (Monthly)',
+        amountMinor: 59000n,
+        currency: 'VND',
+        interval: { intervalUnit: 'MONTH', intervalCount: 1 },
+      },
+      { label: 'iCloud+ 200GB', amountMinor: 59000n, currency: 'VND' },
+    ]);
+  });
+
+  it('tiền nằm ở dòng riêng (thư HTML dạng bảng) vẫn ghép được với tên phía trên', () => {
+    const items = extractLineItems(
+      ['Duolingo Super', 'Yearly', '$83.88', 'Notion Plus', '$10.00'].join(
+        '\n',
+      ),
+    );
+    expect(items).toMatchObject([
+      {
+        label: 'Yearly',
+        amountMinor: 8388n,
+        currency: 'USD',
+        interval: { intervalUnit: 'YEAR', intervalCount: 1 },
+      },
+      { label: 'Notion Plus', amountMinor: 1000n, currency: 'USD' },
+    ]);
+  });
+});
+
+describe('hóa đơn gộp nhiều dịch vụ', () => {
+  const appleReceipt = email({
+    sender: 'Apple <no_reply@email.apple.com>',
+    senderEmail: 'no_reply@email.apple.com',
+    senderDomain: 'apple.com',
+    subject: 'Your receipt from Apple',
+    textContent: [
+      'Spotify Premium (Monthly)      59.000 ₫',
+      'iCloud+ 200GB                  59.000 ₫',
+      'Bear Pro (Yearly)             399.000 ₫',
+      'Tổng cộng                     517.000 ₫',
+    ].join('\n'),
+  });
+
+  it('mỗi dịch vụ trong biên nhận Apple thành một sự kiện riêng', () => {
+    const events = parseEmails(appleReceipt);
+    expect(events.map((e) => e.merchantKey)).toEqual([
+      'spotify',
+      'icloud',
+      'bear-pro',
+    ]);
+    expect(events.map((e) => e.amountMinor)).toEqual([59000n, 59000n, 399000n]);
+    expect(events.every((e) => e.parser === 'aggregate:apple')).toBe(true);
+    expect(events[0]).toMatchObject({
+      eventType: 'PAYMENT_SUCCESS',
+      serviceSlug: 'spotify',
+      intervalUnit: 'MONTH',
+    });
+    expect(events[2]).toMatchObject({
+      merchantName: 'Bear Pro',
+      intervalUnit: 'YEAR',
+      intervalCount: 1,
+    });
+  });
+
+  it('dịch vụ lạ trong hóa đơn có độ tin cậy thấp hơn dịch vụ đã biết', () => {
+    const events = parseEmails(appleReceipt);
+    expect(events[2]!.confidence).toBeLessThan(events[0]!.confidence);
+  });
+
+  it('hóa đơn Google Play gộp hai app', () => {
+    const events = parseEmails(
+      email({
+        sender: 'Google Play <googleplay-noreply@google.com>',
+        senderEmail: 'googleplay-noreply@google.com',
+        senderDomain: 'google.com',
+        subject: 'Hóa đơn Google Play của bạn',
+        textContent: [
+          'Cảm ơn bạn đã thanh toán.',
+          'YouTube Premium   79.000₫',
+          'ELSA Speak        149.000₫',
+        ].join('\n'),
+      }),
+    );
+    expect(events.map((e) => e.merchantKey)).toEqual(['youtube', 'elsa']);
+    expect(events.map((e) => e.serviceSlug)).toEqual([
+      'youtube-premium',
+      'elsa-speak',
+    ]);
+  });
+
+  it('hóa đơn gộp chỉ có một dịch vụ vẫn đi đường thường (giữ được ngày gia hạn)', () => {
+    const events = parseEmails(
+      email({
+        sender: 'Apple <no_reply@email.apple.com>',
+        senderEmail: 'no_reply@email.apple.com',
+        senderDomain: 'apple.com',
+        subject: 'Your receipt from Apple',
+        textContent:
+          'Spotify Premium (Monthly) 59.000₫. Your subscription renews on 2026-10-18.',
+      }),
+    );
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({
+      merchantKey: 'spotify',
+      renewalDate: '2026-10-18',
+      parser: 'merchant:spotify',
+    });
   });
 });

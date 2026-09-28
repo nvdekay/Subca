@@ -206,3 +206,104 @@ export function extractPlanName(text: string): string | null {
     .replace(/\s{2,}/g, ' ')
     .slice(0, 40);
 }
+
+export interface LineItem {
+  /** Tên dịch vụ đọc được trên dòng, VD "Spotify Premium". */
+  label: string;
+  amountMinor: bigint;
+  currency: CurrencyCode;
+  interval?: ExtractedInterval;
+}
+
+/** Tiền ở bất kỳ đâu trong một dòng — cần cả vị trí để tách phần tên đứng trước. */
+const AMOUNT_IN_LINE =
+  /(us\$|\$|€|¥|₫)\s?([\d.,]+)|([\d.,]+)\s?(vnđ|vnd|usd|eur|jpy|đ|₫)(?![\p{L}\d])/giu;
+
+/** Dòng tổng kết / thông tin đơn hàng — không phải một dịch vụ. */
+const NOT_AN_ITEM =
+  /(sub)?total|tổng|thành tiền|\btax\b|\bvat\b|thuế|order (id|number|total)|mã đơn|invoice (number|no|date)|payment method|phương thức|card ending|thẻ|balance|credit|refund|discount|giảm giá|shipping|billed to|renews? on|next (billing|charge)|gia hạn|ngày|date/i;
+
+/** Ký tự dẫn đầu của dòng liệt kê: "• ", "- ", "1 x ", "2. ". */
+const ITEM_PREFIX = /^\s*(?:[•·*\-–—]|\d+\s*[x×.)]|\(\d+\))\s*/i;
+
+/**
+ * Tách các dòng "tên dịch vụ + số tiền" trong một hóa đơn gộp (Apple, Google Play, PayPal…).
+ *
+ * Hai kiểu trình bày đều gặp:
+ * - cùng dòng: `Spotify Premium (Monthly)    59.000 ₫`
+ * - tiền xuống dòng riêng (thư HTML dạng bảng đổi sang text): tên ở dòng trên, tiền ở dòng dưới
+ */
+export function extractLineItems(text: string): LineItem[] {
+  const items: LineItem[] = [];
+  /** Các dòng chữ chưa gắn được với số tiền nào — để dùng khi tiền nằm ở dòng riêng. */
+  let pending: string[] = [];
+
+  for (const rawLine of text.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line) continue;
+
+    const last = lastAmountInLine(line);
+    if (!last) {
+      if (!NOT_AN_ITEM.test(line) && isLabel(line)) pending.push(line);
+      else pending = [];
+      continue;
+    }
+
+    if (NOT_AN_ITEM.test(line.slice(0, last.index))) {
+      pending = [];
+      continue;
+    }
+
+    const inline = cleanLabel(line.slice(0, last.index));
+    const label = inline || pending.at(-1) || '';
+    if (!isLabel(label)) {
+      pending = [];
+      continue;
+    }
+
+    const item: LineItem = {
+      label,
+      amountMinor: last.amountMinor,
+      currency: last.currency,
+    };
+    // Chu kỳ có thể nằm ở dòng mô tả ngay trên ("Monthly"), nên xét cả cụm
+    const interval = extractInterval([...pending, line].join(' '));
+    if (interval) item.interval = interval;
+    items.push(item);
+    pending = [];
+  }
+  return items;
+}
+
+/** Số tiền cuối cùng trên dòng (hóa đơn để tiền ở cột phải) kèm vị trí bắt đầu. */
+function lastAmountInLine(
+  line: string,
+): (ExtractedAmount & { index: number }) | null {
+  let found: (ExtractedAmount & { index: number }) | null = null;
+  for (const match of line.matchAll(AMOUNT_IN_LINE)) {
+    const symbolFirst = match[1] !== undefined;
+    const rawSymbol = (symbolFirst ? match[1]! : match[4]!).toLowerCase();
+    const rawNumber = symbolFirst ? match[2]! : match[3]!;
+    const currency = CURRENCY_SYMBOLS[rawSymbol];
+    if (!currency) continue;
+    const amountMinor = toMinorFromRaw(rawNumber, currency);
+    if (amountMinor === null || amountMinor <= 0n) continue;
+    found = { amountMinor, currency, index: match.index };
+  }
+  return found;
+}
+
+function cleanLabel(raw: string): string {
+  return raw
+    .replace(ITEM_PREFIX, '')
+    .replace(/[\s.·…\-–—:|]+$/, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+/** Tên dịch vụ hợp lệ: đủ ngắn, có chữ, không phải một cụm ngày tháng hay số hiệu. */
+function isLabel(label: string): boolean {
+  if (label.length < 2 || label.length > 60) return false;
+  const letters = label.replace(/[^\p{L}]/gu, '');
+  return letters.length >= 2;
+}

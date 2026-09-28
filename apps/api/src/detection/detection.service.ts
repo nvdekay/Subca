@@ -22,7 +22,7 @@ import {
   TRACKED_STATUSES,
 } from '../subscriptions/subscriptions.service.js';
 import { merchantByKey } from './merchants.js';
-import { PARSER_VERSION, parseEmail, type DetectedEvent } from './parser.js';
+import { PARSER_VERSION, parseEmails, type DetectedEvent } from './parser.js';
 import { reconcile, type EventFacts } from './reconcile.js';
 
 export interface ProcessResult {
@@ -49,6 +49,9 @@ export class DetectionService {
   /**
    * Xử lý một lô email: bỏ thư đã xử lý, parse, ghi sự kiện. Cùng một `providerMessageId`
    * không bao giờ tạo sự kiện hai lần (khóa unique ở cả `processed_emails` lẫn `subscription_events`).
+   *
+   * Một email có thể sinh **nhiều** sự kiện: hóa đơn gộp của Apple / Google Play liệt kê
+   * mấy dịch vụ trong cùng một thư.
    */
   async processCandidates(
     userId: string,
@@ -71,11 +74,11 @@ export class DetectionService {
     let events = 0;
     for (const email of emails) {
       if (seenIds.has(email.messageId)) continue;
-      let detected: DetectedEvent | null = null;
+      let detected: DetectedEvent[] = [];
       let parseStatus: 'PARSED' | 'NO_MATCH' | 'FAILED' = 'NO_MATCH';
       try {
-        detected = parseEmail(email);
-        if (detected) {
+        detected = parseEmails(email);
+        if (detected.length > 0) {
           parseStatus = 'PARSED';
           candidates++;
         }
@@ -86,8 +89,9 @@ export class DetectionService {
         );
       }
 
-      if (detected && (await this.storeEvent(userId, email, detected)))
-        events++;
+      for (const event of detected) {
+        if (await this.storeEvent(userId, email, event)) events++;
+      }
       await this.markProcessed(accountId, email, parseStatus);
     }
     return { scanned: emails.length, candidates, events };
@@ -133,7 +137,8 @@ export class DetectionService {
       await this.prisma.subscriptionEvent.create({ data });
       return true;
     } catch {
-      // Trùng (sourceRef, eventType) — email đã sinh sự kiện này rồi
+      // Trùng (sourceRef, eventType, merchantKey) — email đã sinh sự kiện này rồi.
+      // Khóa có merchantKey để hóa đơn gộp ghi được mỗi dịch vụ một sự kiện.
       return false;
     }
   }

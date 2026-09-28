@@ -10,18 +10,22 @@ import {
   extractAmount,
   extractDate,
   extractInterval,
+  extractLineItems,
   extractPlanName,
+  type LineItem,
 } from './extract.js';
 import {
   merchantByDomain,
   merchantByText,
   merchantKeyFromDomain,
+  merchantKeyFromLabel,
   merchantNameFromDomain,
+  merchantNameFromLabel,
   type MerchantRule,
 } from './merchants.js';
 
 /** Đổi parser thì tăng số này để quét lại các email đã xử lý bằng bản cũ. */
-export const PARSER_VERSION = 1;
+export const PARSER_VERSION = 2;
 
 /** Sự kiện parser đọc được. Parser KHÔNG đụng database — engine đối soát mới quyết định ghi gì. */
 export interface DetectedEvent {
@@ -143,17 +147,42 @@ const ACCESS_UNTIL_HINTS =
  *
  * Trả về `null` nếu email không phải chuyện subscription.
  */
-export function parseEmail(email: EmailCandidate): DetectedEvent | null {
+export function parseEmails(email: EmailCandidate): DetectedEvent[] {
   const verdict = classifyCandidate(email);
-  if (!verdict.isCandidate) return null;
+  if (!verdict.isCandidate) return [];
 
   const text = `${email.subject}\n${email.textContent}`;
   // Tiêu đề nói rõ chuyện gì hơn nội dung: mail "dùng thử đã bắt đầu" thường kèm luôn
   // câu "dùng thử kết thúc ngày…", nên xét tiêu đề trước rồi mới tới toàn văn.
   const rule = matchEventRule(email.subject) ?? matchEventRule(text);
-  if (!rule) return null;
+  if (!rule) return [];
 
   const merchant = resolveMerchant(email, text);
+
+  // Hóa đơn gộp (Apple, Google Play, ví điện tử): mỗi dòng là một dịch vụ riêng
+  if (merchant.aggregatorOf) {
+    const split = splitAggregated(email, text, rule, verdict.score, merchant);
+    if (split.length > 0) return split;
+  }
+
+  return [singleEvent(email, text, rule, verdict.score, merchant)];
+}
+
+/**
+ * Bản một-sự-kiện cho những chỗ chỉ cần kết quả chính (test, gỡ lỗi).
+ * Đường chạy thật dùng `parseEmails` vì một email có thể chứa nhiều dịch vụ.
+ */
+export function parseEmail(email: EmailCandidate): DetectedEvent | null {
+  return parseEmails(email)[0] ?? null;
+}
+
+function singleEvent(
+  email: EmailCandidate,
+  text: string,
+  rule: (typeof EVENT_RULES)[number],
+  candidateScore: number,
+  merchant: ResolvedMerchant,
+): DetectedEvent {
   const amount = extractAmount(text);
   const interval = extractInterval(text) ?? merchant.rule?.defaultInterval;
 
@@ -164,7 +193,7 @@ export function parseEmail(email: EmailCandidate): DetectedEvent | null {
     occurredAt: email.receivedAt,
     confidence: scoreConfidence(
       rule.confidence,
-      verdict.score,
+      candidateScore,
       Boolean(amount),
       Boolean(merchant.rule),
     ),
@@ -193,6 +222,95 @@ export function parseEmail(email: EmailCandidate): DetectedEvent | null {
   return event;
 }
 
+/**
+ * Tách hóa đơn gộp thành nhiều sự kiện — một biên nhận Apple có thể gồm iCloud+, Spotify
+ * và một game, mỗi thứ một giá. Coi cả hóa đơn là một subscription thì số tiền sai và
+ * người dùng mất dấu các dịch vụ còn lại.
+ *
+ * Chỉ tách khi đọc được **từ hai dòng trở lên**: một dòng đơn độc thì đường thường xử lý
+ * tốt hơn (còn lấy được cả ngày gia hạn ghi trong thư).
+ */
+function splitAggregated(
+  email: EmailCandidate,
+  text: string,
+  rule: (typeof EVENT_RULES)[number],
+  candidateScore: number,
+  aggregator: ResolvedMerchant,
+): DetectedEvent[] {
+  const aggregatorKey = aggregator.aggregatorOf!.key;
+  const items = extractLineItems(text).filter(
+    (item) => !isAggregatorLabel(item.label, aggregator),
+  );
+  if (items.length < 2) return [];
+
+  const events: DetectedEvent[] = [];
+  const seen = new Set<string>();
+  for (const item of items) {
+    const event = aggregatedEvent(
+      email,
+      rule,
+      candidateScore,
+      aggregatorKey,
+      item,
+    );
+    // Cùng một dịch vụ xuất hiện hai lần trong hóa đơn (bảng tóm tắt + chi tiết) → giữ một
+    if (seen.has(event.merchantKey)) continue;
+    seen.add(event.merchantKey);
+    events.push(event);
+  }
+  return events.length < 2 ? [] : events;
+}
+
+function aggregatedEvent(
+  email: EmailCandidate,
+  rule: (typeof EVENT_RULES)[number],
+  candidateScore: number,
+  aggregatorKey: string,
+  item: LineItem,
+): DetectedEvent {
+  const inner = merchantByText(item.label);
+  const event: DetectedEvent = {
+    eventType: rule.type,
+    merchantKey: inner?.key ?? merchantKeyFromLabel(item.label),
+    merchantName: inner?.name ?? merchantNameFromLabel(item.label),
+    amountMinor: item.amountMinor,
+    currency: item.currency,
+    occurredAt: email.receivedAt,
+    confidence: scoreConfidence(
+      rule.confidence,
+      candidateScore,
+      true,
+      Boolean(inner),
+    ),
+    parser: `aggregate:${aggregatorKey}`,
+  };
+  if (inner?.serviceSlug) event.serviceSlug = inner.serviceSlug;
+
+  const planName = extractPlanName(item.label);
+  if (planName) event.planName = planName;
+
+  const interval = item.interval ?? inner?.defaultInterval;
+  if (interval) {
+    event.intervalUnit = interval.intervalUnit;
+    event.intervalCount = interval.intervalCount;
+  }
+  // Ngày trong hóa đơn gộp (ngày lập, tổng kỳ tới) không gắn riêng cho dòng nào,
+  // nên không gán renewalDate ở đây — engine đối soát tự chiếu từ các lần trừ tiền.
+  return event;
+}
+
+/** Dòng nói về chính cửa hàng ("Apple One", "Google Play") chứ không phải một dịch vụ lẻ. */
+function isAggregatorLabel(
+  label: string,
+  aggregator: ResolvedMerchant,
+): boolean {
+  const rule = aggregator.aggregatorOf!;
+  const lower = label.toLowerCase();
+  return [rule.name, ...(rule.aliases ?? [])].some(
+    (name) => lower === name.toLowerCase(),
+  );
+}
+
 function matchEventRule(text: string): (typeof EVENT_RULES)[number] | null {
   return EVENT_RULES.find((rule) => rule.pattern.test(text)) ?? null;
 }
@@ -201,6 +319,8 @@ interface ResolvedMerchant {
   key: string;
   name: string;
   rule?: MerchantRule;
+  /** Cửa hàng gộp đã gửi email này (nếu có) — dùng để tách hóa đơn nhiều dịch vụ. */
+  aggregatorOf?: MerchantRule;
 }
 
 /**
@@ -214,7 +334,14 @@ function resolveMerchant(
   const byDomain = merchantByDomain(email.senderDomain);
   if (byDomain?.aggregator) {
     const inner = merchantByText(text);
-    if (inner) return { key: inner.key, name: inner.name, rule: inner };
+    if (inner)
+      return {
+        key: inner.key,
+        name: inner.name,
+        rule: inner,
+        aggregatorOf: byDomain,
+      };
+    return { key: byDomain.key, name: byDomain.name, aggregatorOf: byDomain };
   }
   if (byDomain)
     return { key: byDomain.key, name: byDomain.name, rule: byDomain };

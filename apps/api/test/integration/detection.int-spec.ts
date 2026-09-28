@@ -252,6 +252,58 @@ describe('Tự phát hiện subscription từ email (database thật)', () => {
     ).toBe(0);
   });
 
+  it('hóa đơn gộp của Apple ghi mỗi dịch vụ một sự kiện, quét lại không nhân đôi', async () => {
+    const receipt = email({
+      messageId: 'apple-receipt',
+      sender: 'Apple <no_reply@email.apple.com>',
+      senderEmail: 'no_reply@email.apple.com',
+      senderDomain: 'apple.com',
+      subject: 'Your receipt from Apple',
+      receivedAt: daysAgo(5),
+      textContent: [
+        'Thank you for your payment.',
+        'iCloud+ 200GB                  59.000 ₫',
+        'Apple Music (Monthly)          59.000 ₫',
+        'Bear Pro (Yearly)             399.000 ₫',
+        'Tổng cộng                     517.000 ₫',
+      ].join('\n'),
+    });
+
+    const first = await detection.processCandidates(userId, accountId, [
+      receipt,
+    ]);
+    expect(first).toMatchObject({ scanned: 1, candidates: 1, events: 3 });
+
+    const stored = await prisma.subscriptionEvent.findMany({
+      where: { userId, sourceRef: 'apple-receipt' },
+      orderBy: { merchantKey: 'asc' },
+    });
+    expect(stored.map((e) => e.merchantKey)).toEqual([
+      'apple-music',
+      'bear-pro',
+      'icloud',
+    ]);
+    expect(stored.map((e) => e.amountMinor)).toEqual([59000n, 399000n, 59000n]);
+    // Dịch vụ có trong thư viện thì gắn được service_id để lấy logo và hướng dẫn hủy
+    expect(stored.find((e) => e.merchantKey === 'icloud')?.serviceId).not.toBe(
+      null,
+    );
+
+    // Quét lại: khóa unique (source_ref, event_type, merchant_key) chặn ghi trùng
+    await prisma.processedEmail.deleteMany({
+      where: { accountId, providerMessageId: 'apple-receipt' },
+    });
+    const again = await detection.processCandidates(userId, accountId, [
+      receipt,
+    ]);
+    expect(again.events).toBe(0);
+    expect(
+      await prisma.subscriptionEvent.count({
+        where: { userId, sourceRef: 'apple-receipt' },
+      }),
+    ).toBe(3);
+  });
+
   it('người dùng trả lời trong Inbox thì subscription được cập nhật ngay', async () => {
     const box = await inbox.list(userId);
     const spotify = await prisma.subscription.findFirst({
