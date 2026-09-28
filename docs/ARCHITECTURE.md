@@ -54,6 +54,15 @@ Mỗi 5 phút:
 - Worker kiểm tra lại trước khi gửi (hủy / đổi ngày / tắt thông báo / trễ > 6 giờ → CANCELLED), thử lại 3 lần khi lỗi mạng, xóa token `DeviceNotRegistered`.
 - Mỗi 15 phút kiểm tra push receipt.
 
+### Chia tiền nhóm (`apps/api/src/groups`)
+- Nhóm thu theo **tháng**: mỗi tháng một `group_cycles`, mỗi thành viên (trừ chủ nhóm) một `group_payments`. Kỳ được tạo/đồng bộ **ngay khi mở màn nhóm** (`syncCycle`), không cần job nền; khóa unique `(group_id, period)` nên gọi song song vẫn an toàn.
+- Đổi giá gói hoặc cách chia chỉ sửa khoản còn `PENDING`; khoản đã báo chuyển / đã xác nhận giữ nguyên số tiền để lịch sử không đổi theo.
+- `EQUAL` chia bằng `splitEvenly` (phần lẻ dồn cho người đầu, chủ nhóm đứng đầu danh sách) nên tổng luôn khớp giá gói. `CUSTOM` bắt buộc gửi phần của **mọi** thành viên và tổng khớp giá gói (`SPLIT_TOTAL_MISMATCH`).
+- Trạng thái khoản: `PENDING` → thành viên bấm "Tôi đã chuyển" (`CLAIMED_PAID`) → chủ nhóm xác nhận (`CONFIRMED`) hoặc miễn (`WAIVED`). Chủ nhóm còn **chờ tiền** khi khoản là PENDING hoặc CLAIMED_PAID; với thành viên thì CLAIMED_PAID đã coi như xong nên không hiện trong "cần trả".
+- Nhắc trả tiền gửi push ngay (không qua BullMQ) vì luôn do người dùng bấm; chặn nhắc lại cùng một người trong 6 giờ (`REMIND_TOO_SOON`, 429). Người chưa tham gia nhóm thì không nhắc được (`MEMBER_NOT_JOINED`) — gửi lại link mời.
+- Link mời `subca.app/j/<mã>`: mã 8 ký tự không có 0/O, 1/I. Vào nhóm nhận **chỗ trống đầu tiên**; hết chỗ thì `GROUP_FULL`. **Chưa có Universal Links / App Links** (cần tên miền), tạm thời app nhập mã bằng tay.
+- **Mã QR VietQR** (`packages/shared/src/vietqr.ts`): server sinh chuỗi EMVCo + NAPAS247 (QRIBFTTA) kèm CRC-16/CCITT-FALSE, app chỉ vẽ lại. Thành viên nhận QR đúng phần của mình; chủ nhóm chỉ điền sẵn số tiền khi chia đều. Chỉ có QR với nhóm tính bằng VND. Danh sách BIN ngân hàng là **danh sách tham khảo, cần đối chiếu với NAPAS trước khi ra mắt**.
+
 ### Tiền & tỷ giá
 - `FxService.rateTable(target, sources, today)` lấy tỷ giá mới nhất ≤ hôm nay; job lưu đủ 12 cặp VND/USD/EUR/JPY mỗi ngày; kiểm tra khoảng hợp lý trước khi lưu.
 
@@ -78,4 +87,5 @@ Mỗi 5 phút:
 - Xu hướng 6 tháng trong `/analytics` là **ước tính** (lịch sử trừ tiền mới bắt đầu ghi).
 - Chi phí mỗi lần dùng dựa trên mức độ sử dụng người dùng tự chọn (`USES_PER_MONTH`).
 - Giá các gói trong seed là **giá tham khảo**, chưa xác minh.
+- Chia tiền nhóm chỉ hỗ trợ chu kỳ **tháng** (kỳ thu = 1 tháng), chưa chia gói năm.
 - Lượt chạy nhắc nhở / tỷ giá chạy trên mọi instance API (an toàn nhờ khóa unique + upsert); khi scale nên chỉ bật ở 1 instance.

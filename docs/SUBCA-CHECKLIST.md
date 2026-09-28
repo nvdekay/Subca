@@ -1,12 +1,12 @@
 # Subca — Checklist tổng
 
-> Cập nhật: 27/09/2026 · Đánh dấu `[x]` khi xong.
+> Cập nhật: 28/09/2026 · Đánh dấu `[x]` khi xong.
 > File liên quan: `design/subca-mobile-mockup.html` (app), `design/subca-admin-dashboard.html` (admin).
 > Repo: https://github.com/nvdekay/Subca (nhánh `main`, CI xanh). Tài liệu kỹ thuật: `docs/ARCHITECTURE.md`, hướng dẫn cho Claude: `CLAUDE.md`.
 
-### Hiện trạng (27/09/2026, cuối ngày)
+### Hiện trạng (28/09/2026)
 
-**Đang ở:** Giai đoạn 1–2. **API xong; app mobile đã có đủ các màn lõi** (chạy thật trên simulator iOS với Supabase dev); admin mới có khung.
+**Đang ở:** Giai đoạn 1–2 xong phần làm được; đã làm trước **chia tiền nhóm** của Giai đoạn 3 (API + app). Admin mới có khung.
 
 **Đã xong**
 - Mockup app (16 màn) + admin (12 trang) trong `design/`; template email mã đăng nhập `design/email/otp-code.html`.
@@ -14,8 +14,9 @@
 - Supabase dev (Tokyo): 26 bảng, RLS mọi bảng, trigger đăng ký / xóa tài khoản, 3 migration, seed 53 dịch vụ, tỷ giá thật. **Auth:** email OTP 6 số qua SMTP Gmail (dev), template tiếng Việt đã áp.
 - API: xác thực JWT Supabase, `/me` (+ cài đặt, ngân sách, xóa tài khoản), thư viện dịch vụ, subscription CRUD (giới hạn Free, chi tiết kèm thanh toán / hướng dẫn hủy / lịch sử trừ tiền), `/home`, phương thức thanh toán, lịch, đánh giá tháng, phân tích, push token, nhắc nhở BullMQ + Expo Push + receipt, job tỷ giá.
 - **App mobile** (`apps/mobile`): design system theo mockup (NativeWind), đăng nhập OTP 6 số (đếm ngược gửi lại), Trang chủ, Danh sách / Thêm / Sửa / Chi tiết subscription, Lịch, Quản lý Trial, Đánh giá tháng (optimistic), Phân tích, Ngân sách (mô phỏng tiết kiệm), Phương thức thanh toán (tạo ngay trong form + màn phụ), Cài đặt (tiền tệ, múi giờ, giờ nhắc, ngân sách, đăng xuất, xóa tài khoản), Nhắc nhở (lịch sử + sắp tới + cài mốc nhắc), đăng ký push token (EAS project `@nvdeekay/subca`), thông báo cục bộ dự phòng, cache dữ liệu trên máy (MMKV mã hóa).
+- **Chia tiền nhóm (Giai đoạn 3):** API đầy đủ (`/groups`: tạo nhóm từ gói đang trả, chia đều / tùy chỉnh có kiểm tra tổng, mã mời, kỳ thu theo tháng, "Tôi đã chuyển" → chủ nhóm xác nhận / miễn / mở lại, nhắc từng người hoặc tất cả có chặn nhắc dồn, mã QR VietQR) + 2 màn trong app (Chia tiền nhóm, Chi tiết nhóm).
 - **Quyết định sản phẩm:** đã **bỏ danh mục** khỏi app + API (bảng còn trong DB, không dùng) — xem `docs/ARCHITECTURE.md`.
-- Test: shared 51 · API unit + e2e (CI) · 28 tích hợp trên Supabase + Redis thật (`test:int`).
+- Test: shared 79 · API unit + e2e (CI) · tích hợp trên Supabase + Redis thật (`test:int`).
 
 **Việc của chủ dự án (đang chờ)**
 1. **Đổi mật khẩu database Supabase** (đã lộ trong chat) rồi sửa `DATABASE_URL` / `DIRECT_URL` trong `apps/api/.env`.
@@ -24,12 +25,14 @@
 4. Quyết định có chuyển project dev từ Tokyo sang Singapore (production bắt buộc Singapore).
 5. **Đăng ký Apple Developer + Google Play** (cần cho đăng nhập Apple/Google, mua trong app, push thật trên máy).
 6. Xác minh giá các gói trong seed.
+7. **Đối chiếu danh sách BIN ngân hàng VietQR** (`packages/shared/src/vietqr.ts`) với bảng công bố của NAPAS trước khi ra mắt.
 
 **Việc kỹ thuật tiếp theo (gợi ý thứ tự)**
-1. **App mobile (cần thiết bị / tài khoản):** rà soát UI Android (cài Android Studio + emulator trên máy dev) → thử nhận push thật (máy thật + tài khoản Apple, hoặc EAS build Android) → Sentry + PostHog (cần tạo tài khoản) → hàng đợi thao tác khi mất mạng (tùy chọn).
-2. Dọn dữ liệu mẫu trong tài khoản dev `khanhnvd07@gmail.com` khi chủ dự án yêu cầu (subscription có ghi chú `[dữ liệu mẫu]`, 2 phương thức mẫu, ngân sách 800.000đ).
-3. EAS Build (eas.json, development / preview) → TestFlight nội bộ khi có tài khoản Apple.
-4. Giai đoạn 3: Subca Plus (RevenueCat), chia tiền nhóm (API + VietQR), admin v1.
+1. **Chạy thử chia tiền nhóm với database thật** (`pnpm --filter @subca/api test:int` + thử trên simulator): cần mạng không chặn cổng Postgres 5432/6543 — mạng của máy dev hiện đang chặn, dù REST của Supabase vẫn vào được.
+2. **App mobile (cần thiết bị / tài khoản):** rà soát UI Android (cài Android Studio + emulator trên máy dev) → thử nhận push thật (máy thật + tài khoản Apple, hoặc EAS build Android) → Sentry + PostHog (cần tạo tài khoản) → hàng đợi thao tác khi mất mạng (tùy chọn).
+3. Dọn dữ liệu mẫu trong tài khoản dev `khanhnvd07@gmail.com` khi chủ dự án yêu cầu (subscription có ghi chú `[dữ liệu mẫu]`, 2 phương thức mẫu, ngân sách 800.000đ).
+4. EAS Build (eas.json, development / preview) → TestFlight nội bộ khi có tài khoản Apple.
+5. Giai đoạn 3 còn lại: Subca Plus (RevenueCat), admin v1; link mời deep link khi có tên miền `subca.app`.
 
 ---
 
@@ -258,12 +261,14 @@
 - [ ] Khôi phục giao dịch
 
 ### Chia tiền nhóm
-- [ ] Tạo nhóm từ subscription, chọn số người (2–6)
-- [ ] Chia đều / tùy chỉnh, kiểm tra tổng khớp giá gói
-- [ ] Link mời `subca.app/j/...`: Expo Router + Universal Links (file `apple-app-site-association`) + Android App Links (file `assetlinks.json`)
-- [ ] QR chuyển khoản theo chuẩn **VietQR (NAPAS / EMVCo)**
-- [ ] Đánh dấu đã nhận, "Tôi đã chuyển", nhắc thành viên chưa trả
-- [ ] Lịch sử theo tháng
+- [x] Tạo nhóm từ subscription, chọn số người (2–6) — API `POST /groups` + sheet trong app (giới hạn 1 nhóm với gói Free)
+- [x] Chia đều / tùy chỉnh, kiểm tra tổng khớp giá gói (`PUT /groups/:id/split`, lệch thì báo còn thiếu / đang dư)
+- [ ] Link mời `subca.app/j/...`: Expo Router + Universal Links (file `apple-app-site-association`) + Android App Links (file `assetlinks.json`) _(API đã sinh mã mời + `POST /groups/join`; app nhập mã bằng tay — deep link chờ tên miền `subca.app`)_
+- [x] QR chuyển khoản theo chuẩn **VietQR (NAPAS / EMVCo)** — server sinh chuỗi, app vẽ bằng `react-native-qrcode-svg`; **danh sách BIN ngân hàng cần đối chiếu với NAPAS trước khi ra mắt**
+- [x] Đánh dấu đã nhận, "Tôi đã chuyển", nhắc thành viên chưa trả (nhắc từng người / tất cả, chặn nhắc dồn trong 6 giờ, có push cho cả hai phía)
+- [x] Lịch sử theo tháng (mỗi tháng một kỳ thu, tạo tự động khi mở màn nhóm)
+- [ ] Test tích hợp `groups.int-spec.ts` trên Supabase dev (đã viết, **chưa chạy được**: mạng của máy dev chặn cổng Postgres 5432/6543)
+- [ ] Chia gói theo năm / quý (hiện chỉ thu theo tháng)
 
 ### Admin v1
 - [ ] Đăng nhập admin bằng Supabase Auth + bắt buộc MFA (TOTP) + phân quyền theo vai trò (bảng `admin_roles`)
