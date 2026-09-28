@@ -13,6 +13,7 @@ import { Pill } from '@/components/ui/pill';
 import { Progress } from '@/components/ui/progress';
 import { Text } from '@/components/ui/text';
 import { useMe } from '@/features/auth/use-me';
+import { useInbox } from '@/features/detection/queries';
 import { useHome } from '@/features/home/use-home';
 import { formatAmount, formatShort, greeting, splitAmount } from '@/lib/format';
 import { colors } from '@/theme';
@@ -171,6 +172,8 @@ function TrackedContent({ data, tracked }: { data: HomeDto; tracked: number }) {
 
       {data.budget ? <BudgetCard budget={data.budget} currency={data.currency} /> : null}
 
+      <AttentionSection />
+
       <GroupsEntry />
 
       <SectionHead title="Sắp gia hạn" action={{ label: 'Xem tất cả', href: '/subscriptions' }} />
@@ -217,12 +220,51 @@ function EmptyHome() {
         được nhắc trước ngày bị trừ tiền.
       </Text>
       <Button
-        title="Thêm subscription"
+        title="Kết nối Gmail để tự tìm"
         icon="chev"
         className="mt-2 self-stretch"
+        onPress={() => router.push('/connections')}
+      />
+      <Button
+        title="Tự thêm bằng tay"
+        variant="ghost"
+        className="self-stretch"
         onPress={() => router.push('/add')}
       />
     </Card>
+  );
+}
+
+/**
+ * "Cần bạn chú ý" — việc Subca tự phát hiện nhưng chưa dám tự quyết (gói lạ, đổi giá,
+ * thanh toán lỗi). Không có việc nào thì mục này biến mất.
+ */
+function AttentionSection() {
+  const inbox = useInbox();
+  const items = inbox.data?.items ?? [];
+  if (items.length === 0) return null;
+  return (
+    <>
+      <SectionHead title="Cần bạn chú ý" action={{ label: 'Xem tất cả', href: '/inbox' }} />
+      <View className="gap-[10px]">
+        {items.slice(0, 3).map((item) => (
+          <Card key={item.id} tone="peach" onPress={() => router.push('/inbox')}>
+            <View className="flex-row items-center gap-3">
+              <Icon name="alert" color="#8A4B1E" />
+              <View className="flex-1">
+                <Text weight="bold" className="text-[14.5px]">
+                  {item.title}
+                </Text>
+                <Text className="text-[12.5px] leading-[18px] text-on-peach" numberOfLines={2}>
+                  {item.body}
+                </Text>
+              </View>
+              <Icon name="chev" size={18} color="#8A4B1E" />
+            </View>
+          </Card>
+        ))}
+      </View>
+    </>
   );
 }
 

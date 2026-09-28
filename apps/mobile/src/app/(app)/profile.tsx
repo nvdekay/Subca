@@ -214,6 +214,14 @@ export default function Settings() {
       <GroupLabel title="Quản lý" />
       <Group>
         <SetRow
+          icon="link"
+          bg={colors.mint}
+          title="Kết nối hộp thư"
+          value="Tự tìm subscription"
+          onPress={() => router.push('/connections')}
+          divider
+        />
+        <SetRow
           icon="card"
           bg={colors['sky-soft']}
           title="Phương thức thanh toán"
