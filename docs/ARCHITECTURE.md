@@ -63,6 +63,14 @@ Mỗi 5 phút:
 - Link mời `subca.app/j/<mã>`: mã 8 ký tự không có 0/O, 1/I. Vào nhóm nhận **chỗ trống đầu tiên**; hết chỗ thì `GROUP_FULL`. **Chưa có Universal Links / App Links** (cần tên miền), tạm thời app nhập mã bằng tay.
 - **Mã QR VietQR** (`packages/shared/src/vietqr.ts`): server sinh chuỗi EMVCo + NAPAS247 (QRIBFTTA) kèm CRC-16/CCITT-FALSE, app chỉ vẽ lại. Thành viên nhận QR đúng phần của mình; chủ nhóm chỉ điền sẵn số tiền khi chia đều. Chỉ có QR với nhóm tính bằng VND. Danh sách BIN ngân hàng là **danh sách tham khảo, cần đối chiếu với NAPAS trước khi ra mắt**.
 
+### Admin Console (`apps/api/src/admin`, `apps/admin`)
+- **Đăng nhập:** OTP email như app, nhưng `AdminGuard` bắt buộc phiên đạt `aal2` (đã qua TOTP) — tận dụng luôn claim `aal` trong token Supabase, không cần tự làm MFA. Tài khoản phải có trong `admin_users` và đang bật.
+- **Phân quyền** khai ở một chỗ (`ADMIN_PERMISSIONS` trong shared): API chặn bằng `@RequireAdmin('manageUsers')`, giao diện ẩn nút bằng `can('manageUsers')`.
+- **Nhật ký:** mọi thao tác đổi dữ liệu ghi `audit_logs` kèm IP; khóa tài khoản / tặng Plus là `SENSITIVE`, xóa dữ liệu là `CRITICAL`. Ghi nhật ký lỗi thì chỉ log, không làm hỏng thao tác chính.
+- **Tặng Plus** tạo `entitlements` với store `PROMO` (không đi qua RevenueCat); tặng thêm khi đang còn hạn thì cộng dồn vào quyền cũ.
+- **Hàng đợi:** không dùng Bull Board vì giao diện riêng của nó khó đặt sau lớp đăng nhập có MFA; thay bằng `GET /admin/queues` (số liệu BullMQ + job lỗi) để admin tự vẽ. Redis chết thì trả `connected: false`.
+- Admin không đọc thẳng database: mọi thứ qua API, anon key trong trình duyệt không vượt được RLS.
+
 ### Tiền & tỷ giá
 - `FxService.rateTable(target, sources, today)` lấy tỷ giá mới nhất ≤ hôm nay; job lưu đủ 12 cặp VND/USD/EUR/JPY mỗi ngày; kiểm tra khoảng hợp lý trước khi lưu.
 

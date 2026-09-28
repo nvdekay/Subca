@@ -6,7 +6,7 @@
 
 ### Hiện trạng (28/09/2026)
 
-**Đang ở:** Giai đoạn 1–2 xong phần làm được; đã làm trước **chia tiền nhóm** của Giai đoạn 3 (API + app). Admin mới có khung.
+**Đang ở:** Giai đoạn 1–2 xong phần làm được; Giai đoạn 3 đã xong **chia tiền nhóm** và **Admin Console v1**. Còn lại của GĐ3: Subca Plus (chờ tài khoản store + RevenueCat).
 
 **Đã xong**
 - Mockup app (16 màn) + admin (12 trang) trong `design/`; template email mã đăng nhập `design/email/otp-code.html`.
@@ -15,6 +15,7 @@
 - API: xác thực JWT Supabase, `/me` (+ cài đặt, ngân sách, xóa tài khoản), thư viện dịch vụ, subscription CRUD (giới hạn Free, chi tiết kèm thanh toán / hướng dẫn hủy / lịch sử trừ tiền), `/home`, phương thức thanh toán, lịch, đánh giá tháng, phân tích, push token, nhắc nhở BullMQ + Expo Push + receipt, job tỷ giá.
 - **App mobile** (`apps/mobile`): design system theo mockup (NativeWind), đăng nhập OTP 6 số (đếm ngược gửi lại), Trang chủ, Danh sách / Thêm / Sửa / Chi tiết subscription, Lịch, Quản lý Trial, Đánh giá tháng (optimistic), Phân tích, Ngân sách (mô phỏng tiết kiệm), Phương thức thanh toán (tạo ngay trong form + màn phụ), Cài đặt (tiền tệ, múi giờ, giờ nhắc, ngân sách, đăng xuất, xóa tài khoản), Nhắc nhở (lịch sử + sắp tới + cài mốc nhắc), đăng ký push token (EAS project `@nvdeekay/subca`), thông báo cục bộ dự phòng, cache dữ liệu trên máy (MMKV mã hóa).
 - **Chia tiền nhóm (Giai đoạn 3):** API đầy đủ (`/groups`: tạo nhóm từ gói đang trả, chia đều / tùy chỉnh có kiểm tra tổng, mã mời, kỳ thu theo tháng, "Tôi đã chuyển" → chủ nhóm xác nhận / miễn / mở lại, nhắc từng người hoặc tất cả có chặn nhắc dồn, mã QR VietQR) + 2 màn trong app (Chia tiền nhóm, Chi tiết nhóm).
+- **Admin Console v1** (`apps/admin`): đăng nhập OTP + bắt buộc TOTP, phân quyền 5 vai trò, Tổng quan, Người dùng (khóa / tặng Plus / xóa dữ liệu), Thư viện dịch vụ + duyệt đề xuất giá, Hàng đợi nhắc, Nhật ký thao tác.
 - **Quyết định sản phẩm:** đã **bỏ danh mục** khỏi app + API (bảng còn trong DB, không dùng) — xem `docs/ARCHITECTURE.md`.
 - Test: shared 79 · API unit + e2e (CI) · tích hợp trên Supabase + Redis thật (`test:int`).
 
@@ -28,11 +29,11 @@
 7. **Đối chiếu danh sách BIN ngân hàng VietQR** (`packages/shared/src/vietqr.ts`) với bảng công bố của NAPAS trước khi ra mắt.
 
 **Việc kỹ thuật tiếp theo (gợi ý thứ tự)**
-1. **Chạy thử chia tiền nhóm với database thật** (`pnpm --filter @subca/api test:int` + thử trên simulator): cần mạng không chặn cổng Postgres 5432/6543 — mạng của máy dev hiện đang chặn, dù REST của Supabase vẫn vào được.
+1. **Chạy thử chia tiền nhóm và Admin Console với database thật** (`pnpm --filter @subca/api test:int`, thêm admin đầu tiên vào `admin_users`): cần mạng không chặn cổng Postgres 5432/6543 — mạng của máy dev hiện đang chặn, dù REST của Supabase vẫn vào được.
 2. **App mobile (cần thiết bị / tài khoản):** rà soát UI Android (cài Android Studio + emulator trên máy dev) → thử nhận push thật (máy thật + tài khoản Apple, hoặc EAS build Android) → Sentry + PostHog (cần tạo tài khoản) → hàng đợi thao tác khi mất mạng (tùy chọn).
 3. Dọn dữ liệu mẫu trong tài khoản dev `khanhnvd07@gmail.com` khi chủ dự án yêu cầu (subscription có ghi chú `[dữ liệu mẫu]`, 2 phương thức mẫu, ngân sách 800.000đ).
 4. EAS Build (eas.json, development / preview) → TestFlight nội bộ khi có tài khoản Apple.
-5. Giai đoạn 3 còn lại: Subca Plus (RevenueCat), admin v1; link mời deep link khi có tên miền `subca.app`.
+5. Giai đoạn 3 còn lại: Subca Plus (RevenueCat, cần tài khoản store); link mời deep link khi có tên miền `subca.app`; các trang admin còn lại của mockup (nhân sự, thông báo, hỗ trợ, doanh thu).
 
 ---
 
@@ -89,7 +90,7 @@
 - [ ] **Đăng nhập:** **Supabase Auth** (Apple, Google, email OTP); NestJS xác minh JWT của Supabase ở mọi request
 - [x] **Database:** **Supabase** (PostgreSQL 17), gói Pro cho production (gói Free tự tạm dừng khi không hoạt động, không có backup hằng ngày)
   - Project dev hiện ở **Tokyo (`ap-northeast-1`)**; project production phải chọn **Singapore (`ap-southeast-1`)**
-- [ ] **Admin:** Next.js + shadcn/ui (Vercel) _(Next.js 16 + Tailwind 4 đã khởi tạo; shadcn/ui và Vercel chưa làm)_
+- [x] **Admin:** Next.js 16 + Tailwind 4 _(tự dựng bộ UI nhỏ theo token của mockup thay cho shadcn/ui; chưa deploy Vercel)_
 - [ ] **Phân tích sản phẩm / feature flag / A/B:** PostHog
 - [ ] **Theo dõi lỗi:** Sentry (`@sentry/react-native` + API)
 - [ ] **Email:** Resend (kiêm SMTP riêng cho Supabase Auth) · **Lưu file:** Supabase Storage
@@ -207,7 +208,7 @@
   - [x] Khóa duy nhất `(subscription_id, kind, offset_days, due_date)` + jobId = ID lượt nhắc → không gửi trùng
   - [x] Redis dev bằng `docker compose` (OrbStack), `noeviction` + AOF
   - [x] Kiểm tra **push receipt** của Expo mỗi 15 phút (xác nhận đã tới máy, xóa token lỗi) và `POST /reminders/:id/opened` ghi `opened_at` khi người dùng bấm thông báo
-  - [ ] Trang admin theo dõi hàng đợi (Bull Board) và thống kê lượt nhắc
+  - [x] Trang admin theo dõi hàng đợi và thống kê lượt nhắc — không dùng Bull Board (giao diện riêng khó đặt sau lớp đăng nhập có MFA), thay bằng `GET /admin/queues` + trang "Hàng đợi nhắc"
   - [x] Thông báo cục bộ làm dự phòng (`expo-notifications`): app lấy danh sách nhắc 30 ngày tới từ `GET /reminders` và tự lên lịch tối đa 50 lượt — **chỉ khi máy không có push token** (tránh nhận trùng); mở app là đồng bộ lại, đăng xuất thì hủy
   - [x] Xin quyền thông báo đúng lúc (sau khi thêm subscription đầu tiên, có hộp thoại giải thích trước hộp thoại hệ thống); Android 13+ cần quyền `POST_NOTIFICATIONS` (expo-notifications tự khai báo)
   - [x] App đăng ký push token mỗi lần mở (nếu đã cho phép), gỡ token trước khi đăng xuất; bấm thông báo → ghi `opened` + mở màn Chi tiết _(chưa thử nhận push thật trên máy)_
@@ -271,12 +272,14 @@
 - [ ] Chia gói theo năm / quý (hiện chỉ thu theo tháng)
 
 ### Admin v1
-- [ ] Đăng nhập admin bằng Supabase Auth + bắt buộc MFA (TOTP) + phân quyền theo vai trò (bảng `admin_roles`)
-- [ ] Người dùng (tìm kiếm, chi tiết, khóa, tặng Plus, xóa dữ liệu)
-- [ ] Doanh thu (lấy từ RevenueCat)
-- [ ] Thư viện dịch vụ + duyệt đề xuất giá
-- [ ] Nhật ký thao tác (audit log)
-- [ ] Dashboard tổng quan, số liệu phễu và cohort lấy từ PostHog
+- [x] Đăng nhập admin bằng Supabase Auth (OTP email) + **bắt buộc MFA TOTP** (API từ chối phiên chưa đạt `aal2`) + phân quyền theo vai trò trong `admin_users` (OWNER / ADMIN / SUPPORT / MARKETING / VIEWER)
+- [x] Người dùng (tìm kiếm, lọc gói và trạng thái, chi tiết, khóa / mở khóa, tặng Plus, xóa dữ liệu)
+- [ ] Doanh thu (lấy từ RevenueCat) — chờ tài khoản RevenueCat + store
+- [x] Thư viện dịch vụ + duyệt đề xuất giá
+- [x] Nhật ký thao tác (audit log) — ghi kèm IP và mức độ, lọc theo thao tác / mức độ
+- [x] Dashboard tổng quan từ database Subca (người dùng, subscription, tiền đang theo dõi, nhắc nhở, nhóm chia tiền); _phễu và cohort từ PostHog để sau_
+- [ ] Chạy thử admin với database thật + thêm admin đầu tiên vào `admin_users` (xem `apps/admin/README.md`) — chưa làm được vì mạng máy dev chặn cổng Postgres
+- [ ] Nhân sự & phân quyền (thêm / gỡ admin ngay trong giao diện), thông báo & chiến dịch, hỗ trợ — các trang còn lại của mockup
 
 ### Ra mắt
 - [ ] Ảnh chụp màn hình + mô tả trên store (ASO: "quản lý subscription", "nhắc gia hạn", "hủy đăng ký")
