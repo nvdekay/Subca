@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Subca Admin Console
 
-## Getting Started
+Bảng quản trị Subca (Next.js 16 + Tailwind 4). Dữ liệu lấy qua API NestJS (`apps/api`), không đọc thẳng database.
 
-First, run the development server:
+## Chạy
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local     # điền SUPABASE URL + anon key
+pnpm --filter @subca/api dev   # API phải chạy trước
+pnpm --filter @subca/admin dev # http://localhost:3000 (đổi cổng: -p 3100)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Đăng nhập
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Nhập email quản trị → Supabase gửi mã 6 số (cùng luồng OTP với app).
+2. **Bắt buộc xác thực hai bước:** lần đầu quét mã QR bằng Google Authenticator / 1Password, các lần sau nhập mã 6 số. API từ chối mọi request `/admin/*` nếu phiên chưa đạt `aal2`.
+3. Email phải có trong bảng `admin_users` và đang bật, nếu không API trả `NOT_ADMIN`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Thêm admin đầu tiên (chạy trên database, sau khi tài khoản đã đăng nhập app ít nhất 1 lần để có trong `auth.users`):
 
-## Learn More
+```sql
+insert into admin_users (id, email, name, role)
+select id, email, 'Tên hiển thị', 'OWNER' from auth.users where email = 'ban@subca.app';
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Trang
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Trang             | Nội dung                                                                      |
+| ----------------- | ----------------------------------------------------------------------------- |
+| Tổng quan         | Người dùng, subscription, tiền đang theo dõi, nhắc nhở 7 ngày, nhóm chia tiền |
+| Người dùng        | Tìm kiếm, lọc gói / trạng thái, chi tiết, khóa, tặng Plus, xóa dữ liệu        |
+| Thư viện dịch vụ  | Thêm / sửa dịch vụ, duyệt đề xuất giá của người dùng                          |
+| Hàng đợi nhắc     | Số liệu BullMQ và job lỗi gần nhất (thay cho Bull Board)                      |
+| Nhật ký hoạt động | Mọi thao tác admin kèm IP và mức độ                                           |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Phân quyền
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`OWNER`, `ADMIN` toàn quyền · `SUPPORT` xử lý người dùng · `MARKETING` sửa thư viện dịch vụ · `VIEWER` chỉ xem.
+Nguồn chung: `ADMIN_PERMISSIONS` trong `packages/shared/src/api/admin.ts` (API chặn, giao diện ẩn nút).
