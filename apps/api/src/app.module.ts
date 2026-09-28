@@ -4,11 +4,14 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AdminModule } from './admin/admin.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { CatalogModule } from './catalog/catalog.module.js';
+import { ConnectionsModule } from './connections/connections.module.js';
+import { DetectionModule } from './detection/detection.module.js';
 import { validateEnv } from './config/env.js';
 import { FxModule } from './fx/fx.module.js';
 import { GroupsModule } from './groups/groups.module.js';
 import { HealthController } from './health/health.controller.js';
 import { HomeModule } from './home/home.module.js';
+import { InboxModule } from './inbox/inbox.module.js';
 import { InsightsModule } from './insights/insights.module.js';
 import { MeModule } from './me/me.module.js';
 import { PaymentMethodsModule } from './payment-methods/payment-methods.module.js';
@@ -42,6 +45,9 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module.js';
     PushModule,
     RemindersModule,
     AdminModule,
+    DetectionModule,
+    ConnectionsModule,
+    InboxModule,
   ],
   controllers: [HealthController],
 })

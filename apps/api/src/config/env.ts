@@ -17,6 +17,18 @@ const EnvSchema = z.object({
     .enum(['true', 'false'])
     .default('true')
     .transform((v) => v === 'true'),
+  /** URL công khai của API — dùng làm redirect URI cho OAuth Google. */
+  PUBLIC_API_URL: z.url().default('http://localhost:3000'),
+  /** OAuth Google để đọc Gmail (chưa có thì tính năng kết nối hộp thư bị tắt). */
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+  /** Khóa 32 byte dạng base64 để mã hóa refresh token trong database. */
+  SECRETS_KEY: z.string().optional(),
+  /** Tắt lượt quét hộp thư định kỳ (VD khi chạy nhiều instance chỉ cần 1 nơi chạy). */
+  EMAIL_SYNC_ENABLED: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((v) => v === 'true'),
   /**
    * Các origin được gọi API từ trình duyệt (Admin Console), cách nhau bằng dấu phẩy.
    * App mobile là ứng dụng gốc nên không cần CORS.
