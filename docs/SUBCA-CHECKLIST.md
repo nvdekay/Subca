@@ -6,7 +6,7 @@
 
 ### Hiện trạng (28/09/2026, cuối ngày)
 
-**Đang ở:** Giai đoạn 1–2 xong phần làm được; Giai đoạn 3 đã xong **chia tiền nhóm** và **Admin Console v1**. Còn lại của GĐ3: Subca Plus (chờ tài khoản store + RevenueCat).
+**Đang ở:** Giai đoạn 1–2 xong phần làm được; GĐ3 đã xong **chia tiền nhóm** và **Admin Console v1**. Đang chuyển sản phẩm sang **auto-first**: vertical slice tự phát hiện subscription từ email đã chạy end-to-end (còn chờ OAuth client của Google để nối Gmail thật).
 
 **Đã xong**
 - Mockup app (16 màn) + admin (12 trang) trong `design/`; template email mã đăng nhập `design/email/otp-code.html`.
@@ -17,6 +17,7 @@
 - **Chia tiền nhóm (Giai đoạn 3):** API đầy đủ (`/groups`: tạo nhóm từ gói đang trả, chia đều / tùy chỉnh có kiểm tra tổng, mã mời, kỳ thu theo tháng, "Tôi đã chuyển" → chủ nhóm xác nhận / miễn / mở lại, nhắc từng người hoặc tất cả có chặn nhắc dồn, mã QR VietQR) + 2 màn trong app (Chia tiền nhóm, Chi tiết nhóm).
 - **Admin Console v1** (`apps/admin`): đăng nhập **email + mật khẩu**, phân quyền 5 vai trò, 8 trang — Tổng quan, Người dùng (khóa / tặng Plus / xóa dữ liệu), Thư viện dịch vụ + duyệt đề xuất giá, Sử dụng tính năng + feature flag, Nhân sự & phân quyền, Sức khỏe hệ thống, Hàng đợi nhắc, Nhật ký thao tác. Tài khoản `admin@subca.app` (OWNER) đã tạo và đăng nhập chạy thật.
 - **Đã chạy thật 28/09:** chia tiền nhóm trên app với Supabase dev (tạo nhóm Netflix 4 người từ gói đang trả, kỳ thu tháng 9 sinh đủ 3 khoản 65.000đ) — nhóm này còn trong tài khoản dev, xóa trong app nếu không cần.
+- **Tự phát hiện từ email (auto-first, 28/09/2026):** schema + 5 bảng mới, adapter Gmail (OAuth, quyền `gmail.readonly`), lọc ứng viên, parser nhiều lớp, engine đối soát (trạng thái + độ tin cậy), Subca Inbox, quét định kỳ 6 giờ, màn Kết nối hộp thư và Inbox trong app. Nhập tay giữ nguyên làm phương án dự phòng. Test: 27 unit + 8 tích hợp chạy cả luồng trên database thật bằng hộp thư mẫu.
 - **Quyết định sản phẩm:** đã **bỏ danh mục** khỏi app + API (bảng còn trong DB, không dùng) — xem `docs/ARCHITECTURE.md`.
 - Test: shared 88 · API unit + e2e (CI) · **42 test tích hợp trên Supabase + Redis thật đã chạy lại và qua hết** (`test:int`).
 
@@ -30,11 +31,12 @@
 7. **Đối chiếu danh sách BIN ngân hàng VietQR** (`packages/shared/src/vietqr.ts`) với bảng công bố của NAPAS trước khi ra mắt.
 
 **Việc kỹ thuật tiếp theo (gợi ý thứ tự)**
-1. **Thêm `SUPABASE_SERVICE_ROLE_KEY`** vào `apps/api/.env` để trang Nhân sự tạo được tài khoản admin mới / đặt lại mật khẩu, và để Xóa tài khoản hết 503.
-2. **App mobile (cần thiết bị / tài khoản):** rà soát UI Android (cài Android Studio + emulator trên máy dev) → thử nhận push thật (máy thật + tài khoản Apple, hoặc EAS build Android) → Sentry + PostHog (cần tạo tài khoản) → hàng đợi thao tác khi mất mạng (tùy chọn).
-3. Dọn dữ liệu mẫu trong tài khoản dev `khanhnvd07@gmail.com` khi chủ dự án yêu cầu (subscription có ghi chú `[dữ liệu mẫu]`, 2 phương thức mẫu, ngân sách 800.000đ).
-4. EAS Build (eas.json, development / preview) → TestFlight nội bộ khi có tài khoản Apple.
-5. Giai đoạn 3 còn lại: Subca Plus (RevenueCat, cần tài khoản store); link mời deep link khi có tên miền `subca.app`; các trang admin còn lại của mockup (nhân sự, thông báo, hỗ trợ, doanh thu).
+1. **Tạo OAuth client Google** (loại Web application, redirect `<PUBLIC_API_URL>/connections/gmail/callback`) và sinh `SECRETS_KEY` (`openssl rand -base64 32`) để bật kết nối Gmail thật.
+2. **Thêm `SUPABASE_SERVICE_ROLE_KEY`** vào `apps/api/.env` để trang Nhân sự tạo được tài khoản admin mới / đặt lại mật khẩu, và để Xóa tài khoản hết 503.
+3. **App mobile (cần thiết bị / tài khoản):** rà soát UI Android (cài Android Studio + emulator trên máy dev) → thử nhận push thật (máy thật + tài khoản Apple, hoặc EAS build Android) → Sentry + PostHog (cần tạo tài khoản) → hàng đợi thao tác khi mất mạng (tùy chọn).
+4. Dọn dữ liệu mẫu trong tài khoản dev `khanhnvd07@gmail.com` khi chủ dự án yêu cầu (subscription có ghi chú `[dữ liệu mẫu]`, 2 phương thức mẫu, ngân sách 800.000đ).
+5. EAS Build (eas.json, development / preview) → TestFlight nội bộ khi có tài khoản Apple.
+6. Giai đoạn 3 còn lại: Subca Plus (RevenueCat, cần tài khoản store); link mời deep link khi có tên miền `subca.app`; các trang admin còn lại của mockup (nhân sự, thông báo, hỗ trợ, doanh thu).
 
 ---
 
@@ -305,7 +307,11 @@
 - [ ] Bản tiếng Anh → thị trường Đông Nam Á / quốc tế, ra mắt trên Product Hunt
 - [ ] Thanh toán web qua MoMo / ZaloPay / thẻ (kiểm tra quy định store trước)
 - [ ] Đọc biến động số dư ngân hàng (chỉ Android)
-- [ ] Đọc hóa đơn trong Gmail (cần thẩm định bảo mật của Google, tốn vài tuần + có phí → làm sau cùng)
+- [x] Đọc hóa đơn trong Gmail — **đã dựng xong đường ống** (quét → lọc → parse → sự kiện → đối soát → subscription + Inbox), chạy được với hộp thư mẫu
+- [ ] Nối Gmail thật: tạo OAuth client trong Google Cloud, điền `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `SECRETS_KEY`
+- [ ] **Thẩm định bảo mật của Google (CASA)** cho scope `gmail.readonly` — bắt buộc trước khi mở quá 100 người dùng thử; tốn vài tuần và có phí
+- [ ] Mở rộng parser: thêm merchant, hóa đơn gộp Apple/Google Play nhiều dịch vụ, lớp LLM cho email lạ
+- [ ] Màn hình giải thích quyền riêng tư trước khi xin quyền Gmail (Google bắt buộc) + cập nhật chính sách quyền riêng tư
 - [ ] Chiến dịch push / email từ admin
 
 ---

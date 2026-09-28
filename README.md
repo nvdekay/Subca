@@ -100,6 +100,11 @@ Migration hiện có:
 | POST · PATCH · DELETE | `/groups/:id/members`                                                 | Thêm chỗ · đổi tên thành viên · gỡ thành viên hoặc tự rời nhóm                                                                                             |
 | POST                  | `/groups/:id/payments/:paymentId/{claim,confirm,waive,reopen,remind}` | Thành viên báo đã chuyển · chủ nhóm xác nhận / miễn / mở lại · nhắc một người (chặn nhắc dồn trong 6 giờ)                                                  |
 | POST                  | `/groups/:id/remind-all`                                              | Nhắc mọi thành viên chưa trả trong kỳ đang thu                                                                                                             |
+| GET · POST            | `/connections` · `/connections/gmail/start`                           | Hộp thư đã kết nối · xin URL đồng ý của Google (app mở bằng trình duyệt hệ thống)                                                                          |
+| GET                   | `/connections/gmail/callback`                                         | Google gọi về (công khai, bảo vệ bằng `state` dùng một lần) → lưu refresh token đã mã hóa                                                                  |
+| POST · DELETE         | `/connections/:id/sync` · `/connections/:id`                          | Quét hộp thư ngay · ngắt kết nối (thu hồi ở Google rồi xóa token)                                                                                          |
+| GET                   | `/connections/summary`                                                | Tiến độ quét và số subscription đã tìm thấy                                                                                                                |
+| GET · POST            | `/inbox` · `/inbox/:id/resolve`                                       | Subca Inbox: việc cần người dùng quyết định · trả lời                                                                                                      |
 
 ### Nhắc nhở (BullMQ + Expo Push)
 
@@ -109,6 +114,15 @@ Migration hiện có:
 - App đăng ký thiết bị bằng `POST /push-tokens` sau khi đăng nhập, gọi `DELETE /push-tokens` khi đăng xuất.
 - Mỗi 15 phút kiểm tra push receipt của Expo (thông báo có tới máy không); máy đã gỡ app → xóa token; mọi máy lỗi → lượt nhắc FAILED.
 - Biến môi trường: `REDIS_URL`, `REMINDERS_ENABLED`, `EXPO_ACCESS_TOKEN` (tùy chọn). Production dùng Redis cùng khu vực với API, `maxmemory-policy noeviction`.
+
+### Tự phát hiện subscription từ email
+
+- Kết nối Gmail một lần: Subca quét 12 tháng gần nhất rồi cứ 6 giờ quét phần mới (`EMAIL_SYNC_ENABLED`).
+- Đường đi: lọc ứng viên (từ khóa Anh/Việt + danh mục merchant) → parser nhiều lớp (merchant → tổng quát) → `subscription_events` → engine đối soát → tạo/cập nhật subscription.
+- Độ tin cậy quyết định trải nghiệm: ≥75 tự thêm · ≥45 thêm kèm nhãn "Cần kiểm tra" · thấp hơn thì hỏi trong **Subca Inbox**. Im lặng lâu chỉ hạ tin cậy, không tự kết luận đã hủy.
+- Gói nhập tay không bị tạo trùng: engine gộp bằng chứng theo merchant / dịch vụ / giá và **không ghi đè** số liệu người dùng tự nhập.
+- Quyền tối thiểu (`gmail.readonly`), refresh token mã hóa AES-256-GCM (`SECRETS_KEY`) và không bao giờ xuống client; **không lưu nội dung thư** — chỉ lưu thông tin gói và băm tiêu đề.
+- Cần `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `SECRETS_KEY`; thiếu thì API trả `GMAIL_UNAVAILABLE` và app ẩn nút kết nối.
 
 ### Chia tiền nhóm (VietQR)
 

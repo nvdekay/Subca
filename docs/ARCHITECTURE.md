@@ -73,6 +73,16 @@ Mỗi 5 phút:
 - **Hàng đợi:** không dùng Bull Board vì giao diện riêng của nó khó đặt sau lớp đăng nhập có MFA; thay bằng `GET /admin/queues` (số liệu BullMQ + job lỗi) để admin tự vẽ. Redis chết thì trả `connected: false`.
 - Admin không đọc thẳng database: mọi thứ qua API, anon key trong trình duyệt không vượt được RLS.
 
+### Tự phát hiện subscription từ email (`apps/api/src/detection`, `integrations/mail`)
+- **Ba lớp tách rời:** adapter hộp thư (chỉ nói chuyện với Gmail) → parser (chỉ đọc, trả `DetectedEvent`) → engine đối soát (chỉ suy luận, không đụng DB) → `DetectionService` là nơi **duy nhất** ghi dữ liệu. Nhờ vậy parser và engine test được bằng hàm thuần.
+- **Idempotency** hai lớp: `processed_emails(account_id, provider_message_id)` và unique `(source_ref, event_type)` trên `subscription_events`. Quét lại cả hộp thư không sinh thêm gì; đổi parser thì tăng `PARSER_VERSION` để quét lại.
+- **`subscription_events` là bằng chứng từ email, khác `renewal_charges`** (tiền đã trừ thật, do job roll-forward ghi) — không gộp hai bảng.
+- **Trạng thái:** `DetectionState` (ACTIVE / TRIAL / POSSIBLY_ACTIVE / CANCELLED / EXPIRED / PAYMENT_ISSUE / UNKNOWN) tách khỏi `SubscriptionStatus` người dùng thấy; `toStatus()` ánh xạ sang. Im lặng quá chu kỳ + 45 ngày → POSSIBLY_ACTIVE (hạ tin cậy), **không** tự kết luận đã hủy.
+- **Chu kỳ** lấy theo thứ tự: email nói rõ → trung vị khoảng cách các lần thanh toán → mặc định tháng. Ngày gia hạn ưu tiên ngày email ghi, không có thì chiếu từ lần trừ tiền gần nhất.
+- **Gộp với gói nhập tay:** khớp theo `merchant_key` → `service_id` → tên gần giống + giá lệch dưới 25%. Gói `source = MANUAL` chỉ được bổ sung bằng chứng, số liệu người dùng nhập không bị ghi đè.
+- **Riêng tư:** chỉ xin `gmail.readonly`; refresh token mã hóa AES-256-GCM (`SECRETS_KEY`), không bao giờ xuống client; ngắt kết nối thì revoke ở Google rồi xóa; không lưu nội dung thư, chỉ lưu trường đã trích + băm tiêu đề.
+- **Chưa làm:** lớp LLM cho email lạ (đã chừa chỗ trong `parser.ts`), Outlook, và hồ sơ CASA của Google cho restricted scope — bắt buộc trước khi mở cho người dùng thật.
+
 ### Tiền & tỷ giá
 - `FxService.rateTable(target, sources, today)` lấy tỷ giá mới nhất ≤ hôm nay; job lưu đủ 12 cặp VND/USD/EUR/JPY mỗi ngày; kiểm tra khoảng hợp lý trước khi lưu.
 
