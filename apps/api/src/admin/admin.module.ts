@@ -5,6 +5,7 @@ import { REMINDERS_QUEUE } from '../reminders/reminders.constants.js';
 import { AdminCatalogService } from './admin-catalog.service.js';
 import { AdminOverviewService } from './admin-overview.service.js';
 import { AdminQueueService } from './admin-queue.service.js';
+import { AdminSystemService } from './admin-system.service.js';
 import { AdminTeamService } from './admin-team.service.js';
 import { AdminUsersService } from './admin-users.service.js';
 import { AdminController } from './admin.controller.js';
@@ -23,6 +24,7 @@ import { AuditService } from './audit.service.js';
     AdminCatalogService,
     AdminQueueService,
     AdminTeamService,
+    AdminSystemService,
   ],
 })
 export class AdminModule {}

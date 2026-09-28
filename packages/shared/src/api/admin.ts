@@ -22,6 +22,8 @@ export const ADMIN_PERMISSIONS = {
   deleteUsers: ['OWNER', 'ADMIN'],
   /** Thêm / sửa / gỡ tài khoản quản trị. */
   manageTeam: ['OWNER'],
+  /** Bật / tắt feature flag. */
+  manageFlags: ['OWNER', 'ADMIN'],
 } as const satisfies Record<string, readonly AdminRole[]>;
 
 export type AdminPermission = keyof typeof ADMIN_PERMISSIONS;
@@ -334,6 +336,56 @@ export interface AdminQueueDto {
   reminders7d: { status: string; count: number }[];
 }
 
+// ─────────────── Sức khỏe hệ thống ───────────────
+
+export interface AdminHealthCheckDto {
+  key: 'database' | 'redis' | 'reminders' | 'exchangeRates' | 'push';
+  label: string;
+  status: 'ok' | 'warn' | 'down';
+  detail: string;
+}
+
+export interface AdminSystemDto {
+  checks: AdminHealthCheckDto[];
+  api: {
+    env: string;
+    /** Giây kể từ lúc tiến trình API khởi động. */
+    uptimeSeconds: number;
+    remindersEnabled: boolean;
+    fxSyncEnabled: boolean;
+    adminRequireMfa: boolean;
+  };
+}
+
+// ─────────────── Sử dụng tính năng ───────────────
+
+export interface FeatureUsageRowDto {
+  key: string;
+  label: string;
+  /** Số người dùng đã dùng tính năng. */
+  users: number;
+  /** Phần trăm trên tổng người dùng (0–100, làm tròn). */
+  percent: number;
+  note?: string;
+}
+
+export interface FeatureFlagDto {
+  key: string;
+  description: string | null;
+  enabled: boolean;
+  updatedAt: string;
+  updatedBy: string | null;
+}
+
+export interface AdminFeaturesDto {
+  totalUsers: number;
+  usage: FeatureUsageRowDto[];
+  flags: FeatureFlagDto[];
+}
+
+export const UpdateFeatureFlagSchema = z.object({ enabled: z.boolean() });
+export type UpdateFeatureFlag = z.infer<typeof UpdateFeatureFlagSchema>;
+
 // ─────────────── Nhật ký thao tác ───────────────
 
 export const AuditLogsQuerySchema = z.object({
@@ -380,4 +432,5 @@ export const AUDIT_ACTIONS = {
   adminUpdate: 'admin.update',
   adminPassword: 'admin.password',
   adminRemove: 'admin.remove',
+  featureFlagUpdate: 'feature_flag.update',
 } as const;

@@ -34,7 +34,9 @@ Các tài khoản sau thêm ngay trong trang **Nhân sự & phân quyền** — 
 | Tổng quan            | Người dùng, subscription, tiền đang theo dõi, nhắc nhở 7 ngày, nhóm chia tiền |
 | Người dùng           | Tìm kiếm, lọc gói / trạng thái, chi tiết, khóa, tặng Plus, xóa dữ liệu        |
 | Thư viện dịch vụ     | Thêm / sửa dịch vụ, duyệt đề xuất giá của người dùng                          |
+| Sức khỏe hệ thống    | Database, Redis, bộ lập lịch nhắc, tỷ giá, thông báo đẩy + cấu hình API       |
 | Hàng đợi nhắc        | Số liệu BullMQ và job lỗi gần nhất (thay cho Bull Board)                      |
+| Sử dụng tính năng    | Tỷ lệ dùng từng tính năng và bật/tắt feature flag                             |
 | Nhân sự & phân quyền | Thêm / gỡ tài khoản quản trị, đổi vai trò, bật tắt, đặt lại mật khẩu          |
 | Nhật ký hoạt động    | Mọi thao tác admin kèm IP và mức độ                                           |
 

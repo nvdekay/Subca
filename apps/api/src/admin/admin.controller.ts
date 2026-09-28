@@ -16,6 +16,7 @@ import {
   CreateAdminSchema,
   SetAdminPasswordSchema,
   UpdateAdminSchema,
+  UpdateFeatureFlagSchema,
   AdminServicesQuerySchema,
   AdminUsersQuerySchema,
   AuditLogsQuerySchema,
@@ -27,11 +28,13 @@ import {
   UpdateServiceSchema,
   UpsertServicePlanSchema,
   type AdminMeDto,
+  type AdminFeaturesDto,
   type AdminOverviewDto,
   type AdminPermission,
   type AdminQueueDto,
   type AdminServiceDto,
   type AdminServicesQuery,
+  type AdminSystemDto,
   type AdminTeamDto,
   type AdminTeamMemberDto,
   type AdminUserDetailDto,
@@ -42,6 +45,7 @@ import {
   type BanUser,
   type CreateAdmin,
   type CreateService,
+  type FeatureFlagDto,
   type GrantPlus,
   type PriceReportDto,
   type PriceReportsDto,
@@ -49,6 +53,7 @@ import {
   type ReviewPriceReport,
   type SetAdminPassword,
   type UpdateAdmin,
+  type UpdateFeatureFlag,
   type UpdateService,
   type UpsertServicePlan,
 } from '@subca/shared';
@@ -58,6 +63,7 @@ import type { AdminUser } from '../generated/prisma/client.js';
 import { AdminCatalogService } from './admin-catalog.service.js';
 import { AdminOverviewService } from './admin-overview.service.js';
 import { AdminQueueService } from './admin-queue.service.js';
+import { AdminSystemService } from './admin-system.service.js';
 import { AdminTeamService } from './admin-team.service.js';
 import { AdminUsersService } from './admin-users.service.js';
 import {
@@ -77,6 +83,7 @@ export class AdminController {
     private readonly catalog: AdminCatalogService,
     private readonly queue: AdminQueueService,
     private readonly team: AdminTeamService,
+    private readonly system: AdminSystemService,
   ) {}
 
   @Get('me')
@@ -238,6 +245,30 @@ export class AdminController {
     @ClientIp() ip: string | null,
   ): Promise<PriceReportDto> {
     return this.catalog.reviewPriceReport(admin, id, body, ip);
+  }
+
+  // ─────────────── Hệ thống & tính năng ───────────────
+
+  @Get('system')
+  getSystem(): Promise<AdminSystemDto> {
+    return this.system.system();
+  }
+
+  @Get('features')
+  getFeatures(): Promise<AdminFeaturesDto> {
+    return this.system.features();
+  }
+
+  @Patch('flags/:key')
+  @RequireAdmin('manageFlags')
+  setFlag(
+    @CurrentAdmin() admin: AdminUser,
+    @Param('key') key: string,
+    @Body(new ZodValidationPipe(UpdateFeatureFlagSchema))
+    body: UpdateFeatureFlag,
+    @ClientIp() ip: string | null,
+  ): Promise<FeatureFlagDto> {
+    return this.system.setFlag(admin, key, body, ip);
   }
 
   // ─────────────── Nhân sự & phân quyền ───────────────

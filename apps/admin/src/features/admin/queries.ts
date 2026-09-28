@@ -1,7 +1,9 @@
 'use client';
 
 import type {
+  AdminFeaturesDto,
   AdminOverviewDto,
+  AdminSystemDto,
   AdminTeamDto,
   AdminTeamMemberDto,
   AdminQueueDto,
@@ -12,12 +14,14 @@ import type {
   BanUser,
   CreateAdmin,
   CreateService,
+  FeatureFlagDto,
   GrantPlus,
   PriceReportDto,
   PriceReportsDto,
   ReviewPriceReport,
   SetAdminPassword,
   UpdateAdmin,
+  UpdateFeatureFlag,
   UpdateService,
   UpsertServicePlan,
 } from '@subca/shared';
@@ -174,6 +178,36 @@ export function useReviewPriceReport() {
         body: JSON.stringify(input),
       }),
     onSuccess: () => invalidateCatalog(queryClient),
+  });
+}
+
+export function useSystem() {
+  return useQuery({
+    queryKey: ['admin', 'system'],
+    queryFn: () => api<AdminSystemDto>('/admin/system'),
+    refetchInterval: 30_000,
+  });
+}
+
+export function useFeatures() {
+  return useQuery({
+    queryKey: ['admin', 'features'],
+    queryFn: () => api<AdminFeaturesDto>('/admin/features'),
+  });
+}
+
+export function useSetFeatureFlag() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ key, input }: { key: string; input: UpdateFeatureFlag }) =>
+      api<FeatureFlagDto>(`/admin/flags/${key}`, {
+        method: 'PATCH',
+        body: JSON.stringify(input),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'features'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'audit'] });
+    },
   });
 }
 

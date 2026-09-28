@@ -15,7 +15,7 @@
 - API: xác thực JWT Supabase, `/me` (+ cài đặt, ngân sách, xóa tài khoản), thư viện dịch vụ, subscription CRUD (giới hạn Free, chi tiết kèm thanh toán / hướng dẫn hủy / lịch sử trừ tiền), `/home`, phương thức thanh toán, lịch, đánh giá tháng, phân tích, push token, nhắc nhở BullMQ + Expo Push + receipt, job tỷ giá.
 - **App mobile** (`apps/mobile`): design system theo mockup (NativeWind), đăng nhập OTP 6 số (đếm ngược gửi lại), Trang chủ, Danh sách / Thêm / Sửa / Chi tiết subscription, Lịch, Quản lý Trial, Đánh giá tháng (optimistic), Phân tích, Ngân sách (mô phỏng tiết kiệm), Phương thức thanh toán (tạo ngay trong form + màn phụ), Cài đặt (tiền tệ, múi giờ, giờ nhắc, ngân sách, đăng xuất, xóa tài khoản), Nhắc nhở (lịch sử + sắp tới + cài mốc nhắc), đăng ký push token (EAS project `@nvdeekay/subca`), thông báo cục bộ dự phòng, cache dữ liệu trên máy (MMKV mã hóa).
 - **Chia tiền nhóm (Giai đoạn 3):** API đầy đủ (`/groups`: tạo nhóm từ gói đang trả, chia đều / tùy chỉnh có kiểm tra tổng, mã mời, kỳ thu theo tháng, "Tôi đã chuyển" → chủ nhóm xác nhận / miễn / mở lại, nhắc từng người hoặc tất cả có chặn nhắc dồn, mã QR VietQR) + 2 màn trong app (Chia tiền nhóm, Chi tiết nhóm).
-- **Admin Console v1** (`apps/admin`): đăng nhập **email + mật khẩu**, phân quyền 5 vai trò, Nhân sự & phân quyền, Tổng quan, Người dùng (khóa / tặng Plus / xóa dữ liệu), Thư viện dịch vụ + duyệt đề xuất giá, Hàng đợi nhắc, Nhật ký thao tác. Tài khoản `admin@subca.app` (OWNER) đã tạo và đăng nhập chạy thật.
+- **Admin Console v1** (`apps/admin`): đăng nhập **email + mật khẩu**, phân quyền 5 vai trò, 8 trang — Tổng quan, Người dùng (khóa / tặng Plus / xóa dữ liệu), Thư viện dịch vụ + duyệt đề xuất giá, Sử dụng tính năng + feature flag, Nhân sự & phân quyền, Sức khỏe hệ thống, Hàng đợi nhắc, Nhật ký thao tác. Tài khoản `admin@subca.app` (OWNER) đã tạo và đăng nhập chạy thật.
 - **Đã chạy thật 28/09:** chia tiền nhóm trên app với Supabase dev (tạo nhóm Netflix 4 người từ gói đang trả, kỳ thu tháng 9 sinh đủ 3 khoản 65.000đ) — nhóm này còn trong tài khoản dev, xóa trong app nếu không cần.
 - **Quyết định sản phẩm:** đã **bỏ danh mục** khỏi app + API (bảng còn trong DB, không dùng) — xem `docs/ARCHITECTURE.md`.
 - Test: shared 88 · API unit + e2e (CI) · **42 test tích hợp trên Supabase + Redis thật đã chạy lại và qua hết** (`test:int`).
@@ -282,7 +282,9 @@
 - [x] Thêm admin đầu tiên vào `admin_users` (`khanhnvd07@gmail.com`, vai trò OWNER)
 - [x] Đã tạo tài khoản đăng nhập `admin@subca.app` (OWNER) — mật khẩu trong `.admin-account.local` ở gốc repo; đã đăng nhập thử thật và tải được dữ liệu
 - [x] Nhân sự & phân quyền (thêm / gỡ admin, đổi vai trò, bật tắt, đặt lại mật khẩu)
-- [ ] Các trang còn lại của mockup: thông báo & chiến dịch, hỗ trợ, tăng trưởng & giữ chân, gói & khuyến mãi
+- [x] Sức khỏe hệ thống (database, Redis, bộ lập lịch nhắc, tỷ giá, thông báo đẩy, cấu hình API đang chạy)
+- [x] Sử dụng tính năng (tỷ lệ dùng từng tính năng) + bật/tắt feature flag
+- [ ] Các trang còn lại của mockup: thông báo & chiến dịch, hỗ trợ, tăng trưởng & giữ chân (cohort cần PostHog), gói & khuyến mãi (mã khuyến mãi cần Subca Plus)
 
 ### Ra mắt
 - [ ] Ảnh chụp màn hình + mô tả trên store (ASO: "quản lý subscription", "nhắc gia hạn", "hủy đăng ký")

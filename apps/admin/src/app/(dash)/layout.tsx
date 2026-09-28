@@ -12,7 +12,10 @@ const NAV: { group: string; items: { href: string; label: string; icon: IconName
   { group: 'Người dùng', items: [{ href: '/users', label: 'Người dùng', icon: 'users' }] },
   {
     group: 'Sản phẩm',
-    items: [{ href: '/catalog', label: 'Thư viện dịch vụ', icon: 'layers' }],
+    items: [
+      { href: '/catalog', label: 'Thư viện dịch vụ', icon: 'layers' },
+      { href: '/features', label: 'Sử dụng tính năng', icon: 'grid' },
+    ],
   },
   {
     group: 'Quản trị',
@@ -21,7 +24,8 @@ const NAV: { group: string; items: { href: string; label: string; icon: IconName
   {
     group: 'Vận hành',
     items: [
-      { href: '/queues', label: 'Hàng đợi nhắc', icon: 'server' },
+      { href: '/system', label: 'Sức khỏe hệ thống', icon: 'server' },
+      { href: '/queues', label: 'Hàng đợi nhắc', icon: 'refresh' },
       { href: '/audit', label: 'Nhật ký hoạt động', icon: 'list' },
     ],
   },

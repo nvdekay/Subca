@@ -8,6 +8,7 @@ import { Test } from '@nestjs/testing';
 import { AdminCatalogService } from '../src/admin/admin-catalog.service.js';
 import { AdminOverviewService } from '../src/admin/admin-overview.service.js';
 import { AdminQueueService } from '../src/admin/admin-queue.service.js';
+import { AdminSystemService } from '../src/admin/admin-system.service.js';
 import { AdminTeamService } from '../src/admin/admin-team.service.js';
 import { AdminUsersService } from '../src/admin/admin-users.service.js';
 import { AdminController } from '../src/admin/admin.controller.js';
@@ -75,6 +76,13 @@ describe('Admin Console (e2e)', () => {
     setPassword: vi.fn().mockResolvedValue(undefined),
     remove: vi.fn().mockResolvedValue(undefined),
   };
+  const system = {
+    system: vi.fn().mockResolvedValue({ checks: [], api: { env: 'test' } }),
+    features: vi
+      .fn()
+      .mockResolvedValue({ totalUsers: 2, usage: [], flags: [] }),
+    setFlag: vi.fn().mockResolvedValue({ key: 'groups', enabled: true }),
+  };
   /** Mặc định không bắt buộc MFA (admin đăng nhập bằng email + mật khẩu). */
   let requireMfa = false;
 
@@ -92,6 +100,7 @@ describe('Admin Console (e2e)', () => {
         { provide: AdminCatalogService, useValue: catalog },
         { provide: AdminQueueService, useValue: queue },
         { provide: AdminTeamService, useValue: team },
+        { provide: AdminSystemService, useValue: system },
         { provide: ConfigService, useValue: { get: () => requireMfa } },
         { provide: SupabaseJwtVerifier, useValue: auth.verifier },
         {
@@ -284,6 +293,41 @@ describe('Admin Console (e2e)', () => {
     });
     expect(denied.statusCode).toBe(403);
     expect(denied.json()).toMatchObject({ code: 'ADMIN_FORBIDDEN' });
+  });
+
+  it('sức khỏe hệ thống và sử dụng tính năng: mọi vai trò xem được', async () => {
+    prisma.adminUser.findUnique.mockResolvedValue({
+      ...adminRow,
+      role: 'VIEWER',
+    } as never);
+    expect((await call('GET', '/admin/system')).statusCode).toBe(200);
+    expect((await call('GET', '/admin/features')).statusCode).toBe(200);
+
+    // Nhưng VIEWER không bật/tắt được feature flag
+    const denied = await call('PATCH', '/admin/flags/groups', {
+      enabled: true,
+    });
+    expect(denied.statusCode).toBe(403);
+    expect(denied.json()).toMatchObject({ code: 'ADMIN_FORBIDDEN' });
+
+    prisma.adminUser.findUnique.mockResolvedValue({
+      ...adminRow,
+      role: 'ADMIN',
+    } as never);
+    const allowed = await call('PATCH', '/admin/flags/groups', {
+      enabled: true,
+    });
+    expect(allowed.statusCode).toBe(200);
+    expect(system.setFlag).toHaveBeenCalledWith(
+      expect.anything(),
+      'groups',
+      { enabled: true },
+      expect.anything(),
+    );
+    expect(
+      (await call('PATCH', '/admin/flags/groups', { enabled: 'có' }))
+        .statusCode,
+    ).toBe(400);
   });
 
   it('nhật ký thao tác lọc theo mức độ', async () => {
