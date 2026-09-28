@@ -728,6 +728,7 @@ export class GroupsService {
       id: group.id,
       name: group.name,
       service: group.subscription?.service ?? null,
+      subscriptionId: group.subscriptionId,
       isOwner: me.role === 'OWNER',
       ownerName: group.owner.displayName ?? 'Chủ nhóm',
       totalAmountMinor: group.totalAmountMinor.toString(),

@@ -283,6 +283,7 @@ describe('Chia tiền nhóm trên database thật', () => {
     expect(ownerView.owned[0]).toMatchObject({
       name: 'Netflix Premium',
       isOwner: true,
+      subscriptionId: expect.any(String),
       myShareMinor: '65000',
       memberCount: 4,
       payerCount: 3,

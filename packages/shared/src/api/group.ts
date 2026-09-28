@@ -173,6 +173,8 @@ export interface GroupCardDto {
   id: string;
   name: string;
   service: ServiceSummaryDto | null;
+  /** Gói đang được chia; app dùng để không mời chia lại gói đã có nhóm. */
+  subscriptionId: string | null;
   isOwner: boolean;
   ownerName: string;
   totalAmountMinor: string;
