@@ -24,6 +24,14 @@ export class PlanService {
     return count > 0;
   }
 
+  /** Giới hạn số nhóm chia tiền được làm chủ; null = không giới hạn. */
+  async ownedGroupLimit(
+    userId: string,
+    now = new Date(),
+  ): Promise<number | null> {
+    return (await this.isPlus(userId, now)) ? null : FREE_LIMITS.maxOwnedGroups;
+  }
+
   /** Giới hạn số subscription đang theo dõi; null = không giới hạn. */
   async subscriptionLimit(
     userId: string,
