@@ -9,3 +9,4 @@ export * from './api/push.js';
 export * from './api/insights.js';
 export * from './api/group.js';
 export * from './api/admin.js';
+export * from './api/detection.js';

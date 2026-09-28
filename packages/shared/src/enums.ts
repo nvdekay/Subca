@@ -43,6 +43,76 @@ export type SplitMode = z.infer<typeof SplitMode>;
 export const GroupPaymentStatus = z.enum(['PENDING', 'CLAIMED_PAID', 'CONFIRMED', 'WAIVED']);
 export type GroupPaymentStatus = z.infer<typeof GroupPaymentStatus>;
 
+export const SubscriptionSource = z.enum(['MANUAL', 'EMAIL']);
+export type SubscriptionSource = z.infer<typeof SubscriptionSource>;
+
+/** Trạng thái Subca suy ra từ email (khác `SubscriptionStatus` mà người dùng chỉnh tay). */
+export const DetectionState = z.enum([
+  'ACTIVE',
+  'TRIAL',
+  'POSSIBLY_ACTIVE',
+  'CANCELLED',
+  'EXPIRED',
+  'PAYMENT_ISSUE',
+  'UNKNOWN',
+]);
+export type DetectionState = z.infer<typeof DetectionState>;
+
+export const ConnectedProvider = z.enum(['GMAIL']);
+export type ConnectedProvider = z.infer<typeof ConnectedProvider>;
+
+export const ConnectedAccountStatus = z.enum(['ACTIVE', 'EXPIRED', 'REVOKED', 'ERROR']);
+export type ConnectedAccountStatus = z.infer<typeof ConnectedAccountStatus>;
+
+export const EmailSyncKind = z.enum(['INITIAL', 'INCREMENTAL']);
+export type EmailSyncKind = z.infer<typeof EmailSyncKind>;
+
+export const EmailSyncStatus = z.enum(['RUNNING', 'DONE', 'FAILED']);
+export type EmailSyncStatus = z.infer<typeof EmailSyncStatus>;
+
+export const EmailParseStatus = z.enum(['NO_MATCH', 'PARSED', 'FAILED', 'SKIPPED']);
+export type EmailParseStatus = z.infer<typeof EmailParseStatus>;
+
+export const SubscriptionEventType = z.enum([
+  'SUBSCRIPTION_STARTED',
+  'TRIAL_STARTED',
+  'TRIAL_ENDING',
+  'PAYMENT_SUCCESS',
+  'RENEWAL',
+  'PRICE_CHANGED',
+  'PLAN_CHANGED',
+  'PAYMENT_FAILED',
+  'CANCELLATION_REQUESTED',
+  'SUBSCRIPTION_CANCELLED',
+  'SUBSCRIPTION_EXPIRED',
+  'SUBSCRIPTION_RESUMED',
+]);
+export type SubscriptionEventType = z.infer<typeof SubscriptionEventType>;
+
+export const EventSource = z.enum(['EMAIL', 'MANUAL', 'SYSTEM']);
+export type EventSource = z.infer<typeof EventSource>;
+
+export const InboxItemKind = z.enum([
+  'CONFIRM_ACTIVE',
+  'TRIAL_ENDING',
+  'PRICE_CHANGED',
+  'PAYMENT_FAILED',
+  'POSSIBLE_DUPLICATE',
+  'SUBSCRIPTION_CANCELLED',
+]);
+export type InboxItemKind = z.infer<typeof InboxItemKind>;
+
+export const InboxItemStatus = z.enum(['OPEN', 'RESOLVED', 'DISMISSED']);
+export type InboxItemStatus = z.infer<typeof InboxItemStatus>;
+
+/** Ngưỡng độ tin cậy quyết định Subca tự nhận hay hỏi người dùng. */
+export const CONFIDENCE = {
+  /** ≥ 75: tự thêm vào danh sách, không hỏi. */
+  high: 75,
+  /** ≥ 45: vẫn thêm nhưng gắn nhãn "Cần kiểm tra". */
+  medium: 45,
+} as const;
+
 export const PlusProduct = z.enum(['PLUS_MONTHLY', 'PLUS_YEARLY', 'PLUS_LIFETIME']);
 export type PlusProduct = z.infer<typeof PlusProduct>;
 

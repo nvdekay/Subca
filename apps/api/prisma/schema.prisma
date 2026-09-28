@@ -32,6 +32,90 @@ enum SubscriptionStatus {
   ARCHIVED
 }
 
+/// Nguồn dữ liệu của subscription: người dùng tự nhập hay Subca tự phát hiện từ email.
+enum SubscriptionSource {
+  MANUAL
+  EMAIL
+}
+
+/// Trạng thái Subca suy ra từ chuỗi sự kiện email (khác `SubscriptionStatus` mà người dùng thấy).
+enum DetectionState {
+  ACTIVE
+  TRIAL
+  POSSIBLY_ACTIVE
+  CANCELLED
+  EXPIRED
+  PAYMENT_ISSUE
+  UNKNOWN
+}
+
+enum ConnectedProvider {
+  GMAIL
+}
+
+enum ConnectedAccountStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+  ERROR
+}
+
+enum EmailSyncKind {
+  INITIAL
+  INCREMENTAL
+}
+
+enum EmailSyncStatus {
+  RUNNING
+  DONE
+  FAILED
+}
+
+/// Kết quả xử lý một email đã quét (để không xử lý lại).
+enum EmailParseStatus {
+  NO_MATCH
+  PARSED
+  FAILED
+  SKIPPED
+}
+
+enum SubscriptionEventType {
+  SUBSCRIPTION_STARTED
+  TRIAL_STARTED
+  TRIAL_ENDING
+  PAYMENT_SUCCESS
+  RENEWAL
+  PRICE_CHANGED
+  PLAN_CHANGED
+  PAYMENT_FAILED
+  CANCELLATION_REQUESTED
+  SUBSCRIPTION_CANCELLED
+  SUBSCRIPTION_EXPIRED
+  SUBSCRIPTION_RESUMED
+}
+
+enum EventSource {
+  EMAIL
+  MANUAL
+  SYSTEM
+}
+
+/// Việc cần người dùng quyết định trong Subca Inbox.
+enum InboxItemKind {
+  CONFIRM_ACTIVE
+  TRIAL_ENDING
+  PRICE_CHANGED
+  PAYMENT_FAILED
+  POSSIBLE_DUPLICATE
+  SUBSCRIPTION_CANCELLED
+}
+
+enum InboxItemStatus {
+  OPEN
+  RESOLVED
+  DISMISSED
+}
+
 enum IntervalUnit {
   DAY
   WEEK
@@ -194,6 +278,9 @@ model Profile {
   billingEvents    BillingEvent[]
   priceReports     PriceReport[]
   promoRedemptions PromoRedemption[]
+  connectedAccounts ConnectedAccount[]
+  subscriptionEvents SubscriptionEvent[]
+  inboxItems        InboxItem[]
 
   @@map("profiles")
 }
@@ -299,6 +386,10 @@ model Service {
   logoKey     String?  @map("logo_key")
   brandColor  String?  @map("brand_color") @db.VarChar(9)
   website     String?
+  /// Tên miền gửi mail của dịch vụ (VD ["netflix.com"]) — dùng để nhận ra merchant.
+  domains     String[] @default([])
+  /// Tên khác của dịch vụ trong email (VD ChatGPT ↔ OpenAI).
+  aliases     String[] @default([])
   cancelUrl   String?  @map("cancel_url")
   /// Các bước hủy gói, dạng mảng chuỗi JSON.
   cancelSteps Json?    @map("cancel_steps")
@@ -310,6 +401,7 @@ model Service {
   plans         ServicePlan[]
   subscriptions Subscription[]
   priceReports  PriceReport[]
+  events        SubscriptionEvent[]
 
   @@index([name])
   @@map("services")
@@ -389,6 +481,18 @@ model Subscription {
   /// Số ngày nhắc trước, ghi đè quy tắc chung của người dùng (VD [7, 1]). Rỗng = dùng quy tắc chung.
   reminderOffsets Int[]              @default([]) @map("reminder_offsets")
   notes           String?
+  /// Người dùng tự nhập hay Subca phát hiện từ email.
+  source          SubscriptionSource @default(MANUAL)
+  /// Trạng thái suy ra từ sự kiện email; null với gói nhập tay chưa có bằng chứng.
+  detectionState  DetectionState?    @map("detection_state")
+  /// Độ tin cậy của phát hiện (0–100).
+  confidence      Int?               @db.SmallInt
+  /// Khóa merchant đã chuẩn hóa (VD "openai") để gom email về đúng subscription.
+  merchantKey     String?            @map("merchant_key")
+  lastDetectedAt  DateTime?          @map("last_detected_at") @db.Timestamptz(6)
+  /// Cần người dùng xác nhận (hiện nhãn "Cần kiểm tra" trong app).
+  needsReview     Boolean            @default(false) @map("needs_review")
+  reviewReason    String?            @map("review_reason")
   cancelledAt     DateTime?          @map("cancelled_at") @db.Timestamptz(6)
   archivedAt      DateTime?          @map("archived_at") @db.Timestamptz(6)
   createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
@@ -403,8 +507,11 @@ model Subscription {
   reminders      Reminder[]
   monthlyReviews MonthlyReview[]
   group          Group?
+  events         SubscriptionEvent[]
+  inboxItems     InboxItem[]
 
   @@index([userId, status])
+  @@index([userId, merchantKey])
   @@index([nextRenewalDate])
   @@index([trialEndDate])
   @@map("subscriptions")
@@ -703,6 +810,139 @@ model FeatureFlag {
   updatedBy AdminUser? @relation(fields: [updatedById], references: [id], onDelete: SetNull)
 
   @@map("feature_flags")
+}
+
+// ─────────────────────────────────────────────
+// Tự động phát hiện subscription từ email
+// ─────────────────────────────────────────────
+
+/// Hộp thư người dùng đã kết nối. Chỉ lưu refresh token đã mã hóa, không bao giờ trả về client.
+model ConnectedAccount {
+  id                    String                 @id @default(uuid(7)) @db.Uuid
+  userId                String                 @map("user_id") @db.Uuid
+  provider              ConnectedProvider      @default(GMAIL)
+  providerEmail         String                 @map("provider_email")
+  /// Refresh token OAuth, mã hóa AES-256-GCM bằng SECRETS_KEY của máy chủ.
+  encryptedRefreshToken String                 @map("encrypted_refresh_token")
+  scope                 String
+  status                ConnectedAccountStatus @default(ACTIVE)
+  /// Mốc lịch sử Gmail của lần đồng bộ gần nhất (đồng bộ tăng dần).
+  lastHistoryId         String?                @map("last_history_id")
+  lastSyncAt            DateTime?              @map("last_sync_at") @db.Timestamptz(6)
+  initialSyncDoneAt     DateTime?              @map("initial_sync_done_at") @db.Timestamptz(6)
+  lastError             String?                @map("last_error")
+  createdAt             DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime               @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user           Profile          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  syncRuns       EmailSyncRun[]
+  processedMails ProcessedEmail[]
+
+  @@unique([userId, provider, providerEmail])
+  @@index([status, lastSyncAt])
+  @@map("connected_accounts")
+}
+
+/// Một lượt quét hộp thư (để hiện tiến độ và gỡ lỗi).
+model EmailSyncRun {
+  id             String          @id @default(uuid(7)) @db.Uuid
+  accountId      String          @map("account_id") @db.Uuid
+  kind           EmailSyncKind
+  status         EmailSyncStatus @default(RUNNING)
+  /// Chỉ quét email nhận sau mốc này.
+  since          DateTime?       @db.Timestamptz(6)
+  scannedCount   Int             @default(0) @map("scanned_count")
+  candidateCount Int             @default(0) @map("candidate_count")
+  eventCount     Int             @default(0) @map("event_count")
+  error          String?
+  startedAt      DateTime        @default(now()) @map("started_at") @db.Timestamptz(6)
+  finishedAt     DateTime?       @map("finished_at") @db.Timestamptz(6)
+
+  account ConnectedAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, startedAt])
+  @@map("email_sync_runs")
+}
+
+/// Email đã xử lý. Không lưu nội dung thư — chỉ đủ để không xử lý lại và để thống kê.
+model ProcessedEmail {
+  id                String           @id @default(uuid(7)) @db.Uuid
+  accountId         String           @map("account_id") @db.Uuid
+  providerMessageId String           @map("provider_message_id")
+  senderDomain      String?          @map("sender_domain")
+  /// Băm SHA-256 của tiêu đề: đủ để dò trùng mà không giữ nội dung.
+  subjectHash       String?          @map("subject_hash")
+  receivedAt        DateTime?        @map("received_at") @db.Timestamptz(6)
+  parseStatus       EmailParseStatus @default(NO_MATCH) @map("parse_status")
+  /// Phiên bản parser đã xử lý; đổi parser thì quét lại được.
+  parserVersion     Int              @default(1) @map("parser_version")
+  processedAt       DateTime         @default(now()) @map("processed_at") @db.Timestamptz(6)
+
+  account ConnectedAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, providerMessageId])
+  @@index([accountId, receivedAt])
+  @@map("processed_emails")
+}
+
+/// Sự kiện đời sống của một subscription, phần lớn trích từ email. Nguồn để suy ra trạng thái.
+model SubscriptionEvent {
+  id             String                @id @default(uuid(7)) @db.Uuid
+  userId         String                @map("user_id") @db.Uuid
+  /// null khi chưa gắn được vào subscription nào (chờ đối soát).
+  subscriptionId String?               @map("subscription_id") @db.Uuid
+  source         EventSource           @default(EMAIL)
+  /// ID email (hoặc nguồn khác) sinh ra sự kiện — dùng để chống xử lý trùng.
+  sourceRef      String?               @map("source_ref")
+  eventType      SubscriptionEventType @map("event_type")
+  /// Khóa merchant đã chuẩn hóa, VD "openai".
+  merchantKey    String                @map("merchant_key")
+  merchantName   String?               @map("merchant_name")
+  serviceId      String?               @map("service_id") @db.Uuid
+  planName       String?               @map("plan_name")
+  amountMinor    BigInt?               @map("amount_minor")
+  currency       String?               @db.Char(3)
+  intervalUnit   IntervalUnit?         @map("interval_unit")
+  intervalCount  Int?                  @map("interval_count") @db.SmallInt
+  occurredAt     DateTime              @map("occurred_at") @db.Timestamptz(6)
+  renewalDate    DateTime?             @map("renewal_date") @db.Date
+  trialEndDate   DateTime?             @map("trial_end_date") @db.Date
+  accessUntil    DateTime?             @map("access_until") @db.Date
+  /// Độ tin cậy của riêng sự kiện này (0–100).
+  confidence     Int                   @default(50) @db.SmallInt
+  /// Chỉ các trường đã trích được (không phải nội dung thư gốc).
+  extracted      Json?
+  createdAt      DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user         Profile       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  service      Service?      @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  @@unique([sourceRef, eventType])
+  @@index([userId, merchantKey, occurredAt])
+  @@index([subscriptionId, occurredAt])
+  @@map("subscription_events")
+}
+
+/// Việc cần người dùng quyết định (Subca Inbox). Chỉ tạo khi hệ thống không chắc.
+model InboxItem {
+  id             String          @id @default(uuid(7)) @db.Uuid
+  userId         String          @map("user_id") @db.Uuid
+  kind           InboxItemKind
+  subscriptionId String?         @map("subscription_id") @db.Uuid
+  eventId        String?         @map("event_id") @db.Uuid
+  /// Dữ liệu để dựng thẻ trong app (tên dịch vụ, số tiền cũ/mới…).
+  payload        Json?
+  status         InboxItemStatus @default(OPEN)
+  resolution     String?
+  resolvedAt     DateTime?       @map("resolved_at") @db.Timestamptz(6)
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user         Profile       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, createdAt])
+  @@map("inbox_items")
 }
 
 // ─────────────────────────────────────────────
