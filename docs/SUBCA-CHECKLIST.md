@@ -15,7 +15,7 @@
 - API: xác thực JWT Supabase, `/me` (+ cài đặt, ngân sách, xóa tài khoản), thư viện dịch vụ, subscription CRUD (giới hạn Free, chi tiết kèm thanh toán / hướng dẫn hủy / lịch sử trừ tiền), `/home`, phương thức thanh toán, lịch, đánh giá tháng, phân tích, push token, nhắc nhở BullMQ + Expo Push + receipt, job tỷ giá.
 - **App mobile** (`apps/mobile`): design system theo mockup (NativeWind), đăng nhập OTP 6 số (đếm ngược gửi lại), Trang chủ, Danh sách / Thêm / Sửa / Chi tiết subscription, Lịch, Quản lý Trial, Đánh giá tháng (optimistic), Phân tích, Ngân sách (mô phỏng tiết kiệm), Phương thức thanh toán (tạo ngay trong form + màn phụ), Cài đặt (tiền tệ, múi giờ, giờ nhắc, ngân sách, đăng xuất, xóa tài khoản), Nhắc nhở (lịch sử + sắp tới + cài mốc nhắc), đăng ký push token (EAS project `@nvdeekay/subca`), thông báo cục bộ dự phòng, cache dữ liệu trên máy (MMKV mã hóa).
 - **Chia tiền nhóm (Giai đoạn 3):** API đầy đủ (`/groups`: tạo nhóm từ gói đang trả, chia đều / tùy chỉnh có kiểm tra tổng, mã mời, kỳ thu theo tháng, "Tôi đã chuyển" → chủ nhóm xác nhận / miễn / mở lại, nhắc từng người hoặc tất cả có chặn nhắc dồn, mã QR VietQR) + 2 màn trong app (Chia tiền nhóm, Chi tiết nhóm).
-- **Admin Console v1** (`apps/admin`): đăng nhập OTP + bắt buộc TOTP, phân quyền 5 vai trò, Tổng quan, Người dùng (khóa / tặng Plus / xóa dữ liệu), Thư viện dịch vụ + duyệt đề xuất giá, Hàng đợi nhắc, Nhật ký thao tác. Đã thêm admin đầu tiên vào `admin_users`; chủ dự án đăng nhập lần đầu để bật TOTP.
+- **Admin Console v1** (`apps/admin`): đăng nhập **email + mật khẩu**, phân quyền 5 vai trò, Nhân sự & phân quyền, Tổng quan, Người dùng (khóa / tặng Plus / xóa dữ liệu), Thư viện dịch vụ + duyệt đề xuất giá, Hàng đợi nhắc, Nhật ký thao tác. Tài khoản `admin@subca.app` (OWNER) đã tạo và đăng nhập chạy thật.
 - **Đã chạy thật 28/09:** chia tiền nhóm trên app với Supabase dev (tạo nhóm Netflix 4 người từ gói đang trả, kỳ thu tháng 9 sinh đủ 3 khoản 65.000đ) — nhóm này còn trong tài khoản dev, xóa trong app nếu không cần.
 - **Quyết định sản phẩm:** đã **bỏ danh mục** khỏi app + API (bảng còn trong DB, không dùng) — xem `docs/ARCHITECTURE.md`.
 - Test: shared 88 · API unit + e2e (CI) · **42 test tích hợp trên Supabase + Redis thật đã chạy lại và qua hết** (`test:int`).
@@ -30,7 +30,7 @@
 7. **Đối chiếu danh sách BIN ngân hàng VietQR** (`packages/shared/src/vietqr.ts`) với bảng công bố của NAPAS trước khi ra mắt.
 
 **Việc kỹ thuật tiếp theo (gợi ý thứ tự)**
-1. **Chủ dự án đăng nhập Admin Console lần đầu** (`pnpm --filter @subca/admin dev`, cần API chạy): nhập mã OTP trong email rồi quét QR bật TOTP. Hàng đã có sẵn trong `admin_users`.
+1. **Thêm `SUPABASE_SERVICE_ROLE_KEY`** vào `apps/api/.env` để trang Nhân sự tạo được tài khoản admin mới / đặt lại mật khẩu, và để Xóa tài khoản hết 503.
 2. **App mobile (cần thiết bị / tài khoản):** rà soát UI Android (cài Android Studio + emulator trên máy dev) → thử nhận push thật (máy thật + tài khoản Apple, hoặc EAS build Android) → Sentry + PostHog (cần tạo tài khoản) → hàng đợi thao tác khi mất mạng (tùy chọn).
 3. Dọn dữ liệu mẫu trong tài khoản dev `khanhnvd07@gmail.com` khi chủ dự án yêu cầu (subscription có ghi chú `[dữ liệu mẫu]`, 2 phương thức mẫu, ngân sách 800.000đ).
 4. EAS Build (eas.json, development / preview) → TestFlight nội bộ khi có tài khoản Apple.
@@ -273,15 +273,16 @@
 - [ ] Chia gói theo năm / quý (hiện chỉ thu theo tháng)
 
 ### Admin v1
-- [x] Đăng nhập admin bằng Supabase Auth (OTP email) + **bắt buộc MFA TOTP** (API từ chối phiên chưa đạt `aal2`) + phân quyền theo vai trò trong `admin_users` (OWNER / ADMIN / SUPPORT / MARKETING / VIEWER)
+- [x] Đăng nhập admin bằng **email + mật khẩu** (Supabase Auth) + phân quyền theo vai trò trong `admin_users` (OWNER / ADMIN / SUPPORT / MARKETING / VIEWER). MFA TOTP giữ nguyên nhưng thành cờ `ADMIN_REQUIRE_MFA` (mặc định tắt) — **bật khi lên production**
 - [x] Người dùng (tìm kiếm, lọc gói và trạng thái, chi tiết, khóa / mở khóa, tặng Plus, xóa dữ liệu)
 - [ ] Doanh thu (lấy từ RevenueCat) — chờ tài khoản RevenueCat + store
 - [x] Thư viện dịch vụ + duyệt đề xuất giá
 - [x] Nhật ký thao tác (audit log) — ghi kèm IP và mức độ, lọc theo thao tác / mức độ
 - [x] Dashboard tổng quan từ database Subca (người dùng, subscription, tiền đang theo dõi, nhắc nhở, nhóm chia tiền); _phễu và cohort từ PostHog để sau_
 - [x] Thêm admin đầu tiên vào `admin_users` (`khanhnvd07@gmail.com`, vai trò OWNER)
-- [ ] Chủ dự án đăng nhập thử Admin Console: nhập mã OTP gửi tới email rồi quét QR bật TOTP (chỉ chủ dự án làm được vì cần hộp thư và app xác thực)
-- [ ] Nhân sự & phân quyền (thêm / gỡ admin ngay trong giao diện), thông báo & chiến dịch, hỗ trợ — các trang còn lại của mockup
+- [x] Đã tạo tài khoản đăng nhập `admin@subca.app` (OWNER) — mật khẩu trong `.admin-account.local` ở gốc repo; đã đăng nhập thử thật và tải được dữ liệu
+- [x] Nhân sự & phân quyền (thêm / gỡ admin, đổi vai trò, bật tắt, đặt lại mật khẩu)
+- [ ] Các trang còn lại của mockup: thông báo & chiến dịch, hỗ trợ, tăng trưởng & giữ chân, gói & khuyến mãi
 
 ### Ra mắt
 - [ ] Ảnh chụp màn hình + mô tả trên store (ASO: "quản lý subscription", "nhắc gia hạn", "hủy đăng ký")

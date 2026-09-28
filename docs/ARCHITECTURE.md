@@ -64,7 +64,9 @@ Mỗi 5 phút:
 - **Mã QR VietQR** (`packages/shared/src/vietqr.ts`): server sinh chuỗi EMVCo + NAPAS247 (QRIBFTTA) kèm CRC-16/CCITT-FALSE, app chỉ vẽ lại. Thành viên nhận QR đúng phần của mình; chủ nhóm chỉ điền sẵn số tiền khi chia đều. Chỉ có QR với nhóm tính bằng VND. Danh sách BIN ngân hàng là **danh sách tham khảo, cần đối chiếu với NAPAS trước khi ra mắt**.
 
 ### Admin Console (`apps/api/src/admin`, `apps/admin`)
-- **Đăng nhập:** OTP email như app, nhưng `AdminGuard` bắt buộc phiên đạt `aal2` (đã qua TOTP) — tận dụng luôn claim `aal` trong token Supabase, không cần tự làm MFA. Tài khoản phải có trong `admin_users` và đang bật.
+- **Đăng nhập:** email + **mật khẩu** (Supabase Auth `signInWithPassword`) theo yêu cầu của chủ dự án; tài khoản phải có trong `admin_users` và đang bật. Xác thực hai bước chuyển thành cờ `ADMIN_REQUIRE_MFA` (mặc định tắt, **bật ở production**): bật thì `AdminGuard` đòi phiên đạt `aal2` và trang đăng nhập tự hiện bước TOTP.
+- **Tài khoản admin đầu tiên** tạo bằng `pnpm --filter @subca/api admin:create` — ghi thẳng vào `auth.users` (bcrypt của pgcrypto) vì lúc đó máy chủ chưa cần service role key. Các tài khoản sau thêm trong trang Nhân sự (qua Supabase Admin API, cần `SUPABASE_SERVICE_ROLE_KEY`).
+- **CORS:** API mở theo `CORS_ORIGINS` cho đúng origin của Admin Console; app mobile là ứng dụng gốc nên không đi qua CORS.
 - **Phân quyền** khai ở một chỗ (`ADMIN_PERMISSIONS` trong shared): API chặn bằng `@RequireAdmin('manageUsers')`, giao diện ẩn nút bằng `can('manageUsers')`.
 - **Nhật ký:** mọi thao tác đổi dữ liệu ghi `audit_logs` kèm IP; khóa tài khoản / tặng Plus là `SENSITIVE`, xóa dữ liệu là `CRITICAL`. Ghi nhật ký lỗi thì chỉ log, không làm hỏng thao tác chính.
 - **Tặng Plus** tạo `entitlements` với store `PROMO` (không đi qua RevenueCat); tặng thêm khi đang còn hạn thì cộng dồn vào quyền cũ.
