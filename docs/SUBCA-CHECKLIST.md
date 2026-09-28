@@ -17,9 +17,9 @@
 - **Chia tiền nhóm (Giai đoạn 3):** API đầy đủ (`/groups`: tạo nhóm từ gói đang trả, chia đều / tùy chỉnh có kiểm tra tổng, mã mời, kỳ thu theo tháng, "Tôi đã chuyển" → chủ nhóm xác nhận / miễn / mở lại, nhắc từng người hoặc tất cả có chặn nhắc dồn, mã QR VietQR) + 2 màn trong app (Chia tiền nhóm, Chi tiết nhóm).
 - **Admin Console v1** (`apps/admin`): đăng nhập **email + mật khẩu**, phân quyền 5 vai trò, 8 trang — Tổng quan, Người dùng (khóa / tặng Plus / xóa dữ liệu), Thư viện dịch vụ + duyệt đề xuất giá, Sử dụng tính năng + feature flag, Nhân sự & phân quyền, Sức khỏe hệ thống, Hàng đợi nhắc, Nhật ký thao tác. Tài khoản `admin@subca.app` (OWNER) đã tạo và đăng nhập chạy thật.
 - **Đã chạy thật 28/09:** chia tiền nhóm trên app với Supabase dev (tạo nhóm Netflix 4 người từ gói đang trả, kỳ thu tháng 9 sinh đủ 3 khoản 65.000đ) — nhóm này còn trong tài khoản dev, xóa trong app nếu không cần.
-- **Tự phát hiện từ email (auto-first, 28/09/2026):** schema + 5 bảng mới, adapter Gmail (OAuth, quyền `gmail.readonly`), lọc ứng viên, parser nhiều lớp, engine đối soát (trạng thái + độ tin cậy), Subca Inbox, quét định kỳ 6 giờ, màn Kết nối hộp thư và Inbox trong app. Nhập tay giữ nguyên làm phương án dự phòng. Test: 27 unit + 8 tích hợp chạy cả luồng trên database thật bằng hộp thư mẫu.
+- **Tự phát hiện từ email (auto-first, 28/09/2026):** schema + 5 bảng mới, adapter Gmail (OAuth, quyền `gmail.readonly`), lọc ứng viên, parser nhiều lớp, engine đối soát (trạng thái + độ tin cậy), Subca Inbox, quét định kỳ 6 giờ, màn Kết nối hộp thư và Inbox trong app. Nhập tay giữ nguyên làm phương án dự phòng. **Parser v2:** danh mục ~65 merchant (đủ dịch vụ phổ biến ở Việt Nam, mọi `serviceSlug` đối chiếu với seed bằng unit test) và **tách hóa đơn gộp** — một biên nhận Apple / Google Play / ví điện tử liệt kê nhiều dịch vụ thì mỗi dịch vụ thành một sự kiện riêng với giá riêng (khóa chống trùng đổi thành `(source_ref, event_type, merchant_key)`, migration thứ 5). Test: 38 unit + 9 tích hợp chạy cả luồng trên database thật bằng hộp thư mẫu.
 - **Quyết định sản phẩm:** đã **bỏ danh mục** khỏi app + API (bảng còn trong DB, không dùng) — xem `docs/ARCHITECTURE.md`.
-- Test: shared 88 · API unit + e2e (CI) · **42 test tích hợp trên Supabase + Redis thật đã chạy lại và qua hết** (`test:int`).
+- Test: shared 88 · API unit + e2e (CI) · **51 test tích hợp trên Supabase + Redis thật đã chạy lại và qua hết** (`test:int`).
 
 **Việc của chủ dự án (đang chờ)**
 1. **Đổi mật khẩu database Supabase** (đã lộ trong chat) rồi sửa `DATABASE_URL` / `DIRECT_URL` trong `apps/api/.env`.
@@ -310,7 +310,8 @@
 - [x] Đọc hóa đơn trong Gmail — **đã dựng xong đường ống** (quét → lọc → parse → sự kiện → đối soát → subscription + Inbox), chạy được với hộp thư mẫu
 - [ ] Nối Gmail thật: tạo OAuth client trong Google Cloud, điền `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `SECRETS_KEY`
 - [ ] **Thẩm định bảo mật của Google (CASA)** cho scope `gmail.readonly` — bắt buộc trước khi mở quá 100 người dùng thử; tốn vài tuần và có phí
-- [ ] Mở rộng parser: thêm merchant, hóa đơn gộp Apple/Google Play nhiều dịch vụ, lớp LLM cho email lạ
+- [x] Mở rộng parser: danh mục ~65 merchant (mọi `serviceSlug` có unit test đối chiếu seed) và tách hóa đơn gộp Apple / Google Play / ví điện tử thành nhiều dịch vụ
+- [ ] Lớp LLM cho email lạ (đã chừa chỗ trong `parser.ts`); thêm merchant theo email thật của người dùng thử
 - [ ] Màn hình giải thích quyền riêng tư trước khi xin quyền Gmail (Google bắt buộc) + cập nhật chính sách quyền riêng tư
 - [ ] Chiến dịch push / email từ admin
 
