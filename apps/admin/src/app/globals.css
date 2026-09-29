@@ -1,34 +1,34 @@
 @import 'tailwindcss';
 
-/* Subca Atelier: bảng màu giấy, olive, dusty red và brass dùng chung toàn console. */
+/* Bốn màu sản phẩm đồng bộ với mobile: charcoal, slate, orange và light grey. */
 @theme {
-  --color-sky: #d7d9c8;
-  --color-sky-soft: #e9e9dc;
-  --color-sky-deep: #5d6247;
-  --color-mint: #e3e3d5;
-  --color-peach: #efe3cf;
-  --color-coral: #e8d2c8;
-  --color-sage: #d4d4c2;
-  --color-brand: #626348;
-  --color-olive: #626348;
-  --color-brass: #a8874f;
-  --color-brass-soft: #f0e7d1;
-  --color-ink: #302c25;
-  --color-ink-2: #51483c;
-  --color-ink-3: #786d5d;
-  --color-bg: #f4efe4;
-  --color-surface: #fbf8f0;
-  --color-line: #ded4c2;
-  --color-line-2: #ebe4d7;
-  --color-good: #505b3e;
-  --color-good-bg: #e3e3d5;
-  --color-warn: #76592d;
-  --color-warn-bg: #f0e7d1;
-  --color-crit: #965448;
-  --color-crit-bg: #efddd5;
+  --color-sky: #d9dadd;
+  --color-sky-soft: #eeeeee;
+  --color-sky-deep: #393e46;
+  --color-mint: #e2e3e5;
+  --color-peach: #eeeeee;
+  --color-coral: #ffd7bb;
+  --color-sage: #d5d7da;
+  --color-brand: #fd7014;
+  --color-olive: #393e46;
+  --color-brass: #fd7014;
+  --color-brass-soft: #eeeeee;
+  --color-ink: #222831;
+  --color-ink-2: #393e46;
+  --color-ink-3: #5e636a;
+  --color-bg: #eeeeee;
+  --color-surface: #ffffff;
+  --color-line: #d4d6d9;
+  --color-line-2: #e6e7e9;
+  --color-good: #393e46;
+  --color-good-bg: #e2e3e5;
+  --color-warn: #222831;
+  --color-warn-bg: #eeeeee;
+  --color-crit: #222831;
+  --color-crit-bg: #ffd7bb;
 
   --radius-card: 18px;
-  --shadow-card: 0 1px 2px rgba(73, 56, 35, 0.05), 0 5px 16px rgba(73, 56, 35, 0.07);
+  --shadow-card: 0 1px 2px rgba(34, 40, 49, 0.05), 0 5px 16px rgba(34, 40, 49, 0.08);
 }
 
 html,
@@ -42,7 +42,7 @@ body {
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Cg fill='%2378664b' fill-opacity='.12'%3E%3Ccircle cx='11' cy='17' r='.7'/%3E%3Ccircle cx='46' cy='9' r='.5'/%3E%3Ccircle cx='83' cy='31' r='.65'/%3E%3Ccircle cx='119' cy='14' r='.5'/%3E%3Ccircle cx='27' cy='57' r='.55'/%3E%3Ccircle cx='69' cy='72' r='.7'/%3E%3Ccircle cx='104' cy='61' r='.5'/%3E%3Ccircle cx='9' cy='103' r='.6'/%3E%3Ccircle cx='47' cy='117' r='.5'/%3E%3Ccircle cx='91' cy='105' r='.65'/%3E%3Ccircle cx='123' cy='122' r='.5'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Cg fill='%23222831' fill-opacity='.045'%3E%3Ccircle cx='11' cy='17' r='.7'/%3E%3Ccircle cx='46' cy='9' r='.5'/%3E%3Ccircle cx='83' cy='31' r='.65'/%3E%3Ccircle cx='119' cy='14' r='.5'/%3E%3Ccircle cx='27' cy='57' r='.55'/%3E%3Ccircle cx='69' cy='72' r='.7'/%3E%3Ccircle cx='104' cy='61' r='.5'/%3E%3Ccircle cx='9' cy='103' r='.6'/%3E%3Ccircle cx='47' cy='117' r='.5'/%3E%3Ccircle cx='91' cy='105' r='.65'/%3E%3Ccircle cx='123' cy='122' r='.5'/%3E%3C/g%3E%3C/svg%3E");
   background-repeat: repeat;
   background-size: 128px 128px;
 }
@@ -60,7 +60,7 @@ h3 {
   width: 42px;
   height: 2px;
   margin-top: 5px;
-  background: var(--color-brass);
+  background: var(--color-brand);
   content: '';
 }
 
@@ -70,14 +70,14 @@ textarea {
   border-color: var(--color-line);
   border-radius: 10px;
   background-color: var(--color-surface);
-  box-shadow: inset 0 1px 2px rgba(73, 56, 35, 0.035);
+  box-shadow: inset 0 1px 2px rgba(34, 40, 49, 0.035);
 }
 
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: var(--color-brass);
-  outline: 2px solid color-mix(in srgb, var(--color-brass) 22%, transparent);
+  border-color: var(--color-brand);
+  outline: 2px solid color-mix(in srgb, var(--color-brand) 22%, transparent);
   outline-offset: 1px;
 }
 
@@ -105,7 +105,7 @@ button:not(:disabled):active {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-brass);
+  outline: 2px solid var(--color-brand);
   outline-offset: 2px;
   border-radius: 8px;
 }

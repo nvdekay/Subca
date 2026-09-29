@@ -49,7 +49,7 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const BUTTON_VARIANT = {
-  primary: 'border border-olive bg-olive text-bg hover:bg-ink',
+  primary: 'border border-brand bg-brand text-ink hover:bg-brand/90',
   default: 'border border-line bg-surface text-ink shadow-sm hover:bg-brass-soft',
   danger: 'border border-crit/30 bg-crit-bg text-crit hover:bg-crit/15',
   ghost: 'text-ink-2 hover:bg-brass-soft',
