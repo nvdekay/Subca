@@ -2,11 +2,11 @@
 
 > Cập nhật: 29/09/2026 · Đánh dấu `[x]` khi code/đầu việc đã hoàn tất; các bước test thực tế, production hoặc phụ thuộc tài khoản ngoài chỉ đánh dấu khi đã xác minh.
 > Tham chiếu UI: `design/Subca V2.html` (mobile flow mới), `design/subca-mobile-mockup.html` (màn/tính năng cũ), `design/subca-admin-dashboard.html` (admin).
-> Repo `nvdekay/Subca`; base commit hiện tại `eaac77a` cộng working tree chưa commit. Trạng thái và lệnh mới nhất: `docs/PROJECT-KNOWLEDGE.md`; quyết định kỹ thuật: `docs/ARCHITECTURE.md`.
+> Repo `nvdekay/Subca`; base commit hiện tại `50b870d` cộng vintage redesign chưa commit. Trạng thái và lệnh mới nhất: `docs/PROJECT-KNOWLEDGE.md`; quyết định kỹ thuật: `docs/ARCHITECTURE.md`.
 
 ### Hiện trạng (đối chiếu working tree 29/09/2026)
 
-**Đang ở:** Luồng lõi, chia tiền nhóm và Admin Console v1 đã có. Mobile đã chuyển sang flow auto-first theo `Subca V2`: onboarding → Gmail → scan → kết quả; tabs chính là Trang chủ / Gói của tôi / Cần chú ý / Phân tích. Gmail detection code + queue đã có, nhưng kết nối/scan bằng Gmail thật và QA toàn luồng chưa được xác nhận. App đã build/mở trên iPhone 17 Pro Simulator; chưa QA Android hoặc phát hành store.
+**Đang ở:** Luồng lõi, chia tiền nhóm và Admin Console v1 đã có. Mobile theo flow auto-first `Subca V2`, giao diện mobile/admin dùng vintage giấy–olive–brass với Nunito. Gmail detection code + queue đã có, nhưng kết nối/scan bằng Gmail thật và QA toàn luồng chưa được xác nhận. App đã build/mở trên iPhone 17 Pro Simulator; cần QA lại typography trên iOS/Android/Admin, chưa phát hành store.
 
 **Đã có trong repo**
 - Monorepo pnpm/Turborepo; Expo SDK 57 + RN 0.86; NestJS 12/Fastify; Next.js 16; Prisma 7.10; shared package. Database schema có 31 Prisma models và 5 migration files.
@@ -36,7 +36,11 @@
 ## A. Thiết kế & prototype
 
 - [x] Phân tích prototype `design/Subca V2.html`; đổi mobile primary tabs thành Trang chủ / Gói của tôi / Cần chú ý / Phân tích; giữ Lịch, Review và các tính năng phụ dưới route riêng
-- [x] Chuyển mobile sang màu sáng, màu phẳng; loại gradient
+- [x] Chuyển mobile/admin sang vintage style: nền giấy kem, olive, dusty red, brass; Nunito thân thiện cho tiêu đề/nội dung, texture nhẹ, viền/bóng thống nhất; không gradient
+- [x] Thay typography toàn hệ thống sang Nunito weights 400–800, tải subset tiếng Việt cho mobile và Admin
+- [x] Intro trước đăng nhập: “Xin chào.” lớn, ba cảnh giới thiệu với animation theo lớp, tiến độ, quay lại/bỏ qua/đăng nhập; giữ OTP/Gmail, hỗ trợ Reduce Motion và không tự chuyển khi dùng screen reader
+- [ ] QA intro trên Android, màn hình nhỏ/chữ lớn và VoiceOver/Reduce Motion; kiểm thử thao tác toàn luồng từ intro đến OTP/Gmail
+- [x] Product redesign mobile: ưu tiên dashboard theo việc cần làm, tổng quan analytics, Inbox queue, top-level CTA, trang danh sách/empty state, header trang con và phân nhóm form thêm/sửa
 - [x] Thêm metadata nguồn phát hiện/độ tin cậy/số bằng chứng vào DTO subscription để UI có thể giải thích dữ liệu
 - [x] Chuyển yêu cầu quét Gmail sang BullMQ, trả run ngay và ghi tiến độ theo trang
 - [x] Hoàn thiện onboarding nhiều bước sau đăng nhập theo V2, gồm kết nối Gmail → scan → summary → vào app
@@ -49,7 +53,7 @@
 - [x] Paywall Subca Plus (so sánh Free/Plus, 3 gói, timeline dùng thử, FAQ, luồng mua)
 - [x] Mockup admin, 12 trang: Tổng quan, Người dùng, Tăng trưởng, Doanh thu, Gói & khuyến mãi, Thư viện dịch vụ, Sử dụng tính năng, Thông báo, Hỗ trợ, Hệ thống, Nhân sự, Nhật ký
 - [ ] Review mockup với 5–10 người dùng mục tiêu (Gen Z), ghi lại góp ý
-- [ ] Chuyển design token (màu, font, bo góc, spacing) thành preset Tailwind dùng chung cho app (NativeWind) và admin
+- [x] Chuẩn hóa token (màu, font, bo góc, spacing), component states và navigation trên NativeWind/mobile + Tailwind/admin
 - [ ] (Tùy chọn) Dựng lại các màn chính trên Figma để làm handoff
 
 ---

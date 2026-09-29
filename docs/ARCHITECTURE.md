@@ -29,7 +29,9 @@
 | Push | **Expo Push Service** | 1 API cho iOS + Android; có thể chuyển FCM/APNs trực tiếp sau |
 | Tỷ giá | **ExchangeRate-API (Open Access)**, dự phòng fawazahmed0/currency-api | ECB không có VND. Điều khoản: dùng thương mại được, **bắt buộc ghi nguồn**, không phân phối lại, gọi ≤ 1 lần/ngày |
 | Mua trong app | **RevenueCat** (chưa làm) | Lo App Store + Google Play, webhook → bảng `entitlements` |
-| Admin | **Next.js 16 + Tailwind 4**, bộ UI nhỏ theo token mockup | Admin Console v1 đã chạy; không dùng shadcn/ui để giữ giao diện gọn và đúng thiết kế hiện có |
+| Admin | **Next.js 16 + Tailwind 4**, bộ UI nhỏ theo token sản phẩm | Admin Console v1 đã chạy; không dùng shadcn/ui để giữ giao diện gọn và nhất quán với app |
+| Visual system | **Modern vintage**: giấy kem, olive, dusty red, brass; Nunito bo tròn, dễ đọc và hỗ trợ tiếng Việt; hạt giấy cực nhẹ, viền mảnh và bóng dịu; không gradient | Dùng Nunito weights 400–800 trên mobile/Admin; font tải riêng theo nền tảng, giữ palette/layout token riêng NativeWind và Tailwind |
+| Mobile information architecture | **4 đích chính + CTA thêm trung tâm**; dashboard theo thứ tự tổng quan → quyết định → mốc gần nhất → ngân sách → lối tắt; phân tích theo tổng → xu hướng → chi tiết | Giữ nguyên route nghiệp vụ/API; các màn phụ dùng cùng header trái biên, nội dung/CTA ưu tiên theo nhiệm vụ của màn |
 | Hosting | Railway / Render / Fly.io, **Singapore** (chưa chọn) | Cùng khu vực với Supabase production |
 | Danh mục | **Bỏ khỏi sản phẩm** (27/09/2026) | Chủ dự án thấy thừa: không chọn danh mục khi thêm subscription, Phân tích không chia theo danh mục, API không còn `/catalog/categories` và `categoryId`. Bảng `categories` và cột `category_id` vẫn còn trong DB (không dùng) để khỏi migration xóa dữ liệu |
 

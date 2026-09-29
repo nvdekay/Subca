@@ -1,8 +1,8 @@
 # Subca — Project Knowledge Base
 
 > **Nguồn sự thật trung tâm cho Claude, Codex và người phát triển.**  
-> Cập nhật: **29/09/2026** · Base commit: `eaac77a` + thay đổi working tree chưa commit · Repo: `nvdekay/Subca`  
-> Đối chiếu code, route, Prisma schema, tài liệu và môi trường local ngày 29/09/2026. Khi vào session mới, đọc `git status` / `git diff` vì phần Mobile V2 và các tài liệu liên quan vẫn chưa commit.
+> Cập nhật: **29/09/2026** · Snapshot code: `6f8e7fd` + commit tài liệu kế tiếp · Repo: `nvdekay/Subca`
+> Đợt Nunito, vintage mobile/Admin, bố cục mobile và intro đã tách thành 5 commit code. Khi vào session mới, đọc `git status` / `git log` để nhận biết thay đổi sau snapshot.
 
 ## 1. Cách dùng trong một session mới
 
@@ -35,14 +35,20 @@ Subca là ứng dụng quản lý subscription cá nhân, ưu tiên người tr�
 
 ## 3. Hiện trạng ngắn gọn
 
-### Cập nhật triển khai Mobile V2 (29/09/2026, chưa commit)
+### Cập nhật triển khai Mobile V2 và vintage UI (29/09/2026)
 
 - Tham chiếu UX: `design/Subca V2.html` (24 trạng thái; gồm cả demo controls và màn minh họa). Mobile tabs đang chuyển sang Trang chủ / Gói của tôi / Cần chú ý / Phân tích; Lịch và Review vẫn giữ làm route phụ, các màn nhóm/ngân sách/thanh toán/thông báo/hồ sơ không bị bỏ.
-- Đã áp dụng nền kem, màu phẳng sáng, góc bo và card mềm; mobile không dùng gradient. Flow onboarding hiện bám các trạng thái V2: welcome/value trước đăng nhập → sau đăng nhập kết nối Gmail → xác nhận đã kết nối → scan → summary. Tài khoản đã có dữ liệu được đưa vào tabs; có thể bỏ qua Gmail hoặc tự thêm gói.
+- Intro trước đăng nhập mới: chữ “Xin chào.” lớn ở giữa → gom gói đăng ký → nhắc gia hạn → tổng quan chi tiêu/chia tiền. Lời chào tự chuyển sau 3 giây một lần; ba cảnh còn lại người dùng tự bấm tiếp/quay lại. Có bỏ qua/đăng nhập ở mọi cảnh. Giữ nguyên OTP → kết nối Gmail → xác nhận đã kết nối → scan → summary; tài khoản đã có phiên không bị buộc xem lại intro, có thể bỏ qua Gmail hoặc tự thêm gói.
+- Intro nằm tại `apps/mobile/src/features/onboarding/intro.tsx` và `intro-art.tsx`, route auth index chỉ re-export. Dùng Reanimated hiện có, minh hoạ code-native, không thêm dependency/API. Tắt tự chuyển và animation khi Reduce Motion; tắt tự chuyển khi screen reader; timer được dọn khi blur/background/unmount. Nội dung cuộn được và CTA nằm ngoài vùng cuộn.
+- QA intro: mobile typecheck/lint qua; xem ảnh cả bốn cảnh trên iPhone 17 Pro Simulator, xác nhận greeting tự chuyển sang cảnh đầu. Chưa kiểm thử thao tác từng nút, VoiceOver/Reduce Motion và Android trên thiết bị; trạng thái preview tạm đã khôi phục về bước 0.
+- Đang áp dụng vintage style trên mobile và Admin: nền giấy kem có hạt SVG rất nhẹ, olive/dusty red/brass, viền mảnh và bóng nâu dịu, góc bo tiết chế; Nunito đồng nhất tiêu đề/nội dung (weights 400–800), hỗ trợ tiếng Việt. Không gradient, không đổi nghiệp vụ.
+- Font: mobile nạp Nunito từ `@expo-google-fonts/nunito` trước khi ẩn splash; admin dùng `next/font/google` với subset `latin` + `vietnamese`. Font Nunito theo OFL-1.1.
+- Đợt product-architecture redesign mobile: thanh tab có 4 đích chính cân quanh CTA thêm ở giữa; dashboard ưu tiên tổng chi → việc cần xác nhận → mốc tiếp theo → ngân sách → lối tắt; Inbox đưa số việc chờ xử lý lên đầu; analytics đặt tổng chi và xu hướng trước phần phân tích phụ. Header màn con dùng căn trái; form tạo gói gom tuỳ chọn ít dùng vào phần mở rộng (edit để mở sẵn), chi tiết gói đưa thao tác chính lên gần đầu trang.
+- Mobile tokens tập trung tại `apps/mobile/src/theme/tokens.json`; component dùng chung đã được làm mới gồm `Text`, `Card`, `Button`, `Input`, tab navigation, segmented, pill, sheet, date/search controls. Admin tokens và form states nằm trong `apps/admin/src/app/globals.css` + `src/components/ui.tsx`.
 - Subscription DTO list/detail bổ sung source, detection state, confidence, needsReview, reviewReason, lastDetectedAt và evidenceCount để UI nêu nguồn/bằng chứng. Dữ liệu này lấy từ bảng/event hiện có.
 - `POST /connections/:id/sync` dùng BullMQ; run được lưu trước khi enqueue và tiến độ scanned/candidate/event cập nhật mỗi trang Gmail. Không đổi schema/migration; Redis cần chạy. Scheduler định kỳ vẫn có luồng riêng.
 - Prototype giả lập OCR ảnh và email forwarding; chưa có backend/API cho các luồng đó nên không giả làm tính năng thật. Prototype có analytics theo category nhưng quyết định sản phẩm hiện tại là bỏ category, không đưa lại.
-- Kiểm tra code trong phiên triển khai: shared build/typecheck, API typecheck/lint, mobile typecheck/lint, Prettier và `git diff --check` qua; không chạy test.
+- Kiểm tra trước commit/push: Turbo build/typecheck/test/lint toàn repo qua 12/12 tác vụ (không cache); shared 88 test, API 122 unit + 60 e2e; Prisma validate và Prettier trên file được Git theo dõi đều qua. Intro đã xem trên iOS Simulator; còn QA typography/các màn khác trên iOS/Android/Admin và integration DB thật. Prettier toàn thư mục chỉ cảnh báo file cá nhân bị Git ignore `.claude/settings.local.json`, giữ nguyên và không commit file đó.
 - Kiểm tra local khi mở app: `GET /health` trả `{"status":"ok","db":"up"}`, Redis healthy, Metro báo running trên 8081; app build/cài/mở được trên iPhone 17 Pro Simulator (iOS 26.2). Build đầu với prebuilt React thất bại vì thiếu binary; build thành công sau `pod install` với `RCT_USE_RN_DEP=0 RCT_USE_PREBUILT_RNCORE=0`. Đây là trạng thái máy dev, không phải bảo đảm các thiết bị/CI khác.
 
 ### Đã hoạt động
@@ -57,7 +63,7 @@ Subca là ứng dụng quản lý subscription cá nhân, ưu tiên người tr�
 
 ### Đang ở đâu
 
-Các chức năng lõi subscription, reminder, nhóm và Admin v1 đã có. Mobile V2 đã được chuyển flow và chạy được trên iOS Simulator; chưa xác nhận end-to-end trên tài khoản Gmail thật, chưa QA Android/push thật, và chưa phát hành. Trọng tâm tiếp theo: OAuth/Gmail thật + kiểm thử scan/inbox, QA thiết bị hai nền tảng, bảo mật/pháp lý, EAS/store và beta.
+Các chức năng lõi subscription, reminder, nhóm và Admin v1 đã có. Mobile V2 chạy trên iOS Simulator; vintage UI đang được áp dụng, build Admin đã qua nhưng chưa QA từng route bằng trình duyệt. Chưa xác nhận Gmail thật, chưa QA Android/push thật, chưa phát hành. Trọng tâm tiếp theo: QA toàn bộ màn vintage trên iOS/Android/Admin, OAuth/Gmail thật + kiểm thử scan/inbox, bảo mật/pháp lý, EAS/store và beta.
 
 ### Blocker/việc cần chủ dự án xử lý
 
