@@ -6,7 +6,13 @@
  * vì JSON không có BigInt. Dùng `toMinor()` để đổi số người dùng nhập sang chuỗi này.
  */
 import { z } from 'zod';
-import { IntervalUnit, PaymentMethodType, SubscriptionStatus, UsageFrequency } from '../enums.js';
+import {
+  DetectionState,
+  IntervalUnit,
+  PaymentMethodType,
+  SubscriptionStatus,
+  UsageFrequency,
+} from '../enums.js';
 import { CurrencyCode } from '../money.js';
 import { IsoDateSchema, type IsoDate } from '../renewal.js';
 
@@ -105,6 +111,14 @@ export interface SubscriptionDto {
   usageFrequency: UsageFrequency | null;
   reminderOffsets: number[];
   notes: string | null;
+  /** Nguồn và độ tin cậy để giải thích dữ liệu tự phát hiện. */
+  source: 'MANUAL' | 'EMAIL';
+  detectionState: DetectionState | null;
+  confidence: number | null;
+  needsReview: boolean;
+  reviewReason: string | null;
+  lastDetectedAt: string | null;
+  evidenceCount: number;
   createdAt: string;
   updatedAt: string;
 }

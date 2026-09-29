@@ -45,6 +45,7 @@ export const subscriptionInclude = {
       brandColor: true,
     },
   },
+  _count: { select: { events: true } },
 } satisfies Prisma.SubscriptionInclude;
 /** Chỉ dùng cho màn Chi tiết (thêm dữ liệu so với danh sách). */
 const detailInclude = {
@@ -64,6 +65,7 @@ const detailInclude = {
     orderBy: { chargedOn: 'desc' },
     take: 12,
   },
+  _count: { select: { events: true } },
 } satisfies Prisma.SubscriptionInclude;
 
 export type SubscriptionRow = Prisma.SubscriptionGetPayload<{
@@ -488,6 +490,13 @@ export function toDto(row: SubscriptionRow, today: IsoDate): SubscriptionDto {
     usageFrequency: row.usageFrequency,
     reminderOffsets: row.reminderOffsets,
     notes: row.notes,
+    source: row.source,
+    detectionState: row.detectionState,
+    confidence: row.confidence,
+    needsReview: row.needsReview,
+    reviewReason: row.reviewReason,
+    lastDetectedAt: row.lastDetectedAt?.toISOString() ?? null,
+    evidenceCount: row._count.events,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
