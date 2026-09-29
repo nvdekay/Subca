@@ -1,46 +1,47 @@
 # Subca — Checklist tổng
 
-> Cập nhật: 28/09/2026 · Đánh dấu `[x]` khi xong.
-> File liên quan: `design/subca-mobile-mockup.html` (app), `design/subca-admin-dashboard.html` (admin).
-> Repo: https://github.com/nvdekay/Subca (nhánh `main`, CI xanh). Tài liệu kỹ thuật: `docs/ARCHITECTURE.md`, hướng dẫn cho Claude: `CLAUDE.md`.
+> Cập nhật: 29/09/2026 · Đánh dấu `[x]` khi code/đầu việc đã hoàn tất; các bước test thực tế, production hoặc phụ thuộc tài khoản ngoài chỉ đánh dấu khi đã xác minh.
+> Tham chiếu UI: `design/Subca V2.html` (mobile flow mới), `design/subca-mobile-mockup.html` (màn/tính năng cũ), `design/subca-admin-dashboard.html` (admin).
+> Repo `nvdekay/Subca`; base commit hiện tại `eaac77a` cộng working tree chưa commit. Trạng thái và lệnh mới nhất: `docs/PROJECT-KNOWLEDGE.md`; quyết định kỹ thuật: `docs/ARCHITECTURE.md`.
 
-### Hiện trạng (28/09/2026, cuối ngày)
+### Hiện trạng (đối chiếu working tree 29/09/2026)
 
-**Đang ở:** Giai đoạn 1–2 xong phần làm được; GĐ3 đã xong **chia tiền nhóm** và **Admin Console v1**. Đang chuyển sản phẩm sang **auto-first**: vertical slice tự phát hiện subscription từ email đã chạy end-to-end (còn chờ OAuth client của Google để nối Gmail thật).
+**Đang ở:** Luồng lõi, chia tiền nhóm và Admin Console v1 đã có. Mobile đã chuyển sang flow auto-first theo `Subca V2`: onboarding → Gmail → scan → kết quả; tabs chính là Trang chủ / Gói của tôi / Cần chú ý / Phân tích. Gmail detection code + queue đã có, nhưng kết nối/scan bằng Gmail thật và QA toàn luồng chưa được xác nhận. App đã build/mở trên iPhone 17 Pro Simulator; chưa QA Android hoặc phát hành store.
 
-**Đã xong**
-- Mockup app (16 màn) + admin (12 trang) trong `design/`; template email mã đăng nhập `design/email/otp-code.html`.
-- Monorepo: Expo SDK 57, NestJS 12 + Fastify, Next.js 16, Prisma 7.10, TypeScript 6.0, pnpm 11 + Turborepo; CI GitHub Actions (có Redis cho smoke test).
-- Supabase dev (Tokyo): 26 bảng, RLS mọi bảng, trigger đăng ký / xóa tài khoản, 3 migration, seed 53 dịch vụ, tỷ giá thật. **Auth:** email OTP 6 số qua SMTP Gmail (dev), template tiếng Việt đã áp.
-- API: xác thực JWT Supabase, `/me` (+ cài đặt, ngân sách, xóa tài khoản), thư viện dịch vụ, subscription CRUD (giới hạn Free, chi tiết kèm thanh toán / hướng dẫn hủy / lịch sử trừ tiền), `/home`, phương thức thanh toán, lịch, đánh giá tháng, phân tích, push token, nhắc nhở BullMQ + Expo Push + receipt, job tỷ giá.
-- **App mobile** (`apps/mobile`): design system theo mockup (NativeWind), đăng nhập OTP 6 số (đếm ngược gửi lại), Trang chủ, Danh sách / Thêm / Sửa / Chi tiết subscription, Lịch, Quản lý Trial, Đánh giá tháng (optimistic), Phân tích, Ngân sách (mô phỏng tiết kiệm), Phương thức thanh toán (tạo ngay trong form + màn phụ), Cài đặt (tiền tệ, múi giờ, giờ nhắc, ngân sách, đăng xuất, xóa tài khoản), Nhắc nhở (lịch sử + sắp tới + cài mốc nhắc), đăng ký push token (EAS project `@nvdeekay/subca`), thông báo cục bộ dự phòng, cache dữ liệu trên máy (MMKV mã hóa).
-- **Chia tiền nhóm (Giai đoạn 3):** API đầy đủ (`/groups`: tạo nhóm từ gói đang trả, chia đều / tùy chỉnh có kiểm tra tổng, mã mời, kỳ thu theo tháng, "Tôi đã chuyển" → chủ nhóm xác nhận / miễn / mở lại, nhắc từng người hoặc tất cả có chặn nhắc dồn, mã QR VietQR) + 2 màn trong app (Chia tiền nhóm, Chi tiết nhóm).
-- **Admin Console v1** (`apps/admin`): đăng nhập **email + mật khẩu**, phân quyền 5 vai trò, 8 trang — Tổng quan, Người dùng (khóa / tặng Plus / xóa dữ liệu), Thư viện dịch vụ + duyệt đề xuất giá, Sử dụng tính năng + feature flag, Nhân sự & phân quyền, Sức khỏe hệ thống, Hàng đợi nhắc, Nhật ký thao tác. Tài khoản `admin@subca.app` (OWNER) đã tạo và đăng nhập chạy thật.
-- **Đã chạy thật 28/09:** chia tiền nhóm trên app với Supabase dev (tạo nhóm Netflix 4 người từ gói đang trả, kỳ thu tháng 9 sinh đủ 3 khoản 65.000đ) — nhóm này còn trong tài khoản dev, xóa trong app nếu không cần.
-- **Tự phát hiện từ email (auto-first, 28/09/2026):** schema + 5 bảng mới, adapter Gmail (OAuth, quyền `gmail.readonly`), lọc ứng viên, parser nhiều lớp, engine đối soát (trạng thái + độ tin cậy), Subca Inbox, quét định kỳ 6 giờ, màn Kết nối hộp thư và Inbox trong app. Nhập tay giữ nguyên làm phương án dự phòng. **Parser v2:** danh mục ~65 merchant (đủ dịch vụ phổ biến ở Việt Nam, mọi `serviceSlug` đối chiếu với seed bằng unit test) và **tách hóa đơn gộp** — một biên nhận Apple / Google Play / ví điện tử liệt kê nhiều dịch vụ thì mỗi dịch vụ thành một sự kiện riêng với giá riêng (khóa chống trùng đổi thành `(source_ref, event_type, merchant_key)`, migration thứ 5). Test: 38 unit + 9 tích hợp chạy cả luồng trên database thật bằng hộp thư mẫu.
-- **Quyết định sản phẩm:** đã **bỏ danh mục** khỏi app + API (bảng còn trong DB, không dùng) — xem `docs/ARCHITECTURE.md`.
-- Test: shared 88 · API unit + e2e (CI) · **51 test tích hợp trên Supabase + Redis thật đã chạy lại và qua hết** (`test:int`).
+**Đã có trong repo**
+- Monorepo pnpm/Turborepo; Expo SDK 57 + RN 0.86; NestJS 12/Fastify; Next.js 16; Prisma 7.10; shared package. Database schema có 31 Prisma models và 5 migration files.
+- Supabase Auth email OTP, API JWT guard, subscription CRUD, home, calendar, review, analytics (không category), reminders/Expo push, FX, payment methods, groups/VietQR, admin v1.
+- Mobile routes cho auth, V2 welcome, bốn tabs chính và các màn phụ; Inbox, Gmail connection, group splitting, settings/account.
+- Detection pipeline có parser ~65 merchant, aggregate receipt handling, reconcile, `subscription_events` và Inbox; Gmail manual scan đưa vào BullMQ, lưu tiến độ từng trang.
+- Admin Console v1: overview, users, catalog, features, system, queues, team, audit; năm vai trò.
+- Base test snapshot trước các thay đổi V2: shared 88, API unit/e2e và 51 integration gần nhất đã qua. **Trong lượt cập nhật tài liệu này không chạy test.** Typecheck/lint V2 và native iOS build đã qua; xem knowledge base để biết giới hạn xác minh.
+- Local đã xác minh tại thời điểm cập nhật: API `GET /health` → `status: ok`, `db: up`; Redis healthy; Metro 8081; iPhone 17 Pro Simulator booted với app `app.subca` cài/mở.
 
-**Việc của chủ dự án (đang chờ)**
-1. **Đổi mật khẩu database Supabase** (đã lộ trong chat) rồi sửa `DATABASE_URL` / `DIRECT_URL` trong `apps/api/.env`.
-2. **Thêm `SUPABASE_SERVICE_ROLE_KEY` vào `apps/api/.env`** (thiếu thì Xóa tài khoản trả 503). Không gửi khóa qua chat.
-3. **Đổi mật khẩu ứng dụng Gmail** dùng cho SMTP Supabase (đã lộ trong chat) và dán cái mới vào Authentication → Emails → SMTP Settings. Trước khi ra mắt: chuyển SMTP sang Resend + tên miền riêng.
-4. Quyết định có chuyển project dev từ Tokyo sang Singapore (production bắt buộc Singapore).
-5. **Đăng ký Apple Developer + Google Play** (cần cho đăng nhập Apple/Google, mua trong app, push thật trên máy).
-6. Xác minh giá các gói trong seed.
-7. **Đối chiếu danh sách BIN ngân hàng VietQR** (`packages/shared/src/vietqr.ts`) với bảng công bố của NAPAS trước khi ra mắt.
+**Còn chờ bên ngoài / chưa xác minh**
+1. OAuth Google/Gmail thật: credentials, callback, scan hộp thư thật và quy trình Google/CASA.
+2. Xác minh trạng thái rotate secrets dev từng bị lộ; service-role key API để test xóa tài khoản và các thao tác quản trị cần Supabase Admin API.
+3. Tài khoản store, EAS build profiles, push trên thiết bị thật và RevenueCat khi bắt đầu làm Plus.
+4. Production Supabase/API/Redis ở Singapore; domain, SMTP Resend, privacy policy/terms và support.
+5. Giá catalog, danh sách BIN VietQR cần kiểm chứng nguồn chính thức trước phát hành.
 
-**Việc kỹ thuật tiếp theo (gợi ý thứ tự)**
-1. **Tạo OAuth client Google** (loại Web application, redirect `<PUBLIC_API_URL>/connections/gmail/callback`) và sinh `SECRETS_KEY` (`openssl rand -base64 32`) để bật kết nối Gmail thật.
-2. **Thêm `SUPABASE_SERVICE_ROLE_KEY`** vào `apps/api/.env` để trang Nhân sự tạo được tài khoản admin mới / đặt lại mật khẩu, và để Xóa tài khoản hết 503.
-3. **App mobile (cần thiết bị / tài khoản):** rà soát UI Android (cài Android Studio + emulator trên máy dev) → thử nhận push thật (máy thật + tài khoản Apple, hoặc EAS build Android) → Sentry + PostHog (cần tạo tài khoản) → hàng đợi thao tác khi mất mạng (tùy chọn).
-4. Dọn dữ liệu mẫu trong tài khoản dev `khanhnvd07@gmail.com` khi chủ dự án yêu cầu (subscription có ghi chú `[dữ liệu mẫu]`, 2 phương thức mẫu, ngân sách 800.000đ).
-5. EAS Build (eas.json, development / preview) → TestFlight nội bộ khi có tài khoản Apple.
-6. Giai đoạn 3 còn lại: Subca Plus (RevenueCat, cần tài khoản store); link mời deep link khi có tên miền `subca.app`; các trang admin còn lại của mockup (nhân sự, thông báo, hỗ trợ, doanh thu).
+**Ưu tiên tiếp theo**
+1. Test flow end-to-end trên simulator bằng user test: OTP → onboarding → Gmail → scan → summary → Inbox/list.
+2. Kiểm tra queue error/reconnect/resume; thêm hoặc xác minh smoke coverage AppModule và integration cho Gmail job.
+3. QA Android, iOS safe area/keyboard/accessibility và push thật.
+4. Bảo mật + compliance: rotate secrets, OAuth/CASA, account deletion thật, privacy policy/terms.
+5. EAS profiles → internal distribution → beta kín; sau đó mới store review/RevenueCat.
 
 ---
 
 ## A. Thiết kế & prototype
+
+- [x] Phân tích prototype `design/Subca V2.html`; đổi mobile primary tabs thành Trang chủ / Gói của tôi / Cần chú ý / Phân tích; giữ Lịch, Review và các tính năng phụ dưới route riêng
+- [x] Chuyển mobile sang màu sáng, màu phẳng; loại gradient
+- [x] Thêm metadata nguồn phát hiện/độ tin cậy/số bằng chứng vào DTO subscription để UI có thể giải thích dữ liệu
+- [x] Chuyển yêu cầu quét Gmail sang BullMQ, trả run ngay và ghi tiến độ theo trang
+- [x] Hoàn thiện onboarding nhiều bước sau đăng nhập theo V2, gồm kết nối Gmail → scan → summary → vào app
+- [ ] Thiết kế trải nghiệm xử lý scan lỗi/Redis không khả dụng và xác nhận run tồn tại khi app mở lại
+- [ ] Không đưa OCR ảnh, email forwarding giả lập hoặc analytics category vào app khi API/quyết định sản phẩm chưa hỗ trợ
 
 - [x] Mockup app mobile, 16 màn: Onboarding, Trang chủ, Danh sách, Thêm, Chi tiết, Lịch, Trial, Đánh giá, Phân tích, Ngân sách, Thanh toán, Chia tiền nhóm, Chi tiết nhóm, Subca Plus, Thông báo, Cài đặt
 - [x] Logo thật của các hãng (Simple Icons, nhúng inline, chỉ logo, không khung)
@@ -238,7 +239,7 @@
   - [x] API `GET/PUT/DELETE /me/budget`; tình trạng ngân sách (đã chi, %, vượt) trả trong `/home`
 - [x] Phân tích (xu hướng, dự tính năm, chi phí mỗi lần dùng, top đắt nhất, theo phương thức thanh toán)
   - [x] API `GET /analytics` (xu hướng 6 tháng là ước tính từ các gói còn hoạt động mỗi tháng; chi phí mỗi lần dùng theo mức độ sử dụng người dùng chọn)
-- [x] Phương thức thanh toán (chỉ lưu nhãn + 4 số cuối) — chọn / tạo nhanh ngay trong form subscription (chip "+ Thêm"); màn quản lý phụ trong Cài đặt: thẻ gradient, xem gói theo thẻ, sửa/xóa, mặc định
+- [x] Phương thức thanh toán (chỉ lưu nhãn + 4 số cuối) — chọn / tạo nhanh ngay trong form subscription (chip "+ Thêm"); màn quản lý phụ trong Cài đặt dùng thẻ màu phẳng, xem gói theo thẻ, sửa/xóa, mặc định
   - [x] API `/payment-methods`: chỉ nhận 4 số cuối, luôn đúng 1 phương thức mặc định (transaction), lưu trữ thì gỡ khỏi subscription, kèm số subscription và tổng tháng quy đổi
 - [ ] Xuất dữ liệu CSV / PDF (tác vụ nền → gửi qua email)
 - [x] Tỷ giá tự cập nhật hằng ngày (job 07:30 giờ VN + cập nhật khi khởi động nếu cũ): nguồn chính ExchangeRate-API (Open Access), dự phòng fawazahmed0/currency-api; kiểm tra khoảng hợp lý trước khi lưu; lưu 12 cặp VND/USD/EUR/JPY; lệnh `fx:sync` — đã nạp tỷ giá thật vào Supabase dev
@@ -321,12 +322,12 @@
 
 - [x] `profiles` (liên kết `auth.users`), `user_settings` (tiền tệ, múi giờ, giờ nhắc, ngôn ngữ), `push_tokens`
 - [x] `subscriptions` (service_id / tên tự nhập, amount_minor, currency, interval_unit, interval_count, anchor_day, start_date, next_renewal_date, status, trial_end_date, payment_method_id, category_id, auto_renew, usage_frequency, notes)
-- [x] `renewal_history`, `reminders`, `monthly_reviews`, `budgets`
+- [x] `renewal_charges` (model `RenewalCharge`), `reminders`, `monthly_reviews`, `budgets`
 - [x] `payment_methods` (loại, nhãn, 4 số cuối, **không** lưu số thẻ)
 - [x] `services`, `service_plans`, `price_reports`, `categories`, `exchange_rates`
 - [x] `groups`, `group_members`, `group_cycles`, `group_payments`
 - [x] `entitlements`, `promo_codes`, `feature_flags`
-- [x] `admin_users`, `admin_roles`, `audit_logs`
+- [x] `admin_users`, enum `AdminRole`, `audit_logs` (không có bảng `admin_roles` riêng)
 
 **Quy tắc:**
 - [x] Tiền lưu `bigint` theo đơn vị nhỏ nhất + mã tiền tệ (không dùng float)

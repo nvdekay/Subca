@@ -1,56 +1,54 @@
-# Welcome to your Expo app 👋
+# Subca Mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Ứng dụng iOS/Android của Subca — React Native 0.86, Expo SDK 57, Expo Router, TypeScript, NativeWind và TanStack Query. App dùng Supabase Auth cho phiên đăng nhập; dữ liệu nghiệp vụ đi qua API NestJS.
 
-## Get started
+## Chạy local
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+Yêu cầu Node 22+, pnpm 11, Xcode/iOS Simulator cho iOS hoặc Android Studio cho Android. App có native modules (đặc biệt MMKV), vì vậy dùng development build thay vì Expo Go.
 
 ```bash
-npm run reset-project
+cp .env.example .env.local
+# Điền EXPO_PUBLIC_SUPABASE_ANON_KEY và kiểm tra EXPO_PUBLIC_API_URL
+pnpm --filter @subca/mobile dev
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Chạy API + Redis trong terminal khác:
 
-### Other setup steps
+```bash
+docker compose up -d
+pnpm --filter @subca/api dev
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+Build/cài lên simulator hoặc emulator:
 
-## Learn more
+```bash
+pnpm --filter @subca/mobile ios
+pnpm --filter @subca/mobile android
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Trên simulator iOS dùng `http://localhost:3000`; Android emulator dùng `http://10.0.2.2:3000`; điện thoại thật cần IP LAN của máy chạy API. Chỉ `EXPO_PUBLIC_*` được nhúng vào app; tuyệt đối không đặt service-role key hoặc bí mật server trong `.env.local`.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Nếu Xcode báo `framework 'React' not found` khi cài Pods trên cấu hình máy này, Pods prebuilt có thể thiếu binary. Thử build React Native từ source:
 
-## Join the community
+```bash
+cd ios
+RCT_USE_RN_DEP=0 RCT_USE_PREBUILT_RNCORE=0 pod install
+cd ../..
+RCT_USE_RN_DEP=0 RCT_USE_PREBUILT_RNCORE=0 pnpm --filter @subca/mobile ios
+```
 
-Join our community of developers creating universal apps.
+## Điều hướng hiện tại
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- Tab chính: Trang chủ, Gói của tôi, Cần chú ý (Inbox), Phân tích.
+- Onboarding đầu tiên: giới thiệu → kết nối Gmail → scan nền → kết quả; có thể bỏ qua hoặc tự thêm gói.
+- Route phụ vẫn có: Lịch, Review, chi tiết/chỉnh sửa subscription, Trial, Ngân sách, Phương thức thanh toán, Nhóm, Kết nối Gmail, Thông báo và Hồ sơ.
+- Prototype `design/Subca V2.html` là tham chiếu tương tác, không phải hợp đồng API. OCR ảnh/forward email trong prototype chưa được backend hỗ trợ. Category analytics không thuộc quyết định sản phẩm hiện tại.
+
+## Kiểm tra
+
+```bash
+pnpm --filter @subca/mobile typecheck
+pnpm --filter @subca/mobile lint
+```
+
+Đọc [`AGENTS.md`](AGENTS.md) trước khi đổi Expo/React Native API; tài liệu Expo phải khớp SDK 57. Tổng quan dự án và backlog ở [`docs/PROJECT-KNOWLEDGE.md`](../../docs/PROJECT-KNOWLEDGE.md) và [`docs/SUBCA-CHECKLIST.md`](../../docs/SUBCA-CHECKLIST.md).

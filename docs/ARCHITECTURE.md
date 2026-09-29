@@ -1,6 +1,6 @@
 # Subca — Kiến trúc & quyết định kỹ thuật
 
-> Cập nhật: 27/09/2026. Ghi lại **vì sao** chọn như hiện tại để không phải bàn lại. Đổi quyết định nào thì sửa file này.
+> Cập nhật: 29/09/2026. Ghi lại **vì sao** chọn như hiện tại để không phải bàn lại. Đổi quyết định nào thì sửa file này. Snapshot vận hành ngắn gọn nằm ở `docs/PROJECT-KNOWLEDGE.md`.
 
 ## Tổng quan
 
@@ -9,9 +9,9 @@
         │                                   │   ▲
         │ đăng nhập                         │   └── cron: tỷ giá (07:30 VN), nhắc nhở (5 phút), push receipt (15 phút)
         ▼                                   ▼
-  Supabase Auth                        Redis ◀── BullMQ (hàng đợi gửi nhắc) ──▶ Expo Push ──▶ APNs / FCM
-  (Apple / Google / email OTP)
- Admin (Next.js) ──▶ API (chưa làm)
+  Supabase Auth                        Redis ◀── BullMQ (reminders + Gmail scan) ──▶ Expo Push ──▶ APNs / FCM
+  (email OTP đang dùng; Apple/Google sign-in chưa làm)
+ Admin (Next.js) ──JWT──▶ API
 ```
 
 - App **không** đọc/ghi DB trực tiếp: mọi bảng bật RLS không có policy, thu hồi quyền `anon`/`authenticated`. App chỉ dùng Supabase để đăng nhập, rồi gọi API bằng access token.
@@ -25,19 +25,19 @@
 | Backend | **NestJS 12 trên Fastify** | Đã cân nhắc Go: ở quy mô Subca phần xử lý backend chỉ vài ms trên 50–100 ms người dùng chờ; giữ TypeScript để dùng chung schema và logic. Tách service nặng sang Go nếu sau này cần (VD đọc email hóa đơn) |
 | DB + Auth | **Supabase** (Postgres 17 + Auth) | Đăng nhập Apple/Google/email OTP sẵn có; Postgres đầy đủ. Không dùng Edge Functions / truy cập DB từ client |
 | ORM | **Prisma 7.10** + `@prisma/adapter-pg` | Không dùng 8.0 (đang RC) |
-| Hàng đợi | **BullMQ 6 + Redis** | Dev: `docker compose` (OrbStack). Production: Redis cùng khu vực với API, giá cố định. Không dùng Upstash tính theo số lệnh (BullMQ gọi Redis liên tục). Phương án thay thế đã cân nhắc: pg-boss trên Postgres |
+| Hàng đợi | **BullMQ 6 + Redis** | Dùng cho reminder/push và Gmail scan theo yêu cầu (run trả ngay, worker lưu tiến độ từng trang). Dev: `docker compose`; production: Redis cùng khu vực với API. Không dùng Upstash tính theo lệnh. Phương án thay thế đã cân nhắc: pg-boss trên Postgres |
 | Push | **Expo Push Service** | 1 API cho iOS + Android; có thể chuyển FCM/APNs trực tiếp sau |
 | Tỷ giá | **ExchangeRate-API (Open Access)**, dự phòng fawazahmed0/currency-api | ECB không có VND. Điều khoản: dùng thương mại được, **bắt buộc ghi nguồn**, không phân phối lại, gọi ≤ 1 lần/ngày |
 | Mua trong app | **RevenueCat** (chưa làm) | Lo App Store + Google Play, webhook → bảng `entitlements` |
-| Admin | **Next.js + shadcn/ui** (chưa làm) | |
+| Admin | **Next.js 16 + Tailwind 4**, bộ UI nhỏ theo token mockup | Admin Console v1 đã chạy; không dùng shadcn/ui để giữ giao diện gọn và đúng thiết kế hiện có |
 | Hosting | Railway / Render / Fly.io, **Singapore** (chưa chọn) | Cùng khu vực với Supabase production |
 | Danh mục | **Bỏ khỏi sản phẩm** (27/09/2026) | Chủ dự án thấy thừa: không chọn danh mục khi thêm subscription, Phân tích không chia theo danh mục, API không còn `/catalog/categories` và `categoryId`. Bảng `categories` và cột `category_id` vẫn còn trong DB (không dùng) để khỏi migration xóa dữ liệu |
 
 ## Dữ liệu
 
-- 26 bảng (xem `apps/api/prisma/schema.prisma`). Nhóm chính: người dùng (`profiles`, `user_settings`, `push_tokens`, `budgets`), subscription (`subscriptions`, `renewal_charges`, `reminders`, `reminder_rules`, `monthly_reviews`), thư viện (`services`, `service_plans`, `categories`, `price_reports`), thanh toán (`payment_methods`, `entitlements`, `billing_events`, `promo_codes`), chia tiền nhóm (`groups`, `group_members`, `group_cycles`, `group_payments`), hệ thống (`exchange_rates`, `feature_flags`, `admin_users`, `audit_logs`).
+- 31 bảng (xem `apps/api/prisma/schema.prisma`). Nhóm chính: người dùng (`profiles`, `user_settings`, `push_tokens`, `budgets`), subscription (`subscriptions`, `renewal_charges`, `reminders`, `reminder_rules`, `monthly_reviews`), thư viện (`services`, `service_plans`, `categories`, `price_reports`), thanh toán (`payment_methods`, `entitlements`, `billing_events`, `promo_codes`, `promo_redemptions`), chia tiền nhóm (`groups`, `group_members`, `group_cycles`, `group_payments`), tự phát hiện (`connected_accounts`, `email_sync_runs`, `processed_emails`, `subscription_events`, `inbox_items`), hệ thống (`exchange_rates`, `feature_flags`, `admin_users`, `audit_logs`).
 - Trigger trên `auth.users`: đăng ký → tạo `profiles` + `user_settings` + 4 quy tắc nhắc mặc định; xóa → xóa `profiles` (cascade toàn bộ).
-- Migration: `20260927000000_init`, `20260927000100_rls_and_auth`, `20260927000200_reminder_receipts`.
+- Migration: `20260927000000_init`, `20260927000100_rls_and_auth`, `20260927000200_reminder_receipts`, `20260928000000_email_auto_detect`, `20260928010000_aggregated_receipt_events`.
 
 ## Logic lõi
 
@@ -81,8 +81,9 @@ Mỗi 5 phút:
 - **Chu kỳ** lấy theo thứ tự: email nói rõ → trung vị khoảng cách các lần thanh toán → mặc định tháng. Ngày gia hạn ưu tiên ngày email ghi, không có thì chiếu từ lần trừ tiền gần nhất.
 - **Hóa đơn gộp** (Apple, Google Play, PayPal, ví điện tử): parser đọc từng dòng "tên dịch vụ + tiền" (`extractLineItems`) và trả **nhiều** `DetectedEvent`, mỗi dịch vụ một giá — coi cả biên nhận là một subscription thì số tiền sai và các dịch vụ còn lại biến mất. Chỉ tách khi đọc được từ hai dòng trở lên; một dòng thì đường thường xử lý tốt hơn vì còn lấy được ngày gia hạn trong thư. Dòng lạ vẫn thành sự kiện nhưng độ tin cậy thấp → vào Inbox chứ không tự thêm.
 - **Gộp với gói nhập tay:** khớp theo `merchant_key` → `service_id` → tên gần giống + giá lệch dưới 25%. Gói `source = MANUAL` chỉ được bổ sung bằng chứng, số liệu người dùng nhập không bị ghi đè.
+- **Quét:** `POST /connections/:id/sync` tạo `EmailSyncRun` rồi enqueue BullMQ; processor chạy scan, cập nhật scanned/candidate/event counts sau mỗi trang và hoàn tất run. API có thể đọc trạng thái qua `/connections/summary`. Scheduler định kỳ 6 giờ còn dùng luồng sync riêng.
 - **Riêng tư:** chỉ xin `gmail.readonly`; refresh token mã hóa AES-256-GCM (`SECRETS_KEY`), không bao giờ xuống client; ngắt kết nối thì revoke ở Google rồi xóa; không lưu nội dung thư, chỉ lưu trường đã trích + băm tiêu đề.
-- **Chưa làm:** lớp LLM cho email lạ (đã chừa chỗ trong `parser.ts`), Outlook, và hồ sơ CASA của Google cho restricted scope — bắt buộc trước khi mở cho người dùng thật.
+- **Chưa xác minh/hoàn thiện:** OAuth Gmail trên tài khoản thật và CASA; còn thiếu Outlook và lớp LLM cho email lạ (đã chừa chỗ trong `parser.ts`).
 
 ### Tiền & tỷ giá
 - `FxService.rateTable(target, sources, today)` lấy tỷ giá mới nhất ≤ hôm nay; job lưu đủ 12 cặp VND/USD/EUR/JPY mỗi ngày; kiểm tra khoảng hợp lý trước khi lưu.

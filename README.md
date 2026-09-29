@@ -4,9 +4,10 @@
 
 ## Tài liệu
 
-- [`docs/SUBCA-CHECKLIST.md`](docs/SUBCA-CHECKLIST.md) — kế hoạch, tiến độ, việc tiếp theo (xem phần **Hiện trạng** ở đầu file)
+- [`docs/PROJECT-KNOWLEDGE.md`](docs/PROJECT-KNOWLEDGE.md) — **nguồn sự thật trung tâm** cho Claude, Codex và session mới: hiện trạng, việc tiếp theo, kiến trúc, quy ước, môi trường và bẫy đã biết
+- [`docs/SUBCA-CHECKLIST.md`](docs/SUBCA-CHECKLIST.md) — kế hoạch, tiến độ và backlog (xem phần **Hiện trạng** ở đầu file)
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — kiến trúc và các quyết định kỹ thuật đã chốt
-- [`CLAUDE.md`](CLAUDE.md) — quy ước code, test, commit và các bẫy đã gặp (Claude Code tự đọc khi mở phiên)
+- [`CLAUDE.md`](CLAUDE.md) / [`AGENTS.md`](AGENTS.md) — entrypoint tự động để Claude Code và Codex nạp knowledge base khi mở session
 
 ## Cấu trúc
 
@@ -18,7 +19,7 @@ apps/
 packages/
   shared/    Enum, schema zod, xử lý tiền dùng chung cho mobile / API / admin
 design/      Mockup HTML (app + admin)
-docs/        SUBCA-CHECKLIST.md (kế hoạch, tiến độ) · ARCHITECTURE.md (quyết định kỹ thuật)
+docs/        PROJECT-KNOWLEDGE.md (hiện trạng) · SUBCA-CHECKLIST.md (roadmap) · ARCHITECTURE.md (quyết định)
 ```
 
 ## Bắt đầu
@@ -26,13 +27,13 @@ docs/        SUBCA-CHECKLIST.md (kế hoạch, tiến độ) · ARCHITECTURE.md 
 Yêu cầu: Node ≥ 22 (khuyến nghị 24), pnpm 11, Docker (OrbStack hoặc Docker Desktop).
 
 ```bash
-docker compose up -d         # Redis cho hàng đợi nhắc nhở (BullMQ)
+docker compose up -d         # Redis cho BullMQ: reminders, push và Gmail scan
 pnpm install                 # cài toàn bộ + tự sinh Prisma Client
 cp apps/api/.env.example apps/api/.env   # điền chuỗi kết nối Supabase
-pnpm build                   # build shared → api → admin
-pnpm test                    # unit test
+pnpm build
 pnpm typecheck
 pnpm lint
+pnpm test                    # unit/e2e tests trong packages
 ```
 
 Chạy từng app:
@@ -40,7 +41,22 @@ Chạy từng app:
 ```bash
 pnpm --filter @subca/api dev      # http://localhost:3000/health
 pnpm --filter @subca/mobile dev   # Expo
-pnpm --filter @subca/admin dev    # http://localhost:3000 (đổi PORT nếu chạy cùng API)
+pnpm --filter @subca/admin dev -- -p 3100  # API mặc định chiếm cổng 3000
+```
+
+Mobile có native modules (MMKV, notifications, v.v.); để chạy iOS Simulator sau lần đầu:
+
+```bash
+pnpm --filter @subca/mobile ios
+```
+
+Nếu Xcode báo thiếu `React.framework` khi cài Pods trên máy này, đồng bộ lại Pods theo chế độ build React Native từ source rồi chạy lại lệnh iOS:
+
+```bash
+cd apps/mobile/ios
+RCT_USE_RN_DEP=0 RCT_USE_PREBUILT_RNCORE=0 pod install
+cd ../../..
+RCT_USE_RN_DEP=0 RCT_USE_PREBUILT_RNCORE=0 pnpm --filter @subca/mobile ios
 ```
 
 ## Database (Supabase + Prisma)
@@ -50,10 +66,13 @@ pnpm --filter @subca/admin dev    # http://localhost:3000 (đổi PORT nếu ch�
 - Áp dụng migration lên Supabase: `pnpm --filter @subca/api prisma:deploy`.
 - Tạo migration mới khi sửa schema: `pnpm db:migrate` (cần `SHADOW_DATABASE_URL` hoặc quyền tạo database tạm).
 
-Migration hiện có:
+Migration hiện có (5 migration; tổng schema 31 model):
 
 1. `20260927000000_init`: 26 bảng, enum, index.
-2. `20260927000100_rls_and_auth`: bật **Row Level Security cho mọi bảng** (không có policy → client không truy cập thẳng được), thu hồi quyền của `anon` / `authenticated`, trigger trên `auth.users` tự tạo `profiles` + `user_settings` + quy tắc nhắc mặc định khi đăng ký và xóa toàn bộ dữ liệu khi tài khoản bị xóa.
+2. `20260927000100_rls_and_auth`: bật **Row Level Security cho mọi bảng**, thu hồi quyền của `anon` / `authenticated`, trigger tạo profile/settings/reminder rules và cascade dữ liệu khi xóa tài khoản.
+3. `20260927000200_reminder_receipts`: nhắc nhở và trạng thái push receipt.
+4. `20260928000000_email_auto_detect`: Gmail connection, email sync, detection, events và Inbox.
+5. `20260928010000_aggregated_receipt_events`: hỗ trợ hóa đơn gộp thành nhiều sự kiện.
 
 **Quy tắc bắt buộc:** mọi bảng mới phải bật RLS trong chính migration tạo ra nó. Khóa `service_role` của Supabase chỉ dùng ở backend.
 
@@ -73,8 +92,8 @@ Migration hiện có:
 | GET                   | `/health`                                                             | Kiểm tra API + database (công khai)                                                                                                                        |
 | GET                   | `/me`                                                                 | Hồ sơ, cài đặt, gói hiện tại                                                                                                                               |
 | GET                   | `/catalog/services?q=`                                                | Thư viện dịch vụ kèm gói giá                                                                                                                               |
-| GET                   | `/subscriptions?status=&q=`                                           | Danh sách, sắp theo kỳ gia hạn gần nhất, kèm `trackedCount` và `limit`                                                                                     |
-| GET                   | `/subscriptions/:id`                                                  | Chi tiết cho màn Chi tiết: kèm phương thức thanh toán, danh mục, hướng dẫn hủy, 12 lần trừ tiền gần nhất                                                   |
+| GET                   | `/subscriptions?status=&q=`                                           | Danh sách + giới hạn gói; gồm nguồn phát hiện, confidence và số bằng chứng email                                                                           |
+| GET                   | `/subscriptions/:id`                                                  | Chi tiết: phương thức thanh toán, hướng dẫn hủy và 12 lần trừ tiền gần nhất                                                                                |
 | POST                  | `/subscriptions`                                                      | Thêm; server tự tính kỳ gia hạn tiếp theo theo múi giờ người dùng                                                                                          |
 | PATCH                 | `/subscriptions/:id`                                                  | Sửa một phần, hủy (`status: CANCELLED`) hoặc mở lại                                                                                                        |
 | DELETE                | `/subscriptions/:id`                                                  | Lưu trữ (xóa mềm)                                                                                                                                          |
@@ -88,7 +107,7 @@ Migration hiện có:
 | GET                   | `/calendar?month=YYYY-MM`                                             | Lịch gia hạn theo tháng (gộp theo ngày, đánh dấu ngày hết trial, tổng tiền trong tháng)                                                                    |
 | GET                   | `/reviews?period=YYYY-MM`                                             | Đánh giá hằng tháng: danh sách gói, quyết định, số tiền có thể tiết kiệm                                                                                   |
 | PUT · DELETE          | `/reviews/:subscriptionId`                                            | Đặt / bỏ quyết định Giữ · Xem lại · Hủy (Xem lại → gói chuyển REVIEW, Giữ → ACTIVE)                                                                        |
-| GET                   | `/analytics`                                                          | Phân tích: theo danh mục, theo phương thức thanh toán, top đắt nhất, chi phí mỗi lần dùng, xu hướng 6 tháng (ước tính)                                     |
+| GET                   | `/analytics`                                                          | Phân tích theo phương thức thanh toán, top đắt nhất, chi phí mỗi lần dùng và xu hướng 6 tháng (ước tính); không chia theo category                         |
 | GET                   | `/reminders`                                                          | Màn Thông báo: nhắc đã gửi 30 ngày qua + nhắc sẽ gửi 30 ngày tới (cùng nội dung push)                                                                      |
 | GET · PUT             | `/reminders/rules`                                                    | Quy tắc nhắc chung (mốc trước gia hạn / hết trial), PUT thay cả danh sách                                                                                  |
 | POST                  | `/reminders/:id/opened`                                               | Ghi nhận người dùng đã bấm thông báo nhắc                                                                                                                  |
@@ -102,7 +121,7 @@ Migration hiện có:
 | POST                  | `/groups/:id/remind-all`                                              | Nhắc mọi thành viên chưa trả trong kỳ đang thu                                                                                                             |
 | GET · POST            | `/connections` · `/connections/gmail/start`                           | Hộp thư đã kết nối · xin URL đồng ý của Google (app mở bằng trình duyệt hệ thống)                                                                          |
 | GET                   | `/connections/gmail/callback`                                         | Google gọi về (công khai, bảo vệ bằng `state` dùng một lần) → lưu refresh token đã mã hóa                                                                  |
-| POST · DELETE         | `/connections/:id/sync` · `/connections/:id`                          | Quét hộp thư ngay · ngắt kết nối (thu hồi ở Google rồi xóa token)                                                                                          |
+| POST · DELETE         | `/connections/:id/sync` · `/connections/:id`                          | Đưa scan vào BullMQ và trả run ngay · ngắt kết nối (thu hồi ở Google rồi xóa token)                                                                        |
 | GET                   | `/connections/summary`                                                | Tiến độ quét và số subscription đã tìm thấy                                                                                                                |
 | GET · POST            | `/inbox` · `/inbox/:id/resolve`                                       | Subca Inbox: việc cần người dùng quyết định · trả lời                                                                                                      |
 
@@ -117,12 +136,12 @@ Migration hiện có:
 
 ### Tự phát hiện subscription từ email
 
-- Kết nối Gmail một lần: Subca quét 12 tháng gần nhất rồi cứ 6 giờ quét phần mới (`EMAIL_SYNC_ENABLED`).
-- Đường đi: lọc ứng viên (từ khóa Anh/Việt + danh mục merchant) → parser nhiều lớp (merchant → tổng quát) → `subscription_events` → engine đối soát → tạo/cập nhật subscription.
+- Kết nối Gmail một lần: scan ban đầu lùi 12 tháng; scan thủ công trả run ngay qua BullMQ, tiến độ cập nhật theo từng trang. Scheduler định kỳ 6 giờ chỉ chạy khi `EMAIL_SYNC_ENABLED=true`.
+- Đường đi: lọc ứng viên (từ khóa Anh/Việt + merchant registry) → parser nhiều lớp (merchant → tổng quát, gồm line-items cho hóa đơn gộp) → `subscription_events` → engine đối soát → subscription hoặc Inbox.
 - Độ tin cậy quyết định trải nghiệm: ≥75 tự thêm · ≥45 thêm kèm nhãn "Cần kiểm tra" · thấp hơn thì hỏi trong **Subca Inbox**. Im lặng lâu chỉ hạ tin cậy, không tự kết luận đã hủy.
 - Gói nhập tay không bị tạo trùng: engine gộp bằng chứng theo merchant / dịch vụ / giá và **không ghi đè** số liệu người dùng tự nhập.
 - Quyền tối thiểu (`gmail.readonly`), refresh token mã hóa AES-256-GCM (`SECRETS_KEY`) và không bao giờ xuống client; **không lưu nội dung thư** — chỉ lưu thông tin gói và băm tiêu đề.
-- Cần `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `SECRETS_KEY`; thiếu thì API trả `GMAIL_UNAVAILABLE` và app ẩn nút kết nối.
+- Cần `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `SECRETS_KEY` và URL callback chính xác; thiếu thì API trả `GMAIL_UNAVAILABLE` và app ẩn nút kết nối. Tính năng đã có code nhưng OAuth production/CASA và scan hộp thư thật còn phải xác minh.
 
 ### Chia tiền nhóm (VietQR)
 

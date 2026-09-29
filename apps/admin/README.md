@@ -7,7 +7,7 @@ Bảng quản trị Subca (Next.js 16 + Tailwind 4). Dữ liệu lấy qua API N
 ```bash
 cp .env.example .env.local     # điền SUPABASE URL + anon key
 pnpm --filter @subca/api dev   # API phải chạy trước
-pnpm --filter @subca/admin dev # http://localhost:3000 (đổi cổng: -p 3100)
+pnpm --filter @subca/admin dev -- -p 3100 # http://localhost:3100 (API dùng cổng 3000)
 ```
 
 ## Đăng nhập
@@ -35,7 +35,7 @@ Các tài khoản sau thêm ngay trong trang **Nhân sự & phân quyền** — 
 | Người dùng           | Tìm kiếm, lọc gói / trạng thái, chi tiết, khóa, tặng Plus, xóa dữ liệu        |
 | Thư viện dịch vụ     | Thêm / sửa dịch vụ, duyệt đề xuất giá của người dùng                          |
 | Sức khỏe hệ thống    | Database, Redis, bộ lập lịch nhắc, tỷ giá, thông báo đẩy + cấu hình API       |
-| Hàng đợi nhắc        | Số liệu BullMQ và job lỗi gần nhất (thay cho Bull Board)                      |
+| Hàng đợi nhắc        | Số liệu BullMQ và job lỗi gần nhất của hàng đợi nhắc (thay cho Bull Board)    |
 | Sử dụng tính năng    | Tỷ lệ dùng từng tính năng và bật/tắt feature flag                             |
 | Nhân sự & phân quyền | Thêm / gỡ tài khoản quản trị, đổi vai trò, bật tắt, đặt lại mật khẩu          |
 | Nhật ký hoạt động    | Mọi thao tác admin kèm IP và mức độ                                           |
