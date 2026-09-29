@@ -50,11 +50,13 @@ function invalidateAll(queryClient: QueryClient) {
  * Kết nối Gmail: xin URL đồng ý từ API rồi mở trình duyệt hệ thống.
  * Token do máy chủ giữ — app không bao giờ thấy access token hay refresh token.
  */
-export function useConnectGmail() {
+export function useConnectGmail(redirectPath = 'connections') {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async () => {
-      const redirectTo = Linking.createURL('/connections');
+      const redirectTo = Linking.createURL(`/${redirectPath}`, {
+        ...(redirectPath === 'welcome' ? { queryParams: { connected: '1' } } : {}),
+      });
       const { authorizeUrl } = await api<StartConnectionDto>('/connections/gmail/start', {
         method: 'POST',
         body: JSON.stringify({ redirectTo }),

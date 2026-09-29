@@ -45,12 +45,7 @@ export default function Home() {
           accessibilityLabel="Mở hồ sơ"
           onPress={() => router.push('/profile')}
         >
-          <View
-            className="h-11 w-11 items-center justify-center rounded-full"
-            style={{
-              experimental_backgroundImage: `linear-gradient(135deg, ${colors.coral}, ${colors.peach})`,
-            }}
-          >
+          <View className="h-11 w-11 items-center justify-center rounded-full bg-coral">
             <Text weight="bold" className="text-on-coral">
               {(name[0] ?? '?').toUpperCase()}
             </Text>
@@ -86,13 +81,7 @@ function HomeContent({ data }: { data: HomeDto }) {
 
   return (
     <>
-      <View
-        className="overflow-hidden rounded-[30px] p-[22px]"
-        style={{
-          experimental_backgroundImage:
-            'linear-gradient(145deg, #A9D6DF 0%, #C9E6E0 55%, #DAEBE3 100%)',
-        }}
-      >
+      <View className="overflow-hidden rounded-[30px] bg-mint p-[22px]">
         {/* Vòng tròn trang trí góc phải (hero::after trong mockup) */}
         <View className="absolute -right-[50px] -top-[60px] h-[190px] w-[190px] rounded-full bg-[rgba(255,255,255,0.28)]" />
         <Text weight="semibold" className="text-[14px] text-[#1F3530]">

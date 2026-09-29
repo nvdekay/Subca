@@ -4,16 +4,18 @@ import { Pressable, View } from 'react-native';
 import { colors, shadow } from '@/theme';
 import { Icon, type IconName } from './ui/icon';
 import { Text } from './ui/text';
+import { useInbox } from '@/features/detection/queries';
 
 const TABS: Record<string, { label: string; icon: IconName }> = {
   index: { label: 'Trang chủ', icon: 'home' },
-  calendar: { label: 'Lịch', icon: 'cal' },
-  review: { label: 'Đánh giá', icon: 'check-circle' },
+  subscriptions: { label: 'Gói của tôi', icon: 'list' },
+  inbox: { label: 'Cần chú ý', icon: 'bell' },
   analytics: { label: 'Phân tích', icon: 'chart' },
 };
 
 /** Thanh điều hướng nổi bo 28 với nút "+" ở giữa (mockup: .nav). */
 export function TabBar({ state, navigation, insets }: BottomTabBarProps) {
+  const inbox = useInbox();
   const items = state.routes.map((route, index) => {
     const tab = TABS[route.name];
     if (!tab) return null;
@@ -38,6 +40,9 @@ export function TabBar({ state, navigation, insets }: BottomTabBarProps) {
           className={`h-[30px] w-11 items-center justify-center rounded-[12px] ${focused ? 'bg-mint' : ''}`}
         >
           <Icon name={tab.icon} color={focused ? colors.ink : colors['ink-3']} />
+          {route.name === 'inbox' && (inbox.data?.openCount ?? 0) > 0 ? (
+            <View className="absolute right-[2px] top-[1px] h-[8px] w-[8px] rounded-full border border-surface bg-coral-deep" />
+          ) : null}
         </View>
         <Text
           weight="semibold"
@@ -54,14 +59,11 @@ export function TabBar({ state, navigation, insets }: BottomTabBarProps) {
   const bottom = Math.max(insets.bottom, 10) + 4;
   return (
     <>
-      {/* Nền mờ dần sau thanh: nội dung cuộn không lộ ra ở khe giữa thanh và mép màn hình. */}
+      {/* Nền đặc ngăn nội dung cuộn lộ qua khe dưới thanh tab. */}
       <View
         pointerEvents="none"
-        className="absolute bottom-0 left-0 right-0"
-        style={{
-          height: bottom + 72 + 24,
-          experimental_backgroundImage: `linear-gradient(180deg, rgba(248,247,243,0) 0%, ${colors.bg} 45%)`,
-        }}
+        className="absolute bottom-0 left-0 right-0 bg-bg"
+        style={{ height: bottom + 72 + 24 }}
       />
       <View
         className="absolute left-[14px] right-[14px] h-[72px] flex-row items-center justify-around rounded-[28px] px-2"

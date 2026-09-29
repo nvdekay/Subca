@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { colors } from '@/theme';
 
-/** Thanh tiến độ ngân sách; `over` = vượt hạn mức → màu cam đỏ như mockup. */
+/** Thanh tiến độ ngân sách dùng màu phẳng; `over` đổi sang màu san hô. */
 export function Progress({ percent, over = false }: { percent: number; over?: boolean }) {
   const width = `${Math.max(0, Math.min(percent, 100))}%` as const;
   return (
@@ -10,10 +10,7 @@ export function Progress({ percent, over = false }: { percent: number; over?: bo
         className="h-full rounded-[6px]"
         style={{
           width,
-          backgroundColor: over ? undefined : colors['ink-brand'],
-          experimental_backgroundImage: over
-            ? 'linear-gradient(90deg, #E59C82, #C9694D)'
-            : undefined,
+          backgroundColor: over ? colors['coral-deep'] : colors['ink-brand'],
         }}
       />
     </View>

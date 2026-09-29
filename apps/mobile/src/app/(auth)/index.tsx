@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
-import { useEffect, type ReactNode } from 'react';
-import { ScrollView, View } from 'react-native';
+import { useEffect, useState, type ReactNode } from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -17,25 +17,81 @@ import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { colors, shadow } from '@/theme';
 
-/** Màn chào (Onboarding) — dựng theo màn 1 của mockup. */
+/** Hai bước đầu V2 trước đăng nhập; bước kết nối Gmail tiếp tục sau khi có phiên người dùng. */
 export default function Welcome() {
   const insets = useSafeAreaInsets();
+  const [step, setStep] = useState<'welcome' | 'value'>('welcome');
+
+  if (step === 'value') {
+    return (
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingTop: insets.top + 8,
+          paddingBottom: insets.bottom + 28,
+        }}
+        style={{ backgroundColor: colors.bg }}
+        bounces={false}
+      >
+        <View className="flex-1 px-6">
+          <View className="h-11 flex-row items-center justify-between">
+            <Pressable
+              onPress={() => setStep('welcome')}
+              accessibilityRole="button"
+              accessibilityLabel="Quay lại"
+              className="h-11 w-11 items-center justify-center rounded-xl bg-surface"
+            >
+              <Icon name="back" size={20} color={colors['ink-2']} />
+            </Pressable>
+            <View className="flex-row items-center gap-[6px]">
+              <View className="h-1 w-[18px] rounded bg-ink-brand" />
+              <View className="h-1 w-[6px] rounded bg-line" />
+              <View className="h-1 w-[6px] rounded bg-line" />
+            </View>
+            <View className="h-11 w-11" />
+          </View>
+          <Text weight="extrabold" className="mb-2 mt-7 text-[27px] leading-[35px]">
+            Subca làm phần việc nhàm chán cho bạn
+          </Text>
+          <Text className="mb-6 text-[14px] leading-[21px] text-ink-3">
+            Bạn chỉ cần quyết định khi thật sự cần.
+          </Text>
+          <View className="flex-1 gap-3">
+            <ValueCard
+              icon="sparkle"
+              title="Tự động phát hiện"
+              detail="Tìm subscription từ email thanh toán và hóa đơn."
+              tone="mint"
+            />
+            <ValueCard
+              icon="bell"
+              title="Không bỏ lỡ gia hạn"
+              detail="Nhắc trước trial, renewal và các khoản sắp bị trừ."
+              tone="peach"
+            />
+            <ValueCard
+              icon="piggy"
+              title="Giảm chi phí không cần thiết"
+              detail="Phát hiện subscription ít sử dụng hoặc có thể xem lại."
+              tone="sky"
+            />
+          </View>
+          <Button title="Tiếp tục" className="mt-6" onPress={() => router.push('/sign-in')} />
+        </View>
+      </ScrollView>
+    );
+  }
+
   return (
     <ScrollView
       className="flex-1"
       contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 32 }}
-      style={{ experimental_backgroundImage: 'linear-gradient(180deg, #E6F3F1 0%, #F8F7F3 58%)' }}
+      style={{ backgroundColor: colors.bg }}
       bounces={false}
     >
-      <View
-        className="h-[430px] overflow-hidden"
-        style={{ marginTop: insets.top - 20 }}
-        aria-hidden
-      >
-        <Blob size={260} color="#C4E3E9" left={-60} top={70} />
-        <Blob size={220} color="#FDE8D3" right={-50} top={170} />
-        <Blob size={120} color="#F3C3B2" left={150} top={40} opacity={0.7} />
-        <FloatCard left={28} top={96} delay={0}>
+      <View className="h-[286px] overflow-hidden" style={{ marginTop: insets.top + 4 }} aria-hidden>
+        <FloatCard left={34} right={0} top={0} delay={0}>
           <ServiceLogo
             name="Netflix"
             service={{ logoKey: 'netflix', brandColor: '#E50914' }}
@@ -43,7 +99,7 @@ export default function Welcome() {
           />
           <CardText title="Netflix" note="Gia hạn sau 3 ngày" />
         </FloatCard>
-        <FloatCard right={22} top={176} delay={2000}>
+        <FloatCard left={16} right={18} top={68} delay={2000}>
           <ServiceLogo
             name="Spotify"
             service={{ logoKey: 'spotify', brandColor: '#1ED760' }}
@@ -51,13 +107,13 @@ export default function Welcome() {
           />
           <CardText title="Spotify Family" note="Chia 4 · 22.250đ / người" />
         </FloatCard>
-        <FloatCard left={46} top={262} delay={4000}>
+        <FloatCard left={0} right={36} top={136} delay={4000}>
           <View className="h-[30px] w-[30px] items-center justify-center rounded-[10px] bg-peach">
             <Icon name="hourglass" size={15} color="#8A4B1E" />
           </View>
           <CardText title="Trial Notion AI" note="Còn 2 ngày — hủy kịp nhé" />
         </FloatCard>
-        <FloatCard right={36} top={350} delay={1000}>
+        <FloatCard left={68} right={0} top={204} delay={1000}>
           <View className="h-[30px] w-[30px] items-center justify-center rounded-[10px] bg-ink-brand">
             <Icon name="piggy" size={15} color="#FFFFFF" />
           </View>
@@ -69,64 +125,23 @@ export default function Welcome() {
         <BrandMark />
         <Text
           weight="extrabold"
-          className="mb-3 mt-[22px] text-[32px] leading-[37px]"
-          style={{ letterSpacing: -1.1 }}
+          className="mb-2 mt-[14px] text-[34px] leading-[42px]"
+          style={{ letterSpacing: -1 }}
         >
-          Mọi subscription,{'\n'}
-          <Text
-            weight="extrabold"
-            className="text-[32px] leading-[37px]"
-            style={{ backgroundColor: colors.sky }}
-          >
-            gọn trong một nơi.
-          </Text>
+          Quản lý subscription gần như tự động.
         </Text>
         <Text className="text-[14px] leading-[21px] text-ink-2">
-          Biết mình trả bao nhiêu mỗi tháng, được nhắc trước khi bị trừ tiền và cắt bớt những gói
-          không còn dùng.
+          Kết nối email để Subca tự tìm, theo dõi và cập nhật các khoản đăng ký của bạn.
         </Text>
-        <View className="my-[22px] flex-row gap-[6px]">
-          <View className="h-2 w-6 rounded bg-ink" />
-          <View className="h-2 w-2 rounded bg-sage" />
-          <View className="h-2 w-2 rounded bg-sage" />
-        </View>
-        <Button title="Bắt đầu ngay" icon="chev" onPress={() => router.push('/sign-in')} />
+        <Button title="Bắt đầu" className="mt-6" onPress={() => router.push('/sign-in')} />
         <Button
-          title="Tôi đã có tài khoản"
+          title="Tìm hiểu cách hoạt động"
           variant="ghost"
           className="mt-2"
-          onPress={() => router.push('/sign-in')}
+          onPress={() => setStep('value')}
         />
       </View>
     </ScrollView>
-  );
-}
-
-function Blob({
-  size,
-  color,
-  opacity = 1,
-  ...pos
-}: {
-  size: number;
-  color: string;
-  opacity?: number;
-  left?: number;
-  right?: number;
-  top: number;
-}) {
-  return (
-    <View
-      style={{
-        position: 'absolute',
-        width: size,
-        height: size,
-        borderRadius: size / 2,
-        backgroundColor: color,
-        opacity,
-        ...pos,
-      }}
-    />
   );
 }
 
@@ -169,6 +184,33 @@ function CardText({ title, note }: { title: string; note: string }) {
       <Text weight="medium" className="text-[11.5px] leading-[16px] text-ink-3">
         {note}
       </Text>
+    </View>
+  );
+}
+
+function ValueCard({
+  icon,
+  title,
+  detail,
+  tone,
+}: {
+  icon: 'sparkle' | 'bell' | 'piggy';
+  title: string;
+  detail: string;
+  tone: 'mint' | 'peach' | 'sky';
+}) {
+  const toneClass = { mint: 'bg-mint', peach: 'bg-peach', sky: 'bg-sky-soft' }[tone];
+  return (
+    <View className="flex-row gap-3 rounded-[22px] bg-surface p-4" style={{ boxShadow: shadow.md }}>
+      <View className={`h-11 w-11 flex-none items-center justify-center rounded-xl ${toneClass}`}>
+        <Icon name={icon} size={21} color={colors['ink-2']} />
+      </View>
+      <View className="flex-1">
+        <Text weight="semibold" className="mb-1 text-[15px]">
+          {title}
+        </Text>
+        <Text className="text-[13px] leading-[19px] text-ink-3">{detail}</Text>
+      </View>
     </View>
   );
 }

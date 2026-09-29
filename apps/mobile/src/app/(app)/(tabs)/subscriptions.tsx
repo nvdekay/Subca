@@ -64,6 +64,7 @@ export default function SubscriptionList() {
 
   return (
     <Screen
+      tabBar
       refreshControl={
         <RefreshControl
           refreshing={query.isRefetching}

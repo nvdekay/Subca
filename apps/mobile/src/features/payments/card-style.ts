@@ -1,31 +1,30 @@
 import type { PaymentMethodType } from '@subca/shared';
 
-/** Nền thẻ theo thương hiệu (mockup: .pcard), không có thì theo loại. */
-const BY_BRAND: Record<string, [string, string]> = {
-  VISA: ['#1A1F71', '#3A62B8'],
-  MASTERCARD: ['#2B2B2B', '#5A4A42'],
-  JCB: ['#0B4EA2', '#2E86C1'],
-  AMEX: ['#1F6F8B', '#4FA3C0'],
-  NAPAS: ['#0E4C92', '#E0312B'],
-  MOMO: ['#A50064', '#D82D8B'],
-  ZALOPAY: ['#0068FF', '#00A2FF'],
-  VNPAY: ['#005BAA', '#E42127'],
-  SHOPEEPAY: ['#EE4D2D', '#F7794E'],
+/** Màu phẳng theo thương hiệu/loại; UI không dùng gradient. */
+const BY_BRAND: Record<string, string> = {
+  VISA: '#263B86',
+  MASTERCARD: '#4C4038',
+  JCB: '#155CA8',
+  AMEX: '#236E86',
+  NAPAS: '#245B94',
+  MOMO: '#A7196D',
+  ZALOPAY: '#1472D4',
+  VNPAY: '#1D69A6',
+  SHOPEEPAY: '#D95235',
 };
 
-const BY_TYPE: Record<PaymentMethodType, [string, string]> = {
-  CARD: ['#2F3A31', '#4F6655'],
-  PAYPAL: ['#003087', '#0070E0'],
-  APP_STORE: ['#1C1C1E', '#4A4A4F'],
-  GOOGLE_PLAY: ['#1E6B45', '#34A853'],
-  E_WALLET: ['#3F8797', '#6FB3C2'],
-  BANK_TRANSFER: ['#2E5B45', '#4F8A6C'],
-  OTHER: ['#657166', '#8A968B'],
+const BY_TYPE: Record<PaymentMethodType, string> = {
+  CARD: '#3D5547',
+  PAYPAL: '#24549A',
+  APP_STORE: '#414149',
+  GOOGLE_PLAY: '#38734F',
+  E_WALLET: '#347D8B',
+  BANK_TRANSFER: '#357051',
+  OTHER: '#718075',
 };
 
-export function cardGradient(type: PaymentMethodType, brand: string | null): string {
-  const [from, to] = (brand && BY_BRAND[brand]) || BY_TYPE[type];
-  return `linear-gradient(135deg, ${from}, ${to})`;
+export function cardColor(type: PaymentMethodType, brand: string | null): string {
+  return (brand && BY_BRAND[brand]) || BY_TYPE[type];
 }
 
 /** Thương hiệu gợi ý theo loại để chọn nhanh trong form. */

@@ -9,9 +9,11 @@ export default function TabsLayout() {
       screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: colors.bg } }}
     >
       <Tabs.Screen name="index" />
-      <Tabs.Screen name="calendar" />
-      <Tabs.Screen name="review" />
+      <Tabs.Screen name="subscriptions" />
+      <Tabs.Screen name="inbox" />
       <Tabs.Screen name="analytics" />
+      <Tabs.Screen name="calendar" options={{ href: null }} />
+      <Tabs.Screen name="review" options={{ href: null }} />
     </Tabs>
   );
 }

@@ -121,10 +121,7 @@ function ReviewBody({ data, tab, onTab }: { data: ReviewDto; tab: Tab; onTab: (t
   return (
     <>
       {/* Thẻ "Có thể tiết kiệm" (mockup: .savings) */}
-      <View
-        className="overflow-hidden rounded-[30px] p-[22px]"
-        style={{ experimental_backgroundImage: 'linear-gradient(140deg, #FDE8D3, #F7D3C3)' }}
-      >
+      <View className="overflow-hidden rounded-[30px] bg-peach p-[22px]">
         <View className="flex-row items-center justify-between">
           <Text weight="semibold" className="text-[#6B3A22]">
             Có thể tiết kiệm

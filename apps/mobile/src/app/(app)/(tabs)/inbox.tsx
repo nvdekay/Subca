@@ -16,6 +16,7 @@ export default function Inbox() {
 
   return (
     <Screen
+      tabBar
       refreshControl={
         <RefreshControl
           refreshing={inbox.isRefetching}

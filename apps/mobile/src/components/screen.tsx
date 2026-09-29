@@ -8,7 +8,6 @@ import {
   type ScrollViewProps,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors } from '@/theme';
 import { IconButton } from './ui/icon-button';
 import { Text } from './ui/text';
 
@@ -52,23 +51,11 @@ export function Screen({
   const page = (
     <View className="flex-1 bg-bg">
       {content}
-      {/* Dải nền dưới thanh trạng thái (mockup: .statusbar) để nội dung cuộn không đè lên giờ / pin. */}
-      {modal ? null : (
-        <View
-          pointerEvents="none"
-          className="absolute left-0 right-0 top-0"
-          style={{
-            height: insets.top + 8,
-            experimental_backgroundImage: `linear-gradient(180deg, ${colors.bg} 70%, rgba(248,247,243,0) 100%)`,
-          }}
-        />
-      )}
       {footer ? (
         <View
-          className="absolute bottom-0 left-0 right-0 px-5 pt-6"
+          className="absolute bottom-0 left-0 right-0 border-t border-line bg-bg px-5 pt-4"
           style={{
             paddingBottom: Math.max(insets.bottom, 12) + 4,
-            experimental_backgroundImage: `linear-gradient(180deg, rgba(248,247,243,0) 0%, ${colors.bg} 35%)`,
           }}
         >
           {footer}

@@ -10,7 +10,7 @@ import { Icon } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { Text } from '@/components/ui/text';
 import { useMe } from '@/features/auth/use-me';
-import { BRAND_LABEL, cardGradient } from '@/features/payments/card-style';
+import { BRAND_LABEL, cardColor } from '@/features/payments/card-style';
 import { PaymentMethodSheet } from '@/features/payments/payment-method-sheet';
 import { PAYMENT_TYPE_LABEL } from '@/features/subscriptions/labels';
 import { usePaymentMethods, useSubscriptions } from '@/features/subscriptions/queries';
@@ -191,7 +191,7 @@ function MethodCard({
       accessibilityLabel={method.label}
       className="min-h-[168px] justify-between overflow-hidden rounded-lg p-5 active:scale-[0.985]"
       style={{
-        experimental_backgroundImage: cardGradient(method.type, method.brand),
+        backgroundColor: cardColor(method.type, method.brand),
         boxShadow: shadow.md,
       }}
     >

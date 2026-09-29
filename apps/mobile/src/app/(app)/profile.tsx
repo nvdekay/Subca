@@ -123,7 +123,7 @@ export default function Settings() {
         <View
           className="h-14 w-14 items-center justify-center rounded-full"
           style={{
-            experimental_backgroundImage: `linear-gradient(135deg, ${colors.coral}, ${colors.peach})`,
+            backgroundColor: colors.coral,
           }}
         >
           <Text weight="bold" className="text-[22px] leading-[28px] text-on-coral">

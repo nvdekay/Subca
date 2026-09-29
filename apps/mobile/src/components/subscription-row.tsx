@@ -98,8 +98,14 @@ export function SubscriptionListRow({ sub }: { sub: SubscriptionDto }) {
       sub={sub}
       note={[intervalLabel(sub.intervalUnit, sub.intervalCount), when].filter(Boolean).join(' · ')}
       below={
-        <View className="mt-[6px]">
+        <View className="mt-[6px] flex-row items-center gap-2">
           <Pill label={status.label} tone={status.tone} />
+          {sub.source === 'EMAIL' ? (
+            <Text className="text-[11px] text-ink-3">
+              Email{sub.confidence != null ? ` · ${sub.confidence}%` : ''}
+              {sub.evidenceCount > 0 ? ` · ${sub.evidenceCount} bằng chứng` : ''}
+            </Text>
+          ) : null}
         </View>
       }
     />
