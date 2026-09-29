@@ -16,7 +16,6 @@ import { useEffect } from 'react';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { PaperGrain } from '@/components/paper-grain';
 import { Text } from '@/components/ui/text';
 import { SessionProvider, useSession } from '@/features/auth/session';
 import { missingEnv } from '@/lib/env';
@@ -53,7 +52,6 @@ export default function RootLayout() {
             ) : (
               <RootNavigator fontsReady={fontsLoaded || fontError != null} />
             )}
-            <PaperGrain />
           </SessionProvider>
         </PersistQueryClientProvider>
       </SafeAreaProvider>
@@ -62,7 +60,7 @@ export default function RootLayout() {
 }
 
 function RootNavigator({ fontsReady }: { fontsReady: boolean }) {
-  const { session, ready } = useSession();
+  const { session, ready, needsPassword } = useSession();
 
   // Giữ splash tới khi có font và đã biết người dùng đăng nhập hay chưa → không nháy màn đăng nhập.
   useEffect(() => {
@@ -72,7 +70,10 @@ function RootNavigator({ fontsReady }: { fontsReady: boolean }) {
 
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
-      <Stack.Protected guard={session != null}>
+      <Stack.Protected guard={session != null && needsPassword}>
+        <Stack.Screen name="set-password" />
+      </Stack.Protected>
+      <Stack.Protected guard={session != null && !needsPassword}>
         <Stack.Screen name="(app)" />
       </Stack.Protected>
       <Stack.Protected guard={session == null}>
