@@ -1,34 +1,34 @@
 @import 'tailwindcss';
 
-/* Bốn màu sản phẩm đồng bộ với mobile: charcoal, slate, orange và light grey. */
+/* Cùng palette giấy, mực và màu nhấn với apps/mobile/src/theme/tokens.json. */
 @theme {
-  --color-sky: #d9dadd;
-  --color-sky-soft: #eeeeee;
-  --color-sky-deep: #393e46;
-  --color-mint: #e2e3e5;
-  --color-peach: #eeeeee;
-  --color-coral: #ffd7bb;
-  --color-sage: #d5d7da;
+  --color-sky: #d7e4ec;
+  --color-sky-soft: #e8eff2;
+  --color-sky-deep: #213747;
+  --color-mint: #dcebdd;
+  --color-peach: #f6e7c9;
+  --color-coral: #ffd2bc;
+  --color-sage: #8fa78d;
   --color-brand: #fd7014;
-  --color-olive: #393e46;
+  --color-olive: #203240;
   --color-brass: #fd7014;
-  --color-brass-soft: #eeeeee;
-  --color-ink: #222831;
-  --color-ink-2: #393e46;
-  --color-ink-3: #5e636a;
-  --color-bg: #eeeeee;
-  --color-surface: #ffffff;
-  --color-line: #d4d6d9;
-  --color-line-2: #e6e7e9;
-  --color-good: #393e46;
-  --color-good-bg: #e2e3e5;
-  --color-warn: #222831;
-  --color-warn-bg: #eeeeee;
-  --color-crit: #222831;
-  --color-crit-bg: #ffd7bb;
+  --color-brass-soft: #f7f1e2;
+  --color-ink: #202b34;
+  --color-ink-2: #34434c;
+  --color-ink-3: #667078;
+  --color-bg: #f2efe7;
+  --color-surface: #fffefa;
+  --color-line: #202b34;
+  --color-line-2: #e7e3d9;
+  --color-good: #263e31;
+  --color-good-bg: #dcebdd;
+  --color-warn: #574426;
+  --color-warn-bg: #f6e7c9;
+  --color-crit: #a43e24;
+  --color-crit-bg: #f6e3de;
 
-  --radius-card: 18px;
-  --shadow-card: 0 1px 2px rgba(34, 40, 49, 0.05), 0 5px 16px rgba(34, 40, 49, 0.08);
+  --radius-card: 8px;
+  --shadow-card: 0 3px 0 #202b34;
 }
 
 html,
@@ -42,7 +42,7 @@ body {
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Cg fill='%23222831' fill-opacity='.045'%3E%3Ccircle cx='11' cy='17' r='.7'/%3E%3Ccircle cx='46' cy='9' r='.5'/%3E%3Ccircle cx='83' cy='31' r='.65'/%3E%3Ccircle cx='119' cy='14' r='.5'/%3E%3Ccircle cx='27' cy='57' r='.55'/%3E%3Ccircle cx='69' cy='72' r='.7'/%3E%3Ccircle cx='104' cy='61' r='.5'/%3E%3Ccircle cx='9' cy='103' r='.6'/%3E%3Ccircle cx='47' cy='117' r='.5'/%3E%3Ccircle cx='91' cy='105' r='.65'/%3E%3Ccircle cx='123' cy='122' r='.5'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Cg fill='%23202b34' fill-opacity='.045'%3E%3Ccircle cx='11' cy='17' r='.7'/%3E%3Ccircle cx='46' cy='9' r='.5'/%3E%3Ccircle cx='83' cy='31' r='.65'/%3E%3Ccircle cx='119' cy='14' r='.5'/%3E%3Ccircle cx='27' cy='57' r='.55'/%3E%3Ccircle cx='69' cy='72' r='.7'/%3E%3Ccircle cx='104' cy='61' r='.5'/%3E%3Ccircle cx='9' cy='103' r='.6'/%3E%3Ccircle cx='47' cy='117' r='.5'/%3E%3Ccircle cx='91' cy='105' r='.65'/%3E%3Ccircle cx='123' cy='122' r='.5'/%3E%3C/g%3E%3C/svg%3E");
   background-repeat: repeat;
   background-size: 128px 128px;
 }
@@ -68,15 +68,14 @@ input,
 select,
 textarea {
   border-color: var(--color-line);
-  border-radius: 10px;
+  border-radius: 6px;
   background-color: var(--color-surface);
-  box-shadow: inset 0 1px 2px rgba(34, 40, 49, 0.035);
 }
 
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: var(--color-brand);
+  border-color: var(--color-ink);
   outline: 2px solid color-mix(in srgb, var(--color-brand) 22%, transparent);
   outline-offset: 1px;
 }
@@ -107,5 +106,5 @@ button:not(:disabled):active {
 :focus-visible {
   outline: 2px solid var(--color-brand);
   outline-offset: 2px;
-  border-radius: 8px;
+  border-radius: 6px;
 }

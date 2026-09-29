@@ -23,12 +23,12 @@ export function Card({
   return (
     <section
       className={cn(
-        'rounded-(--radius-card) border border-line bg-surface shadow-(--shadow-card)',
+        'rounded-(--radius-card) border-2 border-line bg-surface shadow-(--shadow-card)',
         className,
       )}
     >
       {title ? (
-        <header className="flex items-start justify-between gap-3 border-b border-line-2 px-5 py-4">
+        <header className="flex items-start justify-between gap-3 border-b-2 border-line px-5 py-4">
           <div>
             <h3 className="font-bold">{title}</h3>
             {note ? <p className="text-[12.5px] text-ink-3">{note}</p> : null}
@@ -49,9 +49,9 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const BUTTON_VARIANT = {
-  primary: 'border border-brand bg-brand text-ink hover:bg-brand/90',
-  default: 'border border-line bg-surface text-ink shadow-sm hover:bg-brass-soft',
-  danger: 'border border-crit/30 bg-crit-bg text-crit hover:bg-crit/15',
+  primary: 'border-2 border-ink bg-brand text-ink shadow-(--shadow-card) hover:bg-brand/85',
+  default: 'border-2 border-ink bg-surface text-ink shadow-(--shadow-card) hover:bg-sky-soft',
+  danger: 'border-2 border-crit bg-crit-bg text-crit shadow-[0_3px_0_#a43e24] hover:bg-coral',
   ghost: 'text-ink-2 hover:bg-brass-soft',
 } as const;
 
@@ -70,7 +70,7 @@ export function Button({
       {...props}
       disabled={disabled || loading}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-[10px] font-semibold transition duration-150 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brass disabled:cursor-not-allowed disabled:opacity-55',
+        'inline-flex items-center justify-center gap-2 rounded-[6px] font-bold transition duration-150 active:translate-y-[2px] active:shadow-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brass disabled:cursor-not-allowed disabled:opacity-55',
         size === 'md' ? 'h-10 px-4 text-[13.5px]' : 'h-8 px-3 text-[12.5px]',
         BUTTON_VARIANT[variant],
         className,
@@ -109,7 +109,7 @@ export function Input({
       <input
         {...props}
         className={cn(
-          'h-10 w-full rounded-[10px] border bg-surface px-3 text-[14px] outline-none transition placeholder:text-ink-3 focus:border-brass focus:ring-2 focus:ring-brass/20',
+          'h-10 w-full rounded-[6px] border-2 bg-surface px-3 text-[14px] outline-none transition placeholder:text-ink-3 focus:border-brand focus:ring-2 focus:ring-brand/20',
           error ? 'border-crit' : 'border-line',
         )}
       />
@@ -140,7 +140,7 @@ export function Pill({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-md border border-current/10 px-2.5 py-1 text-[12px] font-semibold',
+        'inline-flex items-center gap-1 rounded-[6px] border border-current/40 px-2.5 py-1 text-[12px] font-bold',
         PILL_TONE[tone],
       )}
     >
@@ -169,7 +169,9 @@ export function Stat({
     sky: 'bg-sky-soft',
   }[tone];
   return (
-    <div className={cn('rounded-(--radius-card) border border-line p-4', bg)}>
+    <div
+      className={cn('rounded-(--radius-card) border-2 border-line p-4 shadow-(--shadow-card)', bg)}
+    >
       <div className="text-[12.5px] text-ink-3">{label}</div>
       <div className="num mt-1 text-[24px] leading-8 font-extrabold tracking-tight">{value}</div>
       {note ? <div className="text-[12px] text-ink-3">{note}</div> : null}
@@ -183,7 +185,7 @@ export function EmptyState({ children }: { children: ReactNode }) {
 
 export function ErrorNote({ error, onRetry }: { error: Error; onRetry?: () => void }) {
   return (
-    <div className="flex items-center gap-3 rounded-(--radius-card) border border-crit/25 bg-crit-bg px-4 py-3 text-[13.5px] text-crit">
+    <div className="flex items-center gap-3 rounded-(--radius-card) border-2 border-crit bg-crit-bg px-4 py-3 text-[13.5px] text-crit">
       <Icon name="alert" className="size-[18px] shrink-0" />
       <span className="flex-1">{error.message}</span>
       {onRetry ? (
@@ -216,7 +218,7 @@ export function Th({
   return (
     <th
       className={cn(
-        'border-b border-line bg-line-2/60 px-4 py-2.5 text-[12px] font-bold tracking-wide text-ink-3 uppercase',
+        'border-b-2 border-line bg-peach/50 px-4 py-2.5 text-[12px] font-bold tracking-wide text-ink-2 uppercase',
         align === 'right' ? 'text-right' : 'text-left',
         className,
       )}
@@ -300,7 +302,7 @@ export function Modal({
         className="absolute inset-0 bg-ink/35"
         onClick={onClose}
       />
-      <div className="relative z-10 w-full max-w-[460px] rounded-2xl border border-line bg-surface p-5 shadow-lg">
+      <div className="relative z-10 w-full max-w-[460px] rounded-(--radius-card) border-2 border-line bg-surface p-5 shadow-[0_6px_0_#202b34]">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <h2 className="text-[17px] font-extrabold">{title}</h2>
