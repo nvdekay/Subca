@@ -36,11 +36,11 @@
 ## A. Thiết kế & prototype
 
 - [x] Phân tích prototype `design/Subca V2.html`; đổi mobile primary tabs thành Trang chủ / Gói của tôi / Cần chú ý / Phân tích; giữ Lịch, Review và các tính năng phụ dưới route riêng
-- [x] Chuyển Admin sang vintage style; mobile sau đó chuyển tiếp sang editorial/bento style nền sáng, viền mực dày và bóng offset; Nunito giữ chung
+- [x] Đồng bộ Admin với editorial/bento style của mobile: nền giấy, palette pastel/cam, viền mực dày, góc gọn và bóng offset; Nunito giữ chung; sidebar desktop đứng yên khi nội dung chính cuộn
 - [x] Thay typography toàn hệ thống sang Nunito weights 400–800, tải subset tiếng Việt cho mobile và Admin
 - [x] Intro trước đăng nhập: “Xin chào.” lớn, ba cảnh giới thiệu với animation theo lớp, tiến độ, quay lại/bỏ qua/đăng nhập; giữ OTP/Gmail, hỗ trợ Reduce Motion và không tự chuyển khi dùng screen reader
 - [x] Đăng nhập email/mật khẩu; OTP chỉ cho đăng ký và khôi phục/thiết lập mật khẩu; recovery không tự tạo tài khoản và không công khai dò email đã đăng ký
-- [x] Lập bảng màu charcoal/slate/orange dùng trước đây; mobile hiện dùng lại navy-charcoal, cam và pastel ngữ nghĩa theo editorial palette, Admin giữ bảng cũ
+- [x] Đồng bộ palette navy-charcoal, cam và pastel ngữ nghĩa của mobile vào Admin
 - [ ] QA đăng ký lần đầu → OTP → tạo password → đăng xuất/đăng nhập lại và reset password trên Supabase thật
 - [x] Bỏ sao trên lời chào; đưa minh hoạ gom gói vào nửa khung điện thoại; thống nhất nút back mobile qua BackButton dùng chung
 - [ ] QA intro trên Android, màn hình nhỏ/chữ lớn và VoiceOver/Reduce Motion; kiểm thử thao tác toàn luồng từ intro đến OTP/Gmail
@@ -305,6 +305,7 @@
 - [x] Dashboard tổng quan từ database Subca (người dùng, subscription, tiền đang theo dõi, nhắc nhở, nhóm chia tiền); _phễu và cohort từ PostHog để sau_
 - [x] Thêm admin đầu tiên vào `admin_users` (`khanhnvd07@gmail.com`, vai trò OWNER)
 - [x] Đã tạo tài khoản đăng nhập `admin@subca.app` (OWNER) — mật khẩu trong `.admin-account.local` ở gốc repo; đã đăng nhập thử thật và tải được dữ liệu
+- [x] Tạo tài khoản riêng `admin-login@subca.app` (ADMIN), đăng nhập trên web bằng tên `admin`; thông tin đăng nhập lưu trong file local đã gitignore, chưa kiểm thử đăng nhập qua UI
 - [x] Nhân sự & phân quyền (thêm / gỡ admin, đổi vai trò, bật tắt, đặt lại mật khẩu)
 - [x] Sức khỏe hệ thống (database, Redis, bộ lập lịch nhắc, tỷ giá, thông báo đẩy, cấu hình API đang chạy)
 - [x] Sử dụng tính năng (tỷ lệ dùng từng tính năng) + bật/tắt feature flag

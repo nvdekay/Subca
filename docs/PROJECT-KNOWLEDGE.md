@@ -1,7 +1,7 @@
 # Subca — Project Knowledge Base
 
 > **Nguồn sự thật trung tâm cho Claude, Codex và người phát triển.**  
-> Cập nhật: **29/09/2026** · Snapshot commit: `5445d1d` · Repo: `nvdekay/Subca`
+> Cập nhật: **29/09/2026** · Snapshot commit: `dbe6de1` · Repo: `nvdekay/Subca`
 > Đợt auth mật khẩu, chọn khoảng quét Gmail + bằng chứng email, palette thương hiệu mới và BackButton đã commit/push. Chạy `git status` / `git diff` để nhận biết thay đổi sau snapshot.
 
 ## 1. Cách dùng trong một session mới
@@ -47,7 +47,9 @@ Subca là ứng dụng quản lý subscription cá nhân, ưu tiên người tr�
 - Chuyển giữa đăng nhập/đăng ký/khôi phục mật khẩu có hiệu ứng trượt nhẹ bằng Reanimated; tự tắt khi Reduce Motion bật.
 - Nút quay lại mobile thống nhất qua `components/ui/back-button.tsx`: IconButton 44×44, bo 12, nền giấy, viền mảnh, cùng icon/màu/bóng/pressed state. Áp dụng qua TopBar cho màn con/auth, intro, các bước Gmail và trạng thái lỗi chi tiết gói. Nút đóng modal giữ icon X nhưng cùng style; mũi tên chuyển tháng không phải back navigation nên không đổi.
 - QA intro: mobile typecheck/lint qua; xem ảnh cả bốn cảnh trên iPhone 17 Pro Simulator, xác nhận greeting tự chuyển sang cảnh đầu. Chưa kiểm thử thao tác từng nút, VoiceOver/Reduce Motion và Android trên thiết bị; trạng thái preview tạm đã khôi phục về bước 0.
-- Mobile giữ nền giấy sáng và Nunito weights 400–800, nhưng chuyển sang viền đậm/góc gọn/bóng offset như ảnh tham chiếu; Admin vẫn giữ vintage style hiện tại. Không gradient, không đổi nghiệp vụ.
+- Mobile và Admin cùng dùng nền giấy sáng, palette navy-charcoal/cam/pastel, Nunito weights 400–800, viền mực dày, góc gọn và bóng offset. Admin đã đổi tokens, layout, login và UI components dùng chung; các trang hiện hữu kế thừa style này. Không đổi nghiệp vụ.
+- Tạo tài khoản quản trị dev riêng `admin-login@subca.app` (vai trò ADMIN, đang bật); web cho đăng nhập bằng tên `admin` qua bí danh email phía client. Tài khoản OWNER `admin@subca.app` giữ nguyên. Mật khẩu chỉ lưu ở Supabase Auth và `.admin-account-admin-login.local` đã gitignore; không ghi vào tài liệu. Script bootstrap nhận tùy chọn `ADMIN_CREATE_ROLE`/`ADMIN_CREATE_PASSWORD`; sửa ép kiểu tham số identity JSON của PostgreSQL. Chưa xác minh đăng nhập qua UI.
+- Layout Admin trên desktop giữ sidebar trong chiều cao viewport, cuộn riêng phần nội dung chính; sidebar chỉ tự cuộn khi danh sách mục vượt chiều cao màn hình. Màn hẹp giữ luồng cuộn trang hiện có.
 - Font: mobile nạp Nunito từ `@expo-google-fonts/nunito` trước khi ẩn splash; admin dùng `next/font/google` với subset `latin` + `vietnamese`. Font Nunito theo OFL-1.1.
 - Đợt product-architecture redesign mobile: thanh tab có 4 đích chính cân quanh CTA thêm ở giữa; dashboard ưu tiên tổng chi → việc cần xác nhận → mốc tiếp theo → ngân sách → lối tắt; Inbox đưa số việc chờ xử lý lên đầu; analytics đặt tổng chi và xu hướng trước phần phân tích phụ. Header màn con dùng căn trái; form tạo gói gom tuỳ chọn ít dùng vào phần mở rộng (edit để mở sẵn), chi tiết gói đưa thao tác chính lên gần đầu trang.
 - Trang chủ có phân cấp tổng chi → việc cần xác nhận → mốc tiếp theo → ngân sách → lối tắt; phần tổng quan bỏ nền charcoal lớn, dùng số tiền lớn trên nền sáng và ba ô chỉ số màu pastel viền mực/bóng cứng. Không thêm số liệu so sánh tháng trước vì API chưa cung cấp.
@@ -78,7 +80,7 @@ Subca là ứng dụng quản lý subscription cá nhân, ưu tiên người tr�
 
 ### Đang ở đâu
 
-Các chức năng lõi subscription, reminder, nhóm và Admin v1 đã có. Mobile đang áp dụng editorial/bento, scan onboarding đã có retry cho run lỗi; API/Redis local khỏe trong phiên 29/09/2026. Chưa xác nhận Google OAuth/Gmail thật, chưa QA Android/push thật, chưa phát hành. Trọng tâm tiếp theo: cấu hình OAuth Gmail thử nghiệm và QA onboarding → scan → summary → Inbox, sau đó QA editorial mobile trên iOS/Android cùng Admin, bảo mật/pháp lý, EAS/store và beta.
+Các chức năng lõi subscription, reminder, nhóm và Admin v1 đã có. Mobile và Admin cùng palette editorial/bento; scan onboarding đã có retry cho run lỗi. Tài khoản `admin` mới đã tạo trong Supabase dev; còn cần QA đăng nhập/UI. Chưa xác nhận Google OAuth/Gmail thật, chưa QA Android/push thật, chưa phát hành. Trọng tâm tiếp theo: cấu hình OAuth Gmail thử nghiệm và QA onboarding → scan → summary → Inbox, sau đó QA editorial mobile trên iOS/Android cùng Admin, bảo mật/pháp lý, EAS/store và beta.
 
 ### Blocker/việc cần chủ dự án xử lý
 
@@ -182,7 +184,7 @@ Trigger `auth.users`: tạo user → profile/settings/reminder rules; xóa user 
 - **Validation:** zod schema API đặt trong `packages/shared/src/api`; lỗi dùng `{statusCode, code, message, issues?}` và code ổn định.
 - **Một màn một request** cho dữ liệu tổng hợp; việc chậm đưa vào queue.
 - **Danh mục:** không đưa category trở lại UI/API nếu không có quyết định sản phẩm mới.
-- **Admin:** dữ liệu qua API, không query DB từ Next.js client. Permission có một nguồn ở `ADMIN_PERMISSIONS` trong shared.
+- **Admin:** dữ liệu qua API, không query DB từ Next.js client. Permission có một nguồn ở `ADMIN_PERMISSIONS` trong shared. Bí danh đăng nhập `admin` chỉ ánh xạ sang email trên web; Supabase Auth và API vẫn xác thực/phân quyền theo email/UUID.
 - **Email detection:** adapter/parser/reconcile tách khỏi ghi DB; chỉ `DetectionService` ghi. Không lưu raw email body. Refresh token mã hóa AES-256-GCM.
 - **Manual subscription:** bằng chứng email có thể bổ sung nhưng không được ghi đè dữ liệu user đã nhập.
 - **Idempotency email:** chống trùng ở processed message và `(source_ref, event_type, merchant_key)`.
@@ -221,6 +223,8 @@ Trạng thái detection tách khỏi trạng thái subscription. Email im lặng
 - ExchangeRate-API có điều kiện attribution và không phân phối lại dữ liệu.
 
 Biến API quan trọng: `DATABASE_URL`, `DIRECT_URL`, tùy chọn `SHADOW_DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `REDIS_URL`, `FX_SYNC_ENABLED`, `REMINDERS_ENABLED`, `EXPO_ACCESS_TOKEN`, `CORS_ORIGINS`, `ADMIN_REQUIRE_MFA`, `PUBLIC_API_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `SECRETS_KEY`, `EMAIL_SYNC_ENABLED`.
+
+Riêng script `apps/api/scripts/create-admin.ts` nhận `ADMIN_CREATE_ROLE` và `ADMIN_CREATE_PASSWORD` tạm thời khi gọi lệnh; không cấu hình cho API runtime. Mẫu comment ở `apps/api/.env.example`.
 
 Mobile chỉ dùng các biến public: `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`, `EXPO_PUBLIC_API_URL`. Admin tương tự với prefix `NEXT_PUBLIC_`. Mẫu đầy đủ nằm trong `.env.example` của từng app.
 
@@ -263,6 +267,7 @@ Integration test cần Supabase dev + Redis thật và tự tạo/dọn dữ li�
 - Mobile phải dùng component `Text` của app và prop `weight`, không dùng `font-bold`; ghép class bằng `cn()`.
 - Tiền hiển thị qua `formatAmount`; ngày qua formatter chuỗi của app, không qua `Date` tùy tiện.
 - Next.js 16 thay đổi nhanh: trước khi sửa admin phải đọc hướng dẫn versioned trong `node_modules/next/dist/docs/` theo `apps/admin/AGENTS.md`.
+- Script bootstrap admin cần ép kiểu `text` cho tham số đưa vào `jsonb_build_object` khi dùng PrismaPg; nếu không PostgreSQL báo `42P18`.
 - Expo API phải tra docs đúng SDK 57 theo `apps/mobile/AGENTS.md`, không dựa vào trí nhớ.
 - Prettier tự căn bảng Markdown; tránh script phụ thuộc nguyên văn spacing của bảng.
 - macOS không có lệnh `timeout`; Docker Hub có thể chập chờn nhưng máy dev đã có image Redis.
@@ -275,6 +280,7 @@ Integration test cần Supabase dev + Redis thật và tự tạo/dọn dữ li�
 - Commit chia theo phần hợp lý, Conventional Commits bằng tiếng Việt; không thêm `Co-Authored-By`/dòng generated by AI.
 - Tài khoản dev còn dữ liệu mẫu và một nhóm Netflix test; chỉ dọn khi chủ dự án yêu cầu.
 - Tại lúc tạo snapshot, workspace có file untracked `design/Subca V2.html`; coi là thay đổi của người dùng, không xóa/ghi đè ngoài task liên quan.
+- Lượt đồng bộ Admin UI và thêm tài khoản `admin` ngày 29/09/2026: script tạo tài khoản dev thành công; đọc lại DB xác nhận ADMIN/đang bật và có một identity email. Đã dọn bản ghi Auth dở dang do lần chạy script lỗi; chưa chạy kiểm thử hoặc QA UI theo yêu cầu session.
 
 ## 14. Quy trình cập nhật knowledge base
 
