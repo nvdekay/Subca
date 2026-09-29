@@ -21,6 +21,10 @@ export function useConnections() {
   return useQuery({
     queryKey: detectionKeys.connections,
     queryFn: () => api<ConnectionsDto>('/connections'),
+    refetchInterval: (query) =>
+      query.state.data?.accounts.some((account) => account.sync?.status === 'RUNNING')
+        ? 3000
+        : false,
   });
 }
 
@@ -71,8 +75,11 @@ export function useConnectGmail(redirectPath = 'connections') {
 export function useSyncConnection() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (accountId: string) =>
-      api<SyncRunDto>(`/connections/${accountId}/sync`, { method: 'POST' }),
+    mutationFn: ({ accountId, windowMonths }: { accountId: string; windowMonths?: number }) =>
+      api<SyncRunDto>(`/connections/${accountId}/sync`, {
+        method: 'POST',
+        body: JSON.stringify(windowMonths ? { windowMonths } : {}),
+      }),
     onSuccess: () => invalidateAll(queryClient),
   });
 }

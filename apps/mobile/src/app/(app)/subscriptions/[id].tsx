@@ -6,6 +6,7 @@ import { ActivityIndicator, Pressable, RefreshControl, View } from 'react-native
 import { Screen, TopBar } from '@/components/screen';
 import { ServiceLogo } from '@/components/service-logo';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/ui/back-button';
 import { Card } from '@/components/ui/card';
 import { Icon, type IconName } from '@/components/ui/icon';
 import { Pill } from '@/components/ui/pill';
@@ -58,7 +59,7 @@ export default function SubscriptionDetail() {
       ) : detail.isError ? (
         <Card className="items-center gap-3">
           <Text className="text-center text-ink-2">{detail.error.message}</Text>
-          <Button title="Quay lại" size="sm" variant="soft" onPress={() => router.back()} />
+          <BackButton onPress={() => router.back()} />
         </Card>
       ) : (
         <ActivityIndicator className="mt-16" color={colors['ink-3']} />
@@ -82,7 +83,7 @@ function DetailBody({ sub }: { sub: SubscriptionDetailDto }) {
     <>
       {/* ── Đầu trang ── */}
       <View
-        className="items-center overflow-hidden rounded-[20px] border border-line p-[22px]"
+        className="items-center overflow-hidden rounded-sm border border-line p-[22px]"
         style={{ backgroundColor: HERO_BG[sub.status] }}
       >
         <View className="mb-3">
@@ -131,6 +132,52 @@ function DetailBody({ sub }: { sub: SubscriptionDetailDto }) {
             />
           ) : null}
         </Card>
+      ) : null}
+
+      {sub.emailEvidence.length > 0 ? (
+        <>
+          <SectionTitle title="Nguồn phát hiện" />
+          <Card className="gap-3 border border-[#D7E7DB] bg-[#F1F8F2]">
+            {sub.emailEvidence.map((evidence) => (
+              <View key={evidence.id} className="flex-row items-start gap-3">
+                <View className="mt-0.5 h-9 w-9 items-center justify-center rounded-sm bg-[#DDEFE1]">
+                  <Icon name="mail" size={18} color="#34764F" />
+                </View>
+                <View className="min-w-0 flex-1">
+                  <Text weight="bold" className="text-[14px] leading-[19px]">
+                    {emailEventLabel(evidence.eventType)}
+                  </Text>
+                  <Text className="mt-0.5 text-[12.5px] leading-[18px] text-ink-2">
+                    {evidence.senderDomain ? `Email từ ${evidence.senderDomain}` : 'Email đã quét'}
+                    {evidence.receivedAt
+                      ? ` · ${formatDate(evidence.receivedAt.slice(0, 10))}`
+                      : ''}
+                  </Text>
+                  {evidence.threadId ? (
+                    <Pressable
+                      className="mt-2 flex-row items-center gap-1.5 self-start"
+                      accessibilityRole="link"
+                      accessibilityLabel="Mở email gốc trong Gmail"
+                      onPress={() =>
+                        WebBrowser.openBrowserAsync(
+                          `https://mail.google.com/mail/u/0/#all/${encodeURIComponent(evidence.threadId!)}`,
+                        )
+                      }
+                    >
+                      <Text weight="bold" className="text-[12.5px] text-[#34764F]">
+                        Mở email gốc trong Gmail
+                      </Text>
+                      <Icon name="link" size={14} color="#34764F" />
+                    </Pressable>
+                  ) : null}
+                </View>
+              </View>
+            ))}
+            <Text className="border-t border-[#D7E7DB] pt-2 text-[11.5px] leading-[16px] text-ink-3">
+              Subca chỉ lưu thông tin trích xuất và liên kết nguồn, không lưu nội dung thư.
+            </Text>
+          </Card>
+        </>
       ) : null}
 
       <View className="mt-3 flex-row gap-2">
@@ -272,6 +319,31 @@ function DetailBody({ sub }: { sub: SubscriptionDetailDto }) {
   );
 }
 
+function emailEventLabel(eventType: SubscriptionDetailDto['emailEvidence'][number]['eventType']) {
+  switch (eventType) {
+    case 'TRIAL_STARTED':
+    case 'TRIAL_ENDING':
+      return 'Email về gói dùng thử';
+    case 'PAYMENT_SUCCESS':
+    case 'RENEWAL':
+      return 'Email xác nhận thanh toán';
+    case 'PRICE_CHANGED':
+      return 'Email thông báo đổi giá';
+    case 'PLAN_CHANGED':
+      return 'Email thông báo đổi gói';
+    case 'PAYMENT_FAILED':
+      return 'Email báo thanh toán thất bại';
+    case 'CANCELLATION_REQUESTED':
+    case 'SUBSCRIPTION_CANCELLED':
+    case 'SUBSCRIPTION_EXPIRED':
+      return 'Email về việc hủy gói';
+    case 'SUBSCRIPTION_RESUMED':
+      return 'Email xác nhận tiếp tục gói';
+    case 'SUBSCRIPTION_STARTED':
+      return 'Email xác nhận đăng ký gói';
+  }
+}
+
 function SectionTitle({ title, right }: { title: string; right?: ReactNode }) {
   return (
     <View className="mx-[2px] mb-3 mt-[26px] flex-row items-baseline justify-between">
@@ -340,10 +412,7 @@ function UsageCard({
               accessibilityRole="button"
               accessibilityLabel={l.label}
               accessibilityState={{ selected: level === i + 1 }}
-              className={cn(
-                'h-[34px] flex-1 rounded-[10px]',
-                i + 1 <= level ? 'bg-sky' : 'bg-stone',
-              )}
+              className={cn('h-[34px] flex-1 rounded-sm', i + 1 <= level ? 'bg-sky' : 'bg-stone')}
             />
           ))}
         </View>
@@ -404,7 +473,7 @@ function Action({
       style={{ boxShadow: shadow.sm }}
     >
       <View
-        className="h-[38px] w-[38px] items-center justify-center rounded-[12px]"
+        className="h-[38px] w-[38px] items-center justify-center rounded-sm"
         style={{ backgroundColor: bg }}
       >
         <Icon name={icon} />
