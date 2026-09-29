@@ -7,7 +7,7 @@ import {
   Nunito_700Bold,
   Nunito_800ExtraBold,
   useFonts,
-} from '@expo-google-fonts/be-vietnam-pro';
+} from '@expo-google-fonts/nunito';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import Constants from 'expo-constants';
 import { SplashScreen, Stack } from 'expo-router';
@@ -16,6 +16,7 @@ import { useEffect } from 'react';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { PaperGrain } from '@/components/paper-grain';
 import { Text } from '@/components/ui/text';
 import { SessionProvider, useSession } from '@/features/auth/session';
 import { missingEnv } from '@/lib/env';
@@ -52,6 +53,7 @@ export default function RootLayout() {
             ) : (
               <RootNavigator fontsReady={fontsLoaded || fontError != null} />
             )}
+            <PaperGrain />
           </SessionProvider>
         </PersistQueryClientProvider>
       </SafeAreaProvider>

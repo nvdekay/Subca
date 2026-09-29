@@ -25,7 +25,7 @@ export function ChoiceSheet<T extends string | number>({
 }) {
   return (
     <Sheet visible={visible} onClose={onClose} title={title} subtitle={subtitle}>
-      <View className="overflow-hidden rounded-[20px] bg-surface">
+      <View className="overflow-hidden rounded-[16px] border border-line bg-surface">
         {options.map((o, i) => (
           <Pressable
             key={String(o.value)}

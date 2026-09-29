@@ -20,7 +20,7 @@ export function IconButton({
       accessibilityRole="button"
       accessibilityLabel={label}
       hitSlop={4}
-      className="h-11 w-11 items-center justify-center rounded-full bg-surface active:scale-[0.94]"
+      className="h-11 w-11 items-center justify-center rounded-[12px] border border-line bg-surface active:scale-[0.96]"
       style={{ boxShadow: shadow.sm }}
     >
       <Icon name={icon} />

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
+import { colors } from '@/theme';
 
 /** Vòng tiến độ (mockup: .ring) — `progress` từ 0 tới 1, nội dung đặt ở giữa. */
 export function Ring({
@@ -26,9 +27,9 @@ export function Ring({
           cx={size / 2}
           cy={size / 2}
           r={r}
-          stroke="#EFEFE9"
+          stroke={colors.line}
           strokeWidth={stroke}
-          fill="#FFFFFF"
+          fill={colors.surface}
         />
         <Circle
           cx={size / 2}

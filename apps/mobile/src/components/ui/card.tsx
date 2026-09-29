@@ -14,7 +14,7 @@ const TONE_CLASS: Record<Tone, string> = {
 
 export type CardProps = ViewProps & { tone?: Tone; className?: string; onPress?: () => void };
 
-/** Thẻ bo góc 26: nền trắng có bóng, hoặc nền màu pastel không bóng (giống .card trong mockup). */
+/** Thẻ nền giấy có viền mảnh và bóng nâu dịu, thống nhất cho mọi màn. */
 export function Card({
   tone = 'surface',
   className,
@@ -23,8 +23,8 @@ export function Card({
   children,
   ...props
 }: CardProps) {
-  const cardClass = cn('rounded-lg p-[18px]', TONE_CLASS[tone], className);
-  const cardStyle = [tone === 'surface' && { boxShadow: shadow.sm }, style];
+  const cardClass = cn('rounded-lg border border-line p-[18px]', TONE_CLASS[tone], className);
+  const cardStyle = [{ boxShadow: shadow.sm }, style];
   if (onPress) {
     return (
       <Pressable

@@ -1,16 +1,17 @@
 import { View } from 'react-native';
 import { cn } from '@/lib/cn';
+import { colors } from '@/theme';
 import { Icon, type IconName } from './icon';
 import { Text } from './text';
 
 export type PillTone = 'active' | 'trial' | 'review' | 'cancel' | 'warn';
 
 const TONE: Record<PillTone, { box: string; text: string; color: string }> = {
-  active: { box: 'bg-mint', text: 'text-on-mint', color: '#2E5B45' },
-  trial: { box: 'bg-sky-soft', text: 'text-on-sky', color: '#2A6572' },
-  review: { box: 'bg-peach', text: 'text-on-peach', color: '#8A4B1E' },
-  cancel: { box: 'bg-muted-bg', text: 'text-ink-2', color: '#4F5B51' },
-  warn: { box: 'bg-coral', text: 'text-on-coral', color: '#7A2E17' },
+  active: { box: 'bg-mint', text: 'text-on-mint', color: colors['on-mint'] },
+  trial: { box: 'bg-sky-soft', text: 'text-on-sky', color: colors['on-sky'] },
+  review: { box: 'bg-peach', text: 'text-on-peach', color: colors['on-peach'] },
+  cancel: { box: 'bg-muted-bg', text: 'text-ink-2', color: colors['ink-2'] },
+  warn: { box: 'bg-coral', text: 'text-on-coral', color: colors['on-coral'] },
 };
 
 export function Pill({

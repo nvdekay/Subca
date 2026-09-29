@@ -5,9 +5,9 @@ export const radius = tokens.radius;
 
 /** Bóng đổ của mockup (--shadow-sm / --shadow-md), dùng thuộc tính `boxShadow` của New Architecture. */
 export const shadow = {
-  sm: '0 1px 2px rgba(47,58,49,0.04), 0 4px 14px rgba(47,58,49,0.05)',
-  md: '0 2px 6px rgba(47,58,49,0.05), 0 14px 34px rgba(47,58,49,0.09)',
-  nav: '0 10px 36px rgba(47,58,49,0.14)',
+  sm: '0 1px 2px rgba(73,56,35,0.05), 0 3px 10px rgba(73,56,35,0.06)',
+  md: '0 2px 5px rgba(73,56,35,0.05), 0 9px 22px rgba(73,56,35,0.09)',
+  nav: '0 8px 28px rgba(64,49,30,0.16)',
 } as const;
 
 /**

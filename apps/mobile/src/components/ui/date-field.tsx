@@ -44,7 +44,7 @@ export function DateField({
         onPress={() => setOpen(true)}
         accessibilityRole="button"
         accessibilityLabel={`${label}: ${formatDate(value)}`}
-        className="h-[52px] flex-row items-center justify-between rounded-[16px] bg-surface px-4"
+        className="h-[52px] flex-row items-center justify-between rounded-[12px] border border-line bg-surface px-4"
         style={{ boxShadow: shadow.sm }}
       >
         <Text tabular>{formatDate(value)}</Text>
@@ -120,8 +120,8 @@ function MonthCalendar({ value, onPick }: { value: IsoDate; onPick: (d: IsoDate)
               >
                 <View
                   className={cn(
-                    'h-10 w-10 items-center justify-center rounded-full',
-                    selected && 'bg-ink',
+                    'h-10 w-10 items-center justify-center rounded-[11px]',
+                    selected && 'bg-ink-brand',
                     !selected && d === today && 'bg-mint',
                   )}
                 >

@@ -3,12 +3,12 @@ import { colors } from '@/theme';
 import { Icon } from './ui/icon';
 import { Text } from './ui/text';
 
-/** Logo chữ Subca: ô vuông tối với icon "repeat" màu sky + chữ Subca. */
+/** Logo chữ Subca: dấu olive và kiểu chữ serif editorial. */
 export function BrandMark() {
   return (
     <View className="flex-row items-center gap-[10px]">
-      <View className="h-[38px] w-[38px] items-center justify-center rounded-[12px] bg-ink">
-        <Icon name="repeat" color={colors.sky} />
+      <View className="h-[38px] w-[38px] items-center justify-center rounded-[10px] border border-brass/50 bg-ink-brand">
+        <Icon name="repeat" color={colors['butter-soft']} />
       </View>
       <Text
         weight="extrabold"

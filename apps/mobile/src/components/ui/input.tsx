@@ -4,7 +4,7 @@ import { cn } from '@/lib/cn';
 import { colors, fontFamily, shadow } from '@/theme';
 import { Text } from './text';
 
-/** Ô nhập cao 52, nền trắng, viền xanh khi đang nhập (giống .input trong mockup). */
+/** Ô nhập nền giấy, viền brass khi focus, lỗi dùng dusty red. */
 export function Input({
   label,
   error,
@@ -23,8 +23,8 @@ export function Input({
       <TextInput
         placeholderTextColor={colors['ink-3']}
         className={cn(
-          'h-[52px] rounded-[16px] border-[1.5px] border-transparent bg-surface px-4 text-[15px] text-ink',
-          focused && 'border-sky',
+          'h-[52px] rounded-[12px] border border-line bg-surface px-4 text-[15px] text-ink',
+          focused && 'border-brass',
           error && 'border-coral-deep',
         )}
         style={[{ fontFamily: fontFamily.regular, boxShadow: shadow.sm }, style]}

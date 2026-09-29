@@ -23,11 +23,11 @@ export function Sheet({
       <View className="flex-1 justify-end">
         <Pressable
           accessibilityLabel="Đóng"
-          className="absolute inset-0 bg-[rgba(31,38,33,0.38)]"
+          className="absolute inset-0 bg-[rgba(48,44,37,0.42)]"
           onPress={onClose}
         />
         <View
-          className="max-h-[82%] rounded-t-[32px] bg-bg px-5 pt-[10px]"
+          className="max-h-[82%] rounded-t-[22px] border-t border-line bg-bg px-5 pt-[10px]"
           style={{ paddingBottom: insets.bottom + 20 }}
         >
           <View className="mx-auto mb-4 h-[5px] w-10 rounded-[3px] bg-sage" />

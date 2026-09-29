@@ -27,9 +27,9 @@ export function ToggleRow({
         value={value}
         onValueChange={onChange}
         accessibilityLabel={title}
-        trackColor={{ true: colors['ink-brand'], false: '#D9DCD3' }}
-        thumbColor="#FFFFFF"
-        ios_backgroundColor="#D9DCD3"
+        trackColor={{ true: colors['ink-brand'], false: colors.line }}
+        thumbColor={colors.surface}
+        ios_backgroundColor={colors.line}
       />
     </View>
   );
