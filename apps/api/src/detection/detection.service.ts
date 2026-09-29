@@ -131,6 +131,8 @@ export class DetectionService {
         parser: detected.parser,
         senderDomain: email.senderDomain,
         subjectHash: hash(email.subject),
+        threadId: email.threadId,
+        receivedAt: email.receivedAt.toISOString(),
       },
     };
     try {

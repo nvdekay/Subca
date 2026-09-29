@@ -65,6 +65,20 @@ const detailInclude = {
     orderBy: { chargedOn: 'desc' },
     take: 12,
   },
+  events: {
+    where: { source: 'EMAIL' },
+    select: {
+      id: true,
+      eventType: true,
+      occurredAt: true,
+      confidence: true,
+      amountMinor: true,
+      currency: true,
+      extracted: true,
+    },
+    orderBy: { occurredAt: 'desc' },
+    take: 5,
+  },
   _count: { select: { events: true } },
 } satisfies Prisma.SubscriptionInclude;
 
@@ -156,6 +170,27 @@ export class SubscriptionsService {
         amountMinor: c.amountMinor.toString(),
         currency: c.currency as CurrencyCode,
       })),
+      emailEvidence: row.events.map((event) => {
+        const metadata =
+          event.extracted &&
+          typeof event.extracted === 'object' &&
+          !Array.isArray(event.extracted)
+            ? (event.extracted as Prisma.JsonObject)
+            : {};
+        const senderDomain = metadata.senderDomain;
+        const receivedAt = metadata.receivedAt;
+        const threadId = metadata.threadId;
+        return {
+          id: event.id,
+          eventType: event.eventType,
+          senderDomain: typeof senderDomain === 'string' ? senderDomain : null,
+          receivedAt: typeof receivedAt === 'string' ? receivedAt : null,
+          threadId: typeof threadId === 'string' ? threadId : null,
+          confidence: event.confidence,
+          amountMinor: event.amountMinor?.toString() ?? null,
+          currency: event.currency as CurrencyCode | null,
+        };
+      }),
     };
   }
 

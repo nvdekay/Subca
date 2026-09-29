@@ -45,6 +45,14 @@ export interface SyncRunDto {
   error: string | null;
 }
 
+/** Khoảng thời gian người dùng chọn cho một lượt quét Gmail thủ công. */
+export const SyncConnectionSchema = z
+  .object({
+    windowMonths: z.union([z.literal(1), z.literal(3), z.literal(6), z.literal(12)]).optional(),
+  })
+  .optional();
+export type SyncConnection = z.infer<typeof SyncConnectionSchema>;
+
 export interface ConnectionsDto {
   accounts: ConnectedAccountDto[];
   /** Máy chủ đã cấu hình OAuth Google chưa; chưa thì app ẩn nút kết nối. */
@@ -134,6 +142,8 @@ export type ResolveInboxItem = z.infer<typeof ResolveInboxItemSchema>;
 // ─────────────── Kết quả quét lần đầu ───────────────
 
 export interface DiscoverySummaryDto {
+  /** ID của lượt quét mà các số liệu/trạng thái này thuộc về. */
+  runId: string | null;
   /** Đang quét hay đã xong. */
   status: EmailSyncStatus | 'IDLE';
   scannedCount: number;

@@ -12,10 +12,12 @@ import {
 } from '@nestjs/common';
 import {
   StartConnectionSchema,
+  SyncConnectionSchema,
   type ConnectionsDto,
   type DiscoverySummaryDto,
   type StartConnection,
   type StartConnectionDto,
+  type SyncConnection,
   type SyncRunDto,
 } from '@subca/shared';
 import type { FastifyReply } from 'fastify';
@@ -82,8 +84,9 @@ export class ConnectionsController {
   sync(
     @CurrentUser() user: AuthUser,
     @Param('id', uuidParam) id: string,
+    @Body(new ZodValidationPipe(SyncConnectionSchema)) body: SyncConnection,
   ): Promise<SyncRunDto> {
-    return this.connections.enqueueSync(user.id, id);
+    return this.connections.enqueueSync(user.id, id, body?.windowMonths);
   }
 
   @Get('summary')

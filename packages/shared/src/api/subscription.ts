@@ -11,6 +11,7 @@ import {
   IntervalUnit,
   PaymentMethodType,
   SubscriptionStatus,
+  SubscriptionEventType,
   UsageFrequency,
 } from '../enums.js';
 import { CurrencyCode } from '../money.js';
@@ -136,6 +137,19 @@ export interface SubscriptionDetailDto extends SubscriptionDto {
   cancelGuide: { url: string | null; website: string | null; steps: string[] } | null;
   /** Các lần đã bị trừ tiền, mới nhất trước (tối đa 12). */
   charges: { chargedOn: IsoDate; amountMinor: string; currency: CurrencyCode }[];
+  /** Email làm bằng chứng cho subscription; không bao gồm tiêu đề hay nội dung thư. */
+  emailEvidence: EmailEvidenceDto[];
+}
+
+export interface EmailEvidenceDto {
+  id: string;
+  eventType: SubscriptionEventType;
+  senderDomain: string | null;
+  receivedAt: string | null;
+  threadId: string | null;
+  confidence: number;
+  amountMinor: string | null;
+  currency: CurrencyCode | null;
 }
 
 export interface SubscriptionListDto {

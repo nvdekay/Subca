@@ -30,8 +30,8 @@ import {
 import { PrismaService } from '../prisma/prisma.service.js';
 import { EMAIL_SYNC_QUEUE, type EmailSyncJob } from './email-sync.constants.js';
 
-/** Quét lần đầu lùi lại bao nhiêu tháng. */
-const INITIAL_WINDOW_MONTHS = 12;
+/** Mặc định quét ngắn để giới hạn dữ liệu tải về; người dùng có thể chọn tối đa 12 tháng. */
+const DEFAULT_INITIAL_WINDOW_MONTHS = 3;
 /** Số email tối đa cho một lượt quét, để lượt chạy không kéo dài vô tận. */
 const MAX_MESSAGES_PER_RUN = 400;
 const PAGE_SIZE = 50;
@@ -137,21 +137,30 @@ export class ConnectionsService {
     return { redirectTo: pending.redirectTo ?? null };
   }
 
-  /**
-   * Quét hộp thư: lần đầu lùi 12 tháng, các lần sau chỉ lấy thư mới hơn `lastSyncAt`.
-   * Đã xử lý email nào thì không xử lý lại (khóa ở `processed_emails`).
-   */
-  async sync(userId: string, accountId: string): Promise<SyncRunDto> {
+  /** Quét theo cửa sổ người dùng chọn; lượt nền incremental mặc định lấy thư mới từ lastSyncAt. */
+  async sync(
+    userId: string,
+    accountId: string,
+    windowMonths?: number,
+  ): Promise<SyncRunDto> {
     const account = await this.findOwned(userId, accountId);
     const kind = account.initialSyncDoneAt ? 'INCREMENTAL' : 'INITIAL';
     const run = await this.prisma.emailSyncRun.create({
-      data: { accountId: account.id, kind, since: this.syncSince(account) },
+      data: {
+        accountId: account.id,
+        kind,
+        since: this.syncSince(account, windowMonths),
+      },
     });
     return this.runSync(userId, account, run);
   }
 
   /** Tạo run và đưa quét vào BullMQ để API trả ngay, kể cả hộp thư lớn. */
-  async enqueueSync(userId: string, accountId: string): Promise<SyncRunDto> {
+  async enqueueSync(
+    userId: string,
+    accountId: string,
+    windowMonths?: number,
+  ): Promise<SyncRunDto> {
     const account = await this.findOwned(userId, accountId);
     const current = await this.prisma.emailSyncRun.findFirst({
       where: { accountId, status: 'RUNNING' },
@@ -163,7 +172,7 @@ export class ConnectionsService {
       data: {
         accountId,
         kind: account.initialSyncDoneAt ? 'INCREMENTAL' : 'INITIAL',
-        since: this.syncSince(account),
+        since: this.syncSince(account, windowMonths),
       },
     });
     try {
@@ -280,10 +289,11 @@ export class ConnectionsService {
     }
   }
 
-  private syncSince(account: ConnectedAccount): Date {
+  private syncSince(account: ConnectedAccount, windowMonths?: number): Date {
+    if (windowMonths !== undefined) return monthsAgo(windowMonths);
     return account.initialSyncDoneAt
       ? (account.lastSyncAt ?? monthsAgo(1))
-      : monthsAgo(INITIAL_WINDOW_MONTHS);
+      : monthsAgo(DEFAULT_INITIAL_WINDOW_MONTHS);
   }
 
   /** Ngắt kết nối: thu hồi quyền ở Google rồi xóa hẳn token khỏi database. */
@@ -328,6 +338,7 @@ export class ConnectionsService {
         this.prisma.inboxItem.count({ where: { userId, status: 'OPEN' } }),
       ]);
     return {
+      runId: run?.id ?? null,
       status: run?.status ?? 'IDLE',
       scannedCount: run?.scannedCount ?? 0,
       candidateCount: run?.candidateCount ?? 0,
@@ -418,8 +429,23 @@ function toSyncDto(run: EmailSyncRun): SyncRunDto {
 
 function monthsAgo(months: number): Date {
   const date = new Date();
-  date.setMonth(date.getMonth() - months);
-  return date;
+  const targetMonth = date.getMonth() - months;
+  const targetDate = new Date(date);
+  targetDate.setDate(1);
+  targetDate.setMonth(targetMonth);
+  const lastDay = new Date(
+    targetDate.getFullYear(),
+    targetDate.getMonth() + 1,
+    0,
+  ).getDate();
+  targetDate.setDate(Math.min(date.getDate(), lastDay));
+  targetDate.setHours(
+    date.getHours(),
+    date.getMinutes(),
+    date.getSeconds(),
+    date.getMilliseconds(),
+  );
+  return targetDate;
 }
 
 const message = (error: unknown): string =>
