@@ -31,7 +31,7 @@ const DECISIONS: {
     icon: 'check',
     on: 'bg-mint',
     onText: 'text-on-mint',
-    color: '#2E5B45',
+    color: colors['on-mint'],
   },
   {
     value: 'REVIEW',
@@ -39,7 +39,7 @@ const DECISIONS: {
     icon: 'flag',
     on: 'bg-peach',
     onText: 'text-on-peach',
-    color: '#8A4B1E',
+    color: colors['on-peach'],
   },
   {
     value: 'CANCEL',
@@ -47,7 +47,7 @@ const DECISIONS: {
     icon: 'x',
     on: 'bg-coral',
     onText: 'text-on-coral',
-    color: '#7A2E17',
+    color: colors['on-coral'],
   },
 ];
 
@@ -121,13 +121,13 @@ function ReviewBody({ data, tab, onTab }: { data: ReviewDto; tab: Tab; onTab: (t
   return (
     <>
       {/* Thẻ "Có thể tiết kiệm" (mockup: .savings) */}
-      <View className="overflow-hidden rounded-[30px] bg-peach p-[22px]">
+      <View className="overflow-hidden rounded-[20px] border border-line bg-peach p-[22px]">
         <View className="flex-row items-center justify-between">
-          <Text weight="semibold" className="text-[#6B3A22]">
+          <Text weight="semibold" className="text-on-peach">
             Có thể tiết kiệm
           </Text>
           <View className="rounded-full bg-[rgba(255,255,255,0.7)] px-[10px] py-1">
-            <Text weight="semibold" tabular className="text-[12px] text-[#6B3A22]">
+            <Text weight="semibold" tabular className="text-[12px] text-on-peach">
               {formatAmount(BigInt(data.potentialSavingsMinor) * 12n, data.currency)} / năm
             </Text>
           </View>
@@ -140,11 +140,11 @@ function ReviewBody({ data, tab, onTab }: { data: ReviewDto; tab: Tab; onTab: (t
         >
           {formatAmount(data.potentialSavingsMinor, data.currency)}
         </Text>
-        <Text className="text-[13px] text-[#6B3A22]">mỗi tháng nếu hủy các mục đã đánh dấu</Text>
+        <Text className="text-[13px] text-on-peach">mỗi tháng nếu hủy các mục đã đánh dấu</Text>
         <View className="mt-[14px] flex-row items-center gap-[10px]">
           <View className="h-2 flex-1 overflow-hidden rounded-[6px] bg-[rgba(255,255,255,0.7)]">
             <View
-              className="h-full rounded-[6px] bg-[#C9694D]"
+              className="h-full rounded-[6px] bg-coral-deep"
               style={{ width: `${total ? (done / total) * 100 : 0}%` }}
             />
           </View>

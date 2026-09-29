@@ -25,14 +25,36 @@ export default function Inbox() {
         />
       }
     >
-      <TopBar title="Cần bạn xác nhận" />
+      <TopBar title="Hộp thư xác nhận" eyebrow="TRUNG TÂM VIỆC CẦN LÀM" />
 
       {inbox.data ? (
         inbox.data.items.length > 0 ? (
           <>
-            <Text className="-mt-[6px] mb-4 ml-1 text-[14px] leading-[21px] text-ink-2">
-              Subca chỉ hỏi khi chưa chắc. Trả lời xong là danh sách subscription tự cập nhật.
-            </Text>
+            <View className="mb-5 rounded-[20px] border border-line bg-peach p-5">
+              <View className="flex-row items-end justify-between">
+                <View className="flex-1 pr-4">
+                  <Text className="text-[12px] uppercase tracking-[1px] text-on-peach">
+                    Đang chờ bạn
+                  </Text>
+                  <Text
+                    weight="extrabold"
+                    className="mt-1 text-[34px] leading-[40px] text-on-peach"
+                  >
+                    {inbox.data.items.length} quyết định
+                  </Text>
+                </View>
+                <Icon name="alert" size={26} color={colors['on-peach']} />
+              </View>
+              <Text className="mt-2 text-[13px] leading-[20px] text-on-peach">
+                Subca chỉ hỏi khi chưa chắc. Bạn xác nhận một lần, danh sách gói sẽ được cập nhật.
+              </Text>
+            </View>
+            <View className="mb-3 flex-row items-center justify-between">
+              <Text weight="bold" className="text-[16px]">
+                Cần xử lý
+              </Text>
+              <Text className="text-[12px] text-ink-3">{inbox.data.items.length} mục mở</Text>
+            </View>
             <View className="gap-3">
               {inbox.data.items.map((item) => (
                 <InboxCard key={item.id} item={item} />
@@ -42,14 +64,14 @@ export default function Inbox() {
         ) : (
           <Card className="items-center gap-3 px-6 py-8">
             <View className="h-14 w-14 items-center justify-center rounded-[20px] bg-mint">
-              <Icon name="check-circle" size={26} color="#2E5B45" />
+              <Icon name="check-circle" size={26} color={colors['on-mint']} />
             </View>
             <Text weight="bold" className="text-[17px]">
-              Không có việc nào cần bạn
+              Mọi thứ đã ổn
             </Text>
             <Text className="text-center text-[14px] leading-[21px] text-ink-3">
-              Subca đang tự theo dõi. Khi có gì chưa chắc — gói lạ, đổi giá, thanh toán lỗi — nó sẽ
-              hiện ở đây.
+              Không có quyết định nào đang chờ. Subca tiếp tục theo dõi gói và sẽ báo khi có thay
+              đổi cần bạn xem.
             </Text>
           </Card>
         )

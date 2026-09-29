@@ -16,11 +16,14 @@ const TABS: Record<string, { label: string; icon: IconName }> = {
 /** Thanh điều hướng nổi bo 28 với nút "+" ở giữa (mockup: .nav). */
 export function TabBar({ state, navigation, insets }: BottomTabBarProps) {
   const inbox = useInbox();
-  const items = state.routes.map((route, index) => {
+  // Expo Router's tab state can include routes that are deliberately hidden
+  // from this custom bar (for example modal/utility routes). Exclude them
+  // before calculating the center action's position.
+  const items = state.routes.flatMap((route, index) => {
     const tab = TABS[route.name];
-    if (!tab) return null;
+    if (!tab) return [];
     const focused = state.index === index;
-    return (
+    return [
       <Pressable
         key={route.key}
         accessibilityRole="tab"
@@ -34,28 +37,27 @@ export function TabBar({ state, navigation, insets }: BottomTabBarProps) {
           });
           if (!focused && !event.defaultPrevented) navigation.navigate(route.name, route.params);
         }}
-        className="h-[60px] flex-1 items-center justify-center gap-1"
+        className="h-[60px] w-full items-center justify-center gap-1"
       >
         <View
-          className={`h-[30px] w-11 items-center justify-center rounded-[12px] ${focused ? 'bg-mint' : ''}`}
+          className={`h-[30px] w-11 items-center justify-center rounded-[10px] ${focused ? 'bg-brass-soft' : ''}`}
         >
-          <Icon name={tab.icon} color={focused ? colors.ink : colors['ink-3']} />
+          <Icon name={tab.icon} color={focused ? colors['ink-brand'] : colors['ink-3']} />
           {route.name === 'inbox' && (inbox.data?.openCount ?? 0) > 0 ? (
             <View className="absolute right-[2px] top-[1px] h-[8px] w-[8px] rounded-full border border-surface bg-coral-deep" />
           ) : null}
         </View>
         <Text
           weight="semibold"
-          className={`text-[11px] leading-[14px] ${focused ? 'text-ink' : 'text-ink-3'}`}
+          className={`text-[11px] leading-[14px] ${focused ? 'text-ink-brand' : 'text-ink-3'}`}
         >
           {tab.label}
         </Text>
-      </Pressable>
-    );
+      </Pressable>,
+    ];
   });
 
-  // Nút thêm nằm giữa: 2 tab bên trái, 2 tab bên phải.
-  const middle = Math.ceil(items.length / 2);
+  // Năm cột cố định giữ bốn đích chính cân hai bên CTA, kể cả khi có route ẩn.
   const bottom = Math.max(insets.bottom, 10) + 4;
   return (
     <>
@@ -66,24 +68,30 @@ export function TabBar({ state, navigation, insets }: BottomTabBarProps) {
         style={{ height: bottom + 72 + 24 }}
       />
       <View
-        className="absolute left-[14px] right-[14px] h-[72px] flex-row items-center justify-around rounded-[28px] px-2"
+        className="absolute left-[14px] right-[14px] h-[72px] flex-row items-center rounded-[22px] px-2"
         style={{
           bottom,
-          backgroundColor: 'rgba(255,255,255,0.94)',
+          backgroundColor: 'rgba(251,248,240,0.97)',
+          borderWidth: 1,
+          borderColor: colors.line,
           boxShadow: shadow.nav,
         }}
       >
-        {items.slice(0, middle)}
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Thêm subscription"
-          onPress={() => router.push('/add')}
-          className="mx-1 h-[62px] w-[62px] -translate-y-4 items-center justify-center rounded-[22px] bg-ink active:scale-[0.94]"
-          style={{ boxShadow: `0 12px 24px rgba(47,58,49,0.32), 0 0 0 6px ${colors.bg}` }}
-        >
-          <Icon name="plus" size={26} color="#FFFFFF" strokeWidth={2.4} />
-        </Pressable>
-        {items.slice(middle)}
+        <View className="flex-1">{items[0]}</View>
+        <View className="flex-1">{items[1]}</View>
+        <View className="z-10 w-[58px] items-center">
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Thêm subscription"
+            onPress={() => router.push('/add')}
+            className="h-[58px] w-[58px] -translate-y-4 items-center justify-center rounded-[17px] bg-ink-brand active:scale-[0.95]"
+            style={{ boxShadow: `0 8px 18px rgba(64,49,30,0.24), 0 0 0 5px ${colors.bg}` }}
+          >
+            <Icon name="plus" size={26} color={colors.bg} strokeWidth={2.4} />
+          </Pressable>
+        </View>
+        <View className="flex-1">{items[2]}</View>
+        <View className="flex-1">{items[3]}</View>
       </View>
     </>
   );

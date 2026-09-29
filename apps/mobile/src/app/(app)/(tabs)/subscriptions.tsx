@@ -74,7 +74,8 @@ export default function SubscriptionList() {
       }
     >
       <TopBar
-        title="Subscription của tôi"
+        title="Gói đăng ký"
+        eyebrow={query.data ? `${items.length} gói trong thư viện` : 'THƯ VIỆN CỦA BẠN'}
         right={
           <IconButton icon="plus" label="Thêm subscription" onPress={() => router.push('/add')} />
         }
@@ -114,12 +115,28 @@ export default function SubscriptionList() {
               ))}
             </View>
           ) : items.length === 0 ? (
-            <Card className="items-center gap-3 py-8">
-              <Text weight="bold">Chưa có subscription nào</Text>
+            <Card className="items-start gap-3 px-5 py-6">
+              <View className="h-11 w-11 items-center justify-center rounded-[14px] bg-brass-soft">
+                <Text weight="extrabold" className="text-[22px] text-ink-brand">
+                  S
+                </Text>
+              </View>
+              <Text weight="bold" className="text-[18px]">
+                Bắt đầu từ những gói quen thuộc
+              </Text>
+              <Text className="text-[13px] leading-[20px] text-ink-3">
+                Kết nối email để tìm tự động, hoặc thêm thủ công nếu bạn muốn tự quản lý mọi chi
+                tiết.
+              </Text>
               <Button
-                title="Thêm subscription"
-                size="sm"
-                icon="plus"
+                title="Kết nối Gmail"
+                className="mt-1 self-stretch"
+                onPress={() => router.push('/connections')}
+              />
+              <Button
+                title="Tự thêm subscription"
+                variant="ghost"
+                className="self-stretch"
                 onPress={() => router.push('/add')}
               />
             </Card>

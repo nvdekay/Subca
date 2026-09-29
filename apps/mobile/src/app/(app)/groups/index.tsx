@@ -102,7 +102,7 @@ function Content({
 
       {data.missingRates.length > 0 ? (
         <Card tone="peach" className="mt-3 flex-row items-center gap-3 p-[14px]">
-          <Icon name="alert" color="#8A4B1E" />
+          <Icon name="alert" color={colors['on-peach']} />
           <Text className="flex-1 text-[13px] leading-[19px] text-on-peach">
             Chưa có tỷ giá {data.missingRates.join(', ')} nên các nhóm này chưa được cộng vào tổng.
           </Text>
@@ -127,7 +127,7 @@ function Content({
         className="mt-3 flex-row items-center gap-3 rounded-lg border-[1.5px] border-dashed border-sage bg-surface p-[18px] active:scale-[0.985]"
       >
         <View className="h-10 w-10 items-center justify-center rounded-[14px] bg-mint">
-          <Icon name="plus" size={20} color="#2E5B45" strokeWidth={2.2} />
+          <Icon name="plus" size={20} color={colors['on-mint']} strokeWidth={2.2} />
         </View>
         <View className="flex-1">
           <Text weight="bold">Tạo nhóm mới</Text>

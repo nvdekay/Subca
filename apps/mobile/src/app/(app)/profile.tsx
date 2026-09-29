@@ -191,9 +191,9 @@ export default function Settings() {
               changeSettings({ notificationsEnabled: on });
               if (on) registerForPush({ ask: true });
             }}
-            trackColor={{ true: colors['ink-brand'], false: '#D9DCD3' }}
+            trackColor={{ true: colors['ink-brand'], false: colors.line }}
             thumbColor="#FFFFFF"
-            ios_backgroundColor="#D9DCD3"
+            ios_backgroundColor={colors.line}
           />
         </View>
         <SetRow
@@ -368,7 +368,7 @@ function SetRow({
       )}
     >
       <RowIcon icon={icon} bg={bg} />
-      <Text weight="semibold" className={cn('flex-1', danger && 'text-[#9A3F25]')}>
+      <Text weight="semibold" className={cn('flex-1', danger && 'text-coral-deep')}>
         {title}
       </Text>
       {value ? <Text className="text-[14px] text-ink-3">{value}</Text> : null}

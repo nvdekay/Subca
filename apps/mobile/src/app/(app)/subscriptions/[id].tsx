@@ -82,7 +82,7 @@ function DetailBody({ sub }: { sub: SubscriptionDetailDto }) {
     <>
       {/* ── Đầu trang ── */}
       <View
-        className="items-center overflow-hidden rounded-[30px] p-[22px]"
+        className="items-center overflow-hidden rounded-[20px] border border-line p-[22px]"
         style={{ backgroundColor: HERO_BG[sub.status] }}
       >
         <View className="mb-3">
@@ -132,6 +132,26 @@ function DetailBody({ sub }: { sub: SubscriptionDetailDto }) {
           ) : null}
         </Card>
       ) : null}
+
+      <View className="mt-3 flex-row gap-2">
+        <Button
+          title="Chỉnh sửa"
+          icon="edit"
+          size="sm"
+          className="flex-1"
+          onPress={() =>
+            router.push({ pathname: '/subscriptions/edit/[id]', params: { id: sub.id } })
+          }
+        />
+        <Button
+          title={sub.status === 'REVIEW' ? 'Bỏ xem lại' : 'Đánh dấu xem lại'}
+          icon="flag"
+          variant="soft"
+          size="sm"
+          className="flex-1"
+          onPress={() => setStatus(sub.status === 'REVIEW' ? 'ACTIVE' : 'REVIEW')}
+        />
+      </View>
 
       {/* ── Thông tin ── */}
       <SectionTitle title="Thông tin" />
@@ -191,17 +211,9 @@ function DetailBody({ sub }: { sub: SubscriptionDetailDto }) {
         ) : null}
       </Card>
 
-      {/* ── Thao tác ── */}
-      <SectionTitle title="Thao tác" />
-      <View className="flex-row gap-[10px]">
-        <Action
-          icon="edit"
-          bg={colors['sky-soft']}
-          label="Chỉnh sửa"
-          onPress={() =>
-            router.push({ pathname: '/subscriptions/edit/[id]', params: { id: sub.id } })
-          }
-        />
+      {/* ── Tác vụ ít dùng ── */}
+      <SectionTitle title="Quản lý gói" />
+      <View className="mt-[10px] flex-row gap-[10px]">
         {cancelled ? (
           <Action
             icon="repeat"
@@ -209,16 +221,7 @@ function DetailBody({ sub }: { sub: SubscriptionDetailDto }) {
             label="Dùng lại gói này"
             onPress={() => setStatus('ACTIVE')}
           />
-        ) : (
-          <Action
-            icon="flag"
-            bg={colors.peach}
-            label={sub.status === 'REVIEW' ? 'Bỏ đánh dấu xem lại' : 'Đánh dấu cần xem lại'}
-            onPress={() => setStatus(sub.status === 'REVIEW' ? 'ACTIVE' : 'REVIEW')}
-          />
-        )}
-      </View>
-      <View className="mt-[10px] flex-row gap-[10px]">
+        ) : null}
         <Action
           icon="help"
           bg={colors.coral}
@@ -339,7 +342,7 @@ function UsageCard({
               accessibilityState={{ selected: level === i + 1 }}
               className={cn(
                 'h-[34px] flex-1 rounded-[10px]',
-                i + 1 <= level ? 'bg-sky' : 'bg-[#EFEFE9]',
+                i + 1 <= level ? 'bg-sky' : 'bg-stone',
               )}
             />
           ))}

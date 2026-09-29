@@ -108,7 +108,7 @@ function Feed({ query }: { query: ReturnType<typeof useReminders> }) {
     <>
       {!notificationsEnabled ? (
         <Card tone="peach" className="mt-4 flex-row items-center gap-3 p-[14px]">
-          <Icon name="bell" color="#8A4B1E" />
+          <Icon name="bell" color={colors['on-peach']} />
           <Text className="flex-1 text-[13.5px] leading-[20px] text-on-peach">
             Bạn đang tắt thông báo nhắc. Bật lại trong Cài đặt để không bị trừ tiền bất ngờ.
           </Text>
@@ -257,7 +257,7 @@ function Rules({ query }: { query: ReturnType<typeof useReminderRules> }) {
         <Icon name="clock" />
         <View className="flex-1">
           <Text weight="bold">Giờ nhận thông báo</Text>
-          <Text className="text-[13px] text-[#3A5A4C]">
+          <Text className="text-[13px] text-on-mint">
             Mỗi ngày lúc {String(Math.floor(minute / 60)).padStart(2, '0')}:
             {String(minute % 60).padStart(2, '0')} · đổi trong Cài đặt
           </Text>

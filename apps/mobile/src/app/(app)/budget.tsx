@@ -131,11 +131,11 @@ function BudgetHero({
       <Card className="items-center px-5 py-[26px]">
         <View style={{ width: 220, height: 124 }}>
           <Svg width={220} height={124} viewBox="0 0 220 124">
-            <Path d={ARC} fill="none" stroke="#EFEFE9" strokeWidth={18} strokeLinecap="round" />
+            <Path d={ARC} fill="none" stroke={colors.line} strokeWidth={18} strokeLinecap="round" />
             <Path
               d={ARC}
               fill="none"
-              stroke={over ? '#C9694D' : '#5A99A8'}
+              stroke={over ? colors['coral-deep'] : colors['ink-brand']}
               strokeWidth={18}
               strokeLinecap="round"
               strokeDasharray={`${(Math.min(budget.percent, 100) / 100) * ARC_LENGTH} ${ARC_LENGTH}`}
@@ -174,7 +174,10 @@ function BudgetHero({
           over ? 'bg-coral' : 'bg-mint',
         )}
       >
-        <Icon name={over ? 'alert' : 'check-circle'} color={over ? '#7A2E17' : '#2E5B45'} />
+        <Icon
+          name={over ? 'alert' : 'check-circle'}
+          color={over ? colors['on-coral'] : colors['on-mint']}
+        />
         <View className="flex-1">
           <Text weight="bold" className={over ? 'text-on-coral' : 'text-on-mint'}>
             {over

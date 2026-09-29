@@ -128,7 +128,7 @@ function Hero({ data }: { data: GroupDetailDto }) {
   return (
     <View
       className={cn(
-        'items-center rounded-[30px] px-5 py-6',
+        'items-center rounded-[20px] border border-line px-5 py-6',
         data.isOwner ? 'bg-mint' : 'bg-sky-soft',
       )}
     >
@@ -244,7 +244,7 @@ function OwnerBody({
           >
             <Icon
               name={diff === 0n ? 'check-circle' : 'alert'}
-              color={diff === 0n ? '#2E5B45' : '#7A2E17'}
+              color={diff === 0n ? colors['on-mint'] : colors['on-coral']}
             />
             <Text
               className={cn(
@@ -366,7 +366,7 @@ function MemberBody({ data }: { data: GroupDetailDto }) {
     <>
       {done ? (
         <Card tone="mint" className="mt-3 flex-row items-center gap-3">
-          <Icon name="check-circle" color="#2E5B45" />
+          <Icon name="check-circle" color={colors['on-mint']} />
           <View className="flex-1">
             <Text weight="bold">
               {payment?.status === 'WAIVED' ? 'Bạn được miễn tháng này' : 'Bạn đã trả tháng này'}
@@ -690,7 +690,7 @@ function Row({
         {label} <Text className="text-[13px] text-ink-3">· {note}</Text>
       </Text>
       {right === 'done' ? (
-        <Icon name="check" size={18} color="#3E8E6A" strokeWidth={2.2} />
+        <Icon name="check" size={18} color={colors['on-mint']} strokeWidth={2.2} />
       ) : right === 'missing' ? (
         <Icon name="alert" size={18} color={colors['coral-deep']} />
       ) : (

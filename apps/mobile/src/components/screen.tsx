@@ -74,18 +74,20 @@ export function Screen({
   );
 }
 
-/** Thanh trên cùng: nút quay lại (hoặc "✕" cho màn dạng modal) + tiêu đề giữa. */
+/** Thanh tiêu đề màn con: điều hướng bên trái, tiêu đề theo trục đọc, CTA bên phải. */
 export function TopBar({
   title,
   right,
   close = false,
+  eyebrow,
 }: {
   title?: string;
   right?: ReactNode;
   close?: boolean;
+  eyebrow?: string;
 }) {
   return (
-    <View className="mb-[18px] min-h-11 flex-row items-center justify-between gap-3">
+    <View className="mb-5 min-h-[52px] flex-row items-center gap-3">
       {router.canGoBack() ? (
         <IconButton
           icon={close ? 'x' : 'back'}
@@ -93,16 +95,19 @@ export function TopBar({
           onPress={() => router.back()}
         />
       ) : (
-        <View className="w-11" />
+        <View className="w-1" />
       )}
-      <Text
-        weight="bold"
-        className="flex-1 text-center text-[18px] leading-[24px]"
-        numberOfLines={1}
-      >
-        {title ?? ''}
-      </Text>
-      {right ?? <View className="w-11" />}
+      <View className="min-w-0 flex-1">
+        {eyebrow ? (
+          <Text className="text-[11px] leading-[15px] text-ink-3" numberOfLines={1}>
+            {eyebrow}
+          </Text>
+        ) : null}
+        <Text weight="extrabold" className="text-[20px] leading-[26px]" numberOfLines={1}>
+          {title ?? ''}
+        </Text>
+      </View>
+      {right}
     </View>
   );
 }

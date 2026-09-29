@@ -35,13 +35,9 @@ export default function Analytics() {
         />
       }
     >
-      <View className="mb-[18px] mt-[6px]">
-        <Text className="text-[13px] leading-[18px] text-ink-3">Phân tích chi tiêu</Text>
-        <Text
-          weight="extrabold"
-          className="text-[24px] leading-[30px]"
-          style={{ letterSpacing: -0.6 }}
-        >
+      <View className="mb-5 mt-[6px]">
+        <Text className="text-[11px] uppercase tracking-[1px] text-ink-3">BẢN ĐỒ CHI TIÊU</Text>
+        <Text weight="extrabold" className="mt-1 text-[28px] leading-[34px]">
           Tiền đi đâu?
         </Text>
       </View>
@@ -79,25 +75,41 @@ function AnalyticsBody({ data }: { data: AnalyticsDto }) {
 
   return (
     <>
-      <View className="flex-row gap-3">
-        <StatCard
-          label="Dự tính cả năm"
-          value={formatShort(data.yearlyProjectionMinor, data.currency)}
-        />
+      <View className="rounded-[22px] border border-line bg-mint p-5">
+        <Text className="text-[12px] uppercase tracking-[1px] text-ink-brand">
+          Đang chi mỗi tháng
+        </Text>
+        <Text
+          weight="extrabold"
+          tabular
+          className="mt-1 text-[34px] leading-[42px] text-ink-brand"
+          adjustsFontSizeToFit
+          numberOfLines={1}
+        >
+          {formatAmount(data.monthlyTotalMinor, data.currency)}
+        </Text>
+        <Text className="text-[13px] text-ink-2">
+          Tương đương {formatShort(data.yearlyProjectionMinor, data.currency)} mỗi năm
+        </Text>
+      </View>
+
+      {data.missingRates.length > 0 ? (
+        <Card tone="peach" className="mt-3 flex-row items-center gap-3 p-[14px]">
+          <Text className="flex-1 text-[12.5px] leading-[18px] text-on-peach">
+            Chưa có tỷ giá {data.missingRates.join(', ')} nên một số khoản chưa được tính.
+          </Text>
+        </Card>
+      ) : null}
+
+      <TrendChart trend={data.trend} currency={data.currency} />
+
+      <View className="mt-3">
         <StatCard
           label="Trung bình / ngày"
           value={formatAmount(data.dailyAverageMinor, data.currency)}
           note={data.currency === 'VND' ? cafeNote(data.dailyAverageMinor) : undefined}
         />
       </View>
-
-      {data.missingRates.length > 0 ? (
-        <Text className="mx-1 mt-2 text-[12.5px] leading-[18px] text-on-peach">
-          Chưa có tỷ giá {data.missingRates.join(', ')} nên các khoản này chưa được tính.
-        </Text>
-      ) : null}
-
-      <TrendChart trend={data.trend} currency={data.currency} />
 
       {data.costPerUse.length > 0 ? (
         <ChartCard
@@ -171,7 +183,7 @@ function AnalyticsBody({ data }: { data: AnalyticsDto }) {
                   {formatAmount(p.monthlyMinor, data.currency)} · {p.percent}%
                 </Text>
               </View>
-              <View className="h-2 overflow-hidden rounded-[4px] bg-[#EFEFE9]">
+              <View className="h-2 overflow-hidden rounded-[4px] bg-stone">
                 <View
                   className="h-full rounded-[4px] bg-sky-deep"
                   style={{ width: `${Math.max(p.percent, 1)}%` }}

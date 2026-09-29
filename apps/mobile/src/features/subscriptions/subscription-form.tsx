@@ -221,6 +221,7 @@ export function SubscriptionForm({
 }) {
   const [v, setV] = useState<FormValues>(initial);
   const [errors, setErrors] = useState<Errors>({});
+  const [optionsOpen, setOptionsOpen] = useState(mode === 'edit');
   const [pickerOpen, setPickerOpen] = useState(false);
   const catalog = useCatalog();
   const paymentMethods = usePaymentMethods();
@@ -384,6 +385,15 @@ export function SubscriptionForm({
         </View>
       ) : null}
 
+      <View className="mb-4 mt-1 border-t border-line pt-4">
+        <Text weight="extrabold" className="text-[18px] leading-[24px]">
+          Giá và lịch thanh toán
+        </Text>
+        <Text className="mt-1 text-[12.5px] leading-[18px] text-ink-3">
+          Đây là thông tin Subca dùng để tính chi phí và nhắc đúng ngày.
+        </Text>
+      </View>
+
       {/* ── Giá ── */}
       <View className="mb-4">
         <Input
@@ -434,69 +444,97 @@ export function SubscriptionForm({
         />
       </View>
 
-      {/* ── Thanh toán ── */}
-      <View className="mb-4">
-        <Text weight="semibold" className="mb-[7px] ml-1 text-[13px] leading-[18px] text-ink-2">
-          Thanh toán bằng
-        </Text>
-        {/* Tạo thẻ / ví ngay tại đây, không phải rời form (màn quản lý đầy đủ nằm trong Cài đặt). */}
-        <View className="flex-row flex-wrap gap-2">
-          <Chip
-            label="Chưa chọn"
-            selected={paymentMethodId === null}
-            onPress={() => pickPaymentMethod(null)}
-          />
-          {(paymentMethods.data ?? []).map((pm) => (
-            <Chip
-              key={pm.id}
-              label={paymentMethodLabel(pm)}
-              selected={paymentMethodId === pm.id}
-              onPress={() => pickPaymentMethod(pm.id)}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ expanded: optionsOpen }}
+        onPress={() => setOptionsOpen((open) => !open)}
+        className="mt-2 min-h-[70px] flex-row items-center gap-3 border-y border-line py-3"
+      >
+        <View className="h-10 w-10 items-center justify-center rounded-[13px] bg-brass-soft">
+          <Icon name="settings" size={19} color={colors['ink-brand']} />
+        </View>
+        <View className="flex-1">
+          <Text weight="bold" className="text-[14px]">
+            Nhắc nhở và tuỳ chọn
+          </Text>
+          <Text className="text-[12px] text-ink-3">
+            {optionsOpen ? 'Thiết lập cách theo dõi gói này' : 'Thanh toán, lời nhắc và ghi chú'}
+          </Text>
+        </View>
+        <Icon name="chev" size={17} color={colors['ink-3']} />
+      </Pressable>
+
+      {optionsOpen ? (
+        <View className="pt-4">
+          {/* ── Thanh toán ── */}
+          <View className="mb-4">
+            <Text weight="semibold" className="mb-[7px] ml-1 text-[13px] leading-[18px] text-ink-2">
+              Thanh toán bằng
+            </Text>
+            {/* Tạo thẻ / ví ngay tại đây, không phải rời form (màn quản lý đầy đủ nằm trong Cài đặt). */}
+            <View className="flex-row flex-wrap gap-2">
+              <Chip
+                label="Chưa chọn"
+                selected={paymentMethodId === null}
+                onPress={() => pickPaymentMethod(null)}
+              />
+              {(paymentMethods.data ?? []).map((pm) => (
+                <Chip
+                  key={pm.id}
+                  label={paymentMethodLabel(pm)}
+                  selected={paymentMethodId === pm.id}
+                  onPress={() => pickPaymentMethod(pm.id)}
+                />
+              ))}
+              <Chip
+                label="Thêm"
+                left={<Icon name="plus" size={15} color={colors['ink-2']} strokeWidth={2.2} />}
+                onPress={() => setPmSheetKey(Date.now())}
+              />
+            </View>
+          </View>
+
+          {/* ── Nhắc nhở ── */}
+          <View className="mb-4">
+            <Text weight="semibold" className="mb-[7px] ml-1 text-[13px] leading-[18px] text-ink-2">
+              Nhắc tôi trước
+            </Text>
+            <Segmented
+              options={REMINDERS}
+              value={v.reminder}
+              onChange={(d) => set('reminder', d)}
             />
-          ))}
-          <Chip
-            label="Thêm"
-            left={<Icon name="plus" size={15} color={colors['ink-2']} strokeWidth={2.2} />}
-            onPress={() => setPmSheetKey(Date.now())}
+            {v.reminder === null ? (
+              <Text className="ml-1 mt-2 text-[12.5px] text-ink-3">Đang theo cài đặt chung</Text>
+            ) : null}
+          </View>
+
+          <View className="gap-[10px]">
+            <ToggleRow
+              title="Tự động gia hạn"
+              note="Dịch vụ tự trừ tiền mỗi kỳ"
+              value={v.autoRenew}
+              onChange={(x) => set('autoRenew', x)}
+            />
+            <ToggleRow
+              title="Đây là gói dùng thử"
+              note="Theo dõi ngày hết trial, nhắc trước khi bị tính phí"
+              value={v.isTrial}
+              onChange={(x) => set('isTrial', x)}
+            />
+          </View>
+
+          <Input
+            label="Ghi chú"
+            value={v.notes}
+            onChangeText={(t) => set('notes', t)}
+            placeholder="VD: dùng chung với gia đình, chia 4 người"
+            multiline
+            className="mt-4"
+            style={{ height: 88, paddingTop: 14, textAlignVertical: 'top' }}
           />
         </View>
-      </View>
-
-      {/* ── Nhắc nhở ── */}
-      <View className="mb-4">
-        <Text weight="semibold" className="mb-[7px] ml-1 text-[13px] leading-[18px] text-ink-2">
-          Nhắc tôi trước
-        </Text>
-        <Segmented options={REMINDERS} value={v.reminder} onChange={(d) => set('reminder', d)} />
-        {v.reminder === null ? (
-          <Text className="ml-1 mt-2 text-[12.5px] text-ink-3">Đang theo cài đặt chung</Text>
-        ) : null}
-      </View>
-
-      <View className="gap-[10px]">
-        <ToggleRow
-          title="Tự động gia hạn"
-          note="Dịch vụ tự trừ tiền mỗi kỳ"
-          value={v.autoRenew}
-          onChange={(x) => set('autoRenew', x)}
-        />
-        <ToggleRow
-          title="Đây là gói dùng thử"
-          note="Theo dõi ngày hết trial, nhắc trước khi bị tính phí"
-          value={v.isTrial}
-          onChange={(x) => set('isTrial', x)}
-        />
-      </View>
-
-      <Input
-        label="Ghi chú"
-        value={v.notes}
-        onChangeText={(t) => set('notes', t)}
-        placeholder="VD: dùng chung với gia đình, chia 4 người"
-        multiline
-        className="mt-4"
-        style={{ height: 88, paddingTop: 14, textAlignVertical: 'top' }}
-      />
+      ) : null}
 
       {errors.form ? (
         <Text className="mt-3 text-center text-[13px] text-coral-deep">{errors.form}</Text>

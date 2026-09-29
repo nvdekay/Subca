@@ -64,9 +64,9 @@ export default function Trials() {
               </View>
               <View className="flex-1">
                 <Text weight="bold">Bạn có {trials.length} trial đang chạy</Text>
-                <Text className="text-[14px] leading-[20px] text-[#6B4A33]">
+                <Text className="text-[14px] leading-[20px] text-on-peach">
                   Nếu không hủy, bạn sẽ bị trừ{' '}
-                  <Text weight="bold" tabular className="text-[14px] text-[#6B4A33]">
+                  <Text weight="bold" tabular className="text-[14px] text-on-peach">
                     {sumByCurrency(trials)}
                   </Text>{' '}
                   / tháng.
@@ -158,7 +158,7 @@ function TrialCard({ sub }: { sub: SubscriptionDto }) {
   return (
     <View className="rounded-lg bg-surface p-[18px]" style={{ boxShadow: shadow.sm }}>
       <View className="flex-row items-center gap-3">
-        <Ring progress={progress} color={urgent ? '#C9694D' : colors['sky-deep']}>
+        <Ring progress={progress} color={urgent ? colors['coral-deep'] : colors['sky-deep']}>
           <Text weight="bold" tabular className="text-[18px] leading-[20px]">
             {left}
           </Text>

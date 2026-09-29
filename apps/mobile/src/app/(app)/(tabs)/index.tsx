@@ -1,6 +1,5 @@
 import { FREE_LIMITS, type HomeDto } from '@subca/shared';
 import { router, type Href } from 'expo-router';
-import type { ReactNode } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, View } from 'react-native';
 import { FxAttribution } from '@/components/fx-attribution';
 import { Screen } from '@/components/screen';
@@ -81,31 +80,48 @@ function HomeContent({ data }: { data: HomeDto }) {
 
   return (
     <>
-      <View className="overflow-hidden rounded-[30px] bg-mint p-[22px]">
-        {/* Vòng tròn trang trí góc phải (hero::after trong mockup) */}
-        <View className="absolute -right-[50px] -top-[60px] h-[190px] w-[190px] rounded-full bg-[rgba(255,255,255,0.28)]" />
-        <Text weight="semibold" className="text-[14px] text-[#1F3530]">
-          Chi phí tháng {month}
-        </Text>
+      <View className="overflow-hidden rounded-[22px] border border-line bg-mint p-5">
+        <View className="mb-2 flex-row items-center justify-between">
+          <Text weight="semibold" className="text-[12px] uppercase tracking-[1px] text-ink-brand">
+            Bức tranh tháng {month}
+          </Text>
+          <Pressable
+            accessibilityRole="link"
+            onPress={() => router.navigate('/analytics')}
+            hitSlop={8}
+          >
+            <Text weight="semibold" className="text-[12px] text-ink-brand">
+              Xem phân tích
+            </Text>
+          </Pressable>
+        </View>
         <Text
           weight="extrabold"
           tabular
-          className="mb-1 mt-[6px] text-[38px] leading-[42px] text-[#1F3530]"
+          className="text-[38px] leading-[44px] text-ink-brand"
           style={{ letterSpacing: -1.5 }}
           adjustsFontSizeToFit
           numberOfLines={1}
         >
           {total.value}
-          <Text weight="bold" className="text-[18px] text-[#1F3530]">
+          <Text weight="bold" className="text-[18px] text-ink-brand">
             {total.unit}
           </Text>
         </Text>
-        <Text className="text-[13px] leading-[18px] text-[#34504A]">
+        <Text className="text-[13px] leading-[18px] text-ink-2">
           ≈ {formatAmount(data.yearlyProjectionMinor, data.currency)} / năm
         </Text>
-        <View className="mt-4 flex-row gap-2">
-          <HeroChip value={data.activeCount} label="Đang trả tiền" />
-          <HeroChip value={data.dueIn7DaysCount} label="Gia hạn trong 7 ngày" />
+        <View className="mt-4 flex-row border-t border-line/70 pt-3">
+          <View className="flex-1">
+            <Text weight="bold" tabular className="text-[16px] leading-[21px]">
+              {data.activeCount} <Text className="text-[12px] text-ink-2">đang theo dõi</Text>
+            </Text>
+          </View>
+          <View className="flex-1">
+            <Text weight="bold" tabular className="text-[16px] leading-[21px]">
+              {data.dueIn7DaysCount} <Text className="text-[12px] text-ink-2">trong 7 ngày</Text>
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -115,68 +131,52 @@ function HomeContent({ data }: { data: HomeDto }) {
 }
 
 function TrackedContent({ data, tracked }: { data: HomeDto; tracked: number }) {
+  const nextUp = data.upcoming[0];
   return (
     <>
       {data.missingRates.length > 0 ? (
         <Card tone="peach" className="mt-3 flex-row items-center gap-3 p-[14px]">
-          <Icon name="alert" color="#8A4B1E" />
+          <Icon name="alert" color={colors['on-peach']} />
           <Text className="flex-1 text-[13px] leading-[19px] text-on-peach">
             Chưa có tỷ giá {data.missingRates.join(', ')} nên các khoản này chưa được cộng vào tổng.
           </Text>
         </Card>
       ) : null}
 
-      <View className="mt-3 flex-row gap-3">
-        <StatTile
-          bg={colors['sky-soft']}
-          icon="clock"
-          value={String(data.dueIn7DaysCount)}
-          label="Sắp gia hạn (7 ngày)"
-          href="/calendar"
-        />
-        <StatTile
-          bg={colors.peach}
-          icon="hourglass"
-          value={String(data.trialCount)}
-          label="Trial đang chạy"
-          href="/trials"
-        />
-      </View>
-      <View className="mt-3 flex-row gap-3">
-        <StatTile
-          bg={colors.mint}
-          icon="piggy"
-          value={formatShort(data.potentialSavingsMinor, data.currency)}
-          label="Có thể tiết kiệm / tháng"
-          href="/review"
-        />
-        <StatTile
-          bg={colors.stone}
-          icon="sparkle"
-          value={data.plan === 'PLUS' ? 'Plus' : `${tracked}/${FREE_LIMITS.maxSubscriptions}`}
-          label={data.plan === 'PLUS' ? 'Không giới hạn subscription' : 'Subscription gói Free'}
-          href="/subscriptions"
-        />
-      </View>
+      <AttentionSection />
+
+      {nextUp ? (
+        <View className="mt-5">
+          <SectionHead
+            title={nextUp.status === 'TRIAL' ? 'Mốc gần nhất' : 'Khoản sắp đến'}
+            action={{ label: 'Lịch', href: '/calendar' }}
+          />
+          <UpcomingRow sub={nextUp} />
+        </View>
+      ) : null}
 
       {data.budget ? <BudgetCard budget={data.budget} currency={data.currency} /> : null}
 
-      <AttentionSection />
+      <QuickActions
+        trialCount={data.trialCount}
+        savings={formatShort(data.potentialSavingsMinor, data.currency)}
+        planLabel={
+          data.plan === 'PLUS' ? 'Subca Plus' : `${tracked}/${FREE_LIMITS.maxSubscriptions} gói`
+        }
+      />
 
-      <GroupsEntry />
-
-      <SectionHead title="Sắp gia hạn" action={{ label: 'Xem tất cả', href: '/subscriptions' }} />
-      {data.upcoming.length > 0 ? (
+      <SectionHead title="Lịch gia hạn" action={{ label: 'Xem tất cả', href: '/calendar' }} />
+      {data.upcoming.length > (nextUp ? 1 : 0) ? (
         <View className="gap-[10px]">
-          {data.upcoming.map((sub) => (
+          {data.upcoming.slice(nextUp ? 1 : 0).map((sub) => (
             <UpcomingRow key={sub.id} sub={sub} />
           ))}
         </View>
-      ) : (
+      ) : !nextUp ? (
         <Text className="mx-[2px] text-[14px] leading-[21px] text-ink-3">
           Chưa có khoản nào sắp bị trừ tiền.
         </Text>
-      )}
+      ) : null}
 
       {data.trials.length > 0 ? (
         <>
@@ -239,7 +239,7 @@ function AttentionSection() {
         {items.slice(0, 3).map((item) => (
           <Card key={item.id} tone="peach" onPress={() => router.push('/inbox')}>
             <View className="flex-row items-center gap-3">
-              <Icon name="alert" color="#8A4B1E" />
+              <Icon name="alert" color={colors['on-peach']} />
               <View className="flex-1">
                 <Text weight="bold" className="text-[14.5px]">
                   {item.title}
@@ -248,7 +248,7 @@ function AttentionSection() {
                   {item.body}
                 </Text>
               </View>
-              <Icon name="chev" size={18} color="#8A4B1E" />
+              <Icon name="chev" size={18} color={colors['on-peach']} />
             </View>
           </Card>
         ))}
@@ -257,86 +257,69 @@ function AttentionSection() {
   );
 }
 
-/** Lối vào Chia tiền nhóm; số liệu nhóm nằm ở màn riêng (/home chỉ lo subscription). */
-function GroupsEntry() {
+function QuickActions({
+  trialCount,
+  savings,
+  planLabel,
+}: {
+  trialCount: number;
+  savings: string;
+  planLabel: string;
+}) {
   return (
-    <Card className="mt-3 flex-row items-center gap-3" onPress={() => router.push('/groups')}>
-      <View className="h-10 w-10 items-center justify-center rounded-[14px] bg-mint">
-        <Icon name="users" size={20} color="#2E5B45" />
+    <View className="mt-5">
+      <SectionHead title="Lối tắt" />
+      <View className="overflow-hidden rounded-[18px] border border-line bg-surface">
+        <QuickAction
+          icon="hourglass"
+          label="Trial đang chạy"
+          value={String(trialCount)}
+          href="/trials"
+        />
+        <QuickAction
+          icon="piggy"
+          label="Có thể tiết kiệm mỗi tháng"
+          value={savings}
+          href="/review"
+        />
+        <QuickAction icon="users" label="Chia tiền nhóm" value="Mở nhóm" href="/groups" />
+        <QuickAction
+          icon="sparkle"
+          label="Hạn mức theo dõi"
+          value={planLabel}
+          href="/subscriptions"
+          last
+        />
       </View>
-      <View className="flex-1">
-        <Text weight="bold">Chia tiền nhóm</Text>
-        <Text className="text-[12.5px] leading-[18px] text-ink-3">
-          Chia gói gia đình, nhắc bạn bè chuyển tiền
-        </Text>
-      </View>
-      <Icon name="chev" size={18} color={colors['ink-3']} />
-    </Card>
-  );
-}
-
-function HeroChip({ value, label }: { value: number; label: string }) {
-  return (
-    <View className="flex-1 rounded-[16px] bg-[rgba(255,255,255,0.58)] px-3 py-[10px]">
-      <Text weight="bold" tabular className="text-[17px] leading-[22px]">
-        {value}
-      </Text>
-      <Text className="text-[12px] leading-[17px] text-[#34504A]">{label}</Text>
     </View>
   );
 }
 
-function StatTile({
-  bg,
+function QuickAction({
   icon,
-  value,
   label,
+  value,
   href,
+  last,
 }: {
-  bg: string;
   icon: IconName;
-  value: string;
   label: string;
-  href?: Href;
+  value: string;
+  href: Href;
+  last?: boolean;
 }) {
-  const body: ReactNode = (
-    <>
-      <View className="h-9 w-9 items-center justify-center rounded-[12px] bg-[rgba(255,255,255,0.7)]">
-        <Icon name={icon} />
-      </View>
-      <View>
-        <Text
-          weight="bold"
-          tabular
-          className="mt-[10px] text-[22px] leading-[28px]"
-          style={{ letterSpacing: -0.66 }}
-          numberOfLines={1}
-          adjustsFontSizeToFit
-        >
-          {value}
-        </Text>
-        <Text weight="medium" className="text-[12.5px] leading-[17px] text-ink-2">
-          {label}
-        </Text>
-      </View>
-    </>
-  );
-  const className = 'min-h-[118px] flex-1 justify-between rounded-md p-4';
-  if (!href) {
-    return (
-      <View className={className} style={{ backgroundColor: bg }}>
-        {body}
-      </View>
-    );
-  }
   return (
     <Pressable
-      accessibilityRole="button"
+      accessibilityRole="link"
       onPress={() => router.navigate(href)}
-      className={`${className} active:scale-[0.97]`}
-      style={{ backgroundColor: bg }}
+      className={`min-h-[56px] flex-row items-center gap-3 px-4 active:bg-bg ${last ? '' : 'border-b border-line'}`}
     >
-      {body}
+      <Icon name={icon} size={18} color={colors['ink-3']} />
+      <Text className="flex-1 text-[13px] text-ink-2">{label}</Text>
+      <Text weight="semibold" className="text-[13px] text-ink-brand">
+        {value}
+      </Text>
+      <Icon name="chev" size={16} color={colors['ink-3']} />
     </Pressable>
   );
 }
@@ -354,7 +337,7 @@ function BudgetCard({
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-[10px]">
           <View className="h-[30px] w-[30px] items-center justify-center rounded-[10px] bg-coral">
-            <Icon name="target" size={16} color="#7A2E17" />
+            <Icon name="target" size={16} color={colors['on-coral']} />
           </View>
           <Text weight="bold">Ngân sách subscription</Text>
         </View>

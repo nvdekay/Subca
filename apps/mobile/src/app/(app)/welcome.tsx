@@ -345,13 +345,14 @@ function StepHeader({ step, onBack }: { step: 0 | 1; onBack: () => void }) {
       >
         <Icon name="back" size={20} color={colors['ink-2']} />
       </Pressable>
-      <View className="flex-row items-center gap-[6px]">
-        {[0, 1, 2].map((item) => (
+      <View className="flex-row items-center gap-[7px]">
+        {[0, 1].map((item) => (
           <View
             key={item}
-            className={`h-1 rounded-full ${item === step ? 'w-[18px] bg-ink-2' : 'w-[6px] bg-line'}`}
+            className={`h-[5px] rounded-full ${item === step ? 'w-7 bg-ink-brand' : 'w-3 bg-line'}`}
           />
         ))}
+        <Text className="ml-1 text-[11px] text-ink-3">{step + 1}/2</Text>
       </View>
       <View className="h-11 w-11" />
     </View>

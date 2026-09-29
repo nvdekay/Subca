@@ -80,9 +80,9 @@ function Intro({
 }) {
   return (
     <>
-      <View className="items-center rounded-[30px] bg-mint px-5 py-7">
+      <View className="items-center rounded-[20px] border border-line bg-mint px-5 py-7">
         <View className="h-14 w-14 items-center justify-center rounded-[20px] bg-surface">
-          <Icon name="sparkle" size={26} color="#2E5B45" />
+          <Icon name="sparkle" size={26} color={colors['on-mint']} />
         </View>
         <Text weight="extrabold" className="mt-3 text-center text-[20px] leading-[26px]">
           Để Subca tự tìm subscription
@@ -101,7 +101,7 @@ function Intro({
 
       {!available ? (
         <Card tone="peach" className="mt-3 flex-row items-center gap-3">
-          <Icon name="alert" color="#8A4B1E" />
+          <Icon name="alert" color={colors['on-peach']} />
           <Text className="flex-1 text-[13px] leading-[19px] text-on-peach">
             Máy chủ chưa bật kết nối Gmail. Thử lại sau nhé.
           </Text>
@@ -135,7 +135,7 @@ function Summary({ data }: { data: DiscoverySummaryDto }) {
         {scanning ? (
           <ActivityIndicator color={colors['sky-deep']} />
         ) : (
-          <Icon name="check-circle" color="#2E5B45" />
+          <Icon name="check-circle" color={colors['on-mint']} />
         )}
         <Text weight="bold" className="flex-1 text-[16px]">
           {scanning
@@ -234,7 +234,7 @@ function Row({ icon, text }: { icon: 'check'; text: string }) {
   return (
     <View className="flex-row items-start gap-2">
       <View className="mt-[2px]">
-        <Icon name={icon} size={16} color="#2E5B45" strokeWidth={2.4} />
+        <Icon name={icon} size={16} color={colors['on-mint']} strokeWidth={2.4} />
       </View>
       <Text className="flex-1 text-[13.5px] leading-[20px] text-ink-2">{text}</Text>
     </View>

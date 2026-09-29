@@ -168,7 +168,7 @@ function MonthGrid({
                   className="flex-1 items-center pt-[7px]"
                   style={{ aspectRatio: 1 / 1.12 }}
                 >
-                  <Text className="text-[14px] text-[#B8BDB3]">{c.day}</Text>
+                  <Text className="text-[14px] text-ink-3">{c.day}</Text>
                 </View>
               );
             }
@@ -269,9 +269,7 @@ function MonthSummary({
     <>
       <Card tone="mint" className="mt-3 flex-row items-center justify-between">
         <View>
-          <Text className="text-[13px] leading-[18px] text-[#3A5A4C]">
-            Tổng cần trả trong tháng
-          </Text>
+          <Text className="text-[13px] leading-[18px] text-ink-2">Tổng cần trả trong tháng</Text>
           <Text weight="bold" tabular className="text-[22px] leading-[28px]">
             {formatAmount(data.totalMinor, data.currency)}
           </Text>
