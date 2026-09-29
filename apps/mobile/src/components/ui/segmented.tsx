@@ -14,7 +14,7 @@ export function Segmented<T extends string | number>({
   onChange: (value: T) => void;
 }) {
   return (
-    <View className="flex-row gap-1 rounded-[12px] border border-line bg-stone p-1">
+    <View className="flex-row gap-1 rounded-sm border-2 border-ink bg-stone p-1">
       {options.map((o) => {
         const on = o.value === value;
         return (
@@ -23,10 +23,7 @@ export function Segmented<T extends string | number>({
             onPress={() => onChange(o.value)}
             accessibilityRole="button"
             accessibilityState={{ selected: on }}
-            className={cn(
-              'h-10 flex-1 items-center justify-center rounded-[9px]',
-              on && 'bg-surface',
-            )}
+            className={cn('h-10 flex-1 items-center justify-center rounded-sm', on && 'bg-surface')}
             style={on ? { boxShadow: shadow.sm } : undefined}
           >
             <Text

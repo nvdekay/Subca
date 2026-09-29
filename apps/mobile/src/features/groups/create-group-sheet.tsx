@@ -77,7 +77,7 @@ export function CreateGroupSheet({
                     accessibilityRole="button"
                     accessibilityState={{ selected: on }}
                     className={cn(
-                      'w-[96px] items-center gap-[6px] rounded-[18px] border-[1.5px] bg-surface px-2 py-3',
+                      'w-[96px] items-center gap-[6px] rounded-sm border-[1.5px] bg-surface px-2 py-3',
                       on ? 'border-sky' : 'border-transparent',
                     )}
                   >

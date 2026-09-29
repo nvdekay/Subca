@@ -16,7 +16,7 @@ export function ToggleRow({
 }) {
   return (
     <View
-      className="flex-row items-center justify-between gap-3 rounded-[16px] bg-surface px-4 py-[14px]"
+      className="flex-row items-center justify-between gap-3 rounded-md border-2 border-ink bg-surface px-4 py-[14px]"
       style={{ boxShadow: shadow.sm }}
     >
       <View className="flex-1">
@@ -27,7 +27,7 @@ export function ToggleRow({
         value={value}
         onValueChange={onChange}
         accessibilityLabel={title}
-        trackColor={{ true: colors['ink-brand'], false: colors.line }}
+        trackColor={{ true: colors.accent, false: colors.line }}
         thumbColor={colors.surface}
         ios_backgroundColor={colors.line}
       />

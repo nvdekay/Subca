@@ -7,7 +7,7 @@ import { Text } from './ui/text';
 export function BrandMark() {
   return (
     <View className="flex-row items-center gap-[10px]">
-      <View className="h-[38px] w-[38px] items-center justify-center rounded-[10px] border border-brass/50 bg-ink-brand">
+      <View className="h-[38px] w-[38px] items-center justify-center rounded-sm border border-brass/50 bg-ink-brand">
         <Icon name="repeat" color={colors['butter-soft']} />
       </View>
       <Text

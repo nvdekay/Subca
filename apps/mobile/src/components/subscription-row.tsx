@@ -29,7 +29,7 @@ function RowShell({
       accessibilityLabel={sub.name}
       onPress={() => router.push({ pathname: '/subscriptions/[id]', params: { id: sub.id } })}
       className={cn(
-        'flex-row items-center gap-3 rounded-md bg-surface p-[14px] active:scale-[0.985]',
+        'flex-row items-center gap-3 rounded-md border-2 border-ink bg-surface p-[14px] active:translate-y-[3px]',
         cancelled && 'opacity-60',
       )}
       style={{ boxShadow: shadow.sm }}

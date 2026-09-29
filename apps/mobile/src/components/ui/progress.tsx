@@ -1,16 +1,16 @@
 import { View } from 'react-native';
 import { colors } from '@/theme';
 
-/** Thanh tiến độ giấy mờ; trạng thái vượt hạn mức dùng dusty red. */
+/** Thanh tiến độ dạng ô viền mực; vượt hạn mức dùng đỏ đất. */
 export function Progress({ percent, over = false }: { percent: number; over?: boolean }) {
   const width = `${Math.max(0, Math.min(percent, 100))}%` as const;
   return (
-    <View className="h-[8px] overflow-hidden rounded-[5px] bg-stone">
+    <View className="h-[10px] overflow-hidden border border-ink bg-stone">
       <View
-        className="h-full rounded-[6px]"
+        className="h-full"
         style={{
           width,
-          backgroundColor: over ? colors['coral-deep'] : colors['ink-brand'],
+          backgroundColor: over ? colors['coral-deep'] : colors.accent,
         }}
       />
     </View>

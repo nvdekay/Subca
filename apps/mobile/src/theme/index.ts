@@ -3,11 +3,11 @@ import tokens from './tokens.json';
 export const colors = tokens.colors;
 export const radius = tokens.radius;
 
-/** Bóng đổ của mockup (--shadow-sm / --shadow-md), dùng thuộc tính `boxShadow` của New Architecture. */
+/** Bóng đổ offset cứng theo phong cách editorial/bento của app. */
 export const shadow = {
-  sm: '0 1px 2px rgba(73,56,35,0.05), 0 3px 10px rgba(73,56,35,0.06)',
-  md: '0 2px 5px rgba(73,56,35,0.05), 0 9px 22px rgba(73,56,35,0.09)',
-  nav: '0 8px 28px rgba(64,49,30,0.16)',
+  sm: '0 3px 0 #202B34',
+  md: '0 5px 0 #202B34',
+  nav: '0 4px 0 #202B34',
 } as const;
 
 /**

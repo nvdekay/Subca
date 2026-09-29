@@ -30,7 +30,7 @@ export function QrCard({
       style={{ boxShadow: shadow.sm }}
     >
       {payload ? (
-        <View className="rounded-[16px] bg-white p-3">
+        <View className="rounded-sm bg-white p-3">
           <QRCode value={payload} size={168} color={colors.ink} backgroundColor="#FFFFFF" />
         </View>
       ) : (

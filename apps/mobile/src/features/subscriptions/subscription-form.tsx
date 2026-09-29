@@ -332,7 +332,7 @@ export function SubscriptionForm({
                 onPress={() => pickService(s)}
                 accessibilityRole="button"
                 accessibilityLabel={s.name}
-                className="w-[72px] items-center gap-[6px] rounded-[18px] bg-surface py-3 active:scale-[0.96]"
+                className="w-[72px] items-center gap-[6px] rounded-sm bg-surface py-3 active:scale-[0.96]"
                 style={{ boxShadow: shadow.sm }}
               >
                 <ServiceLogo name={s.name} service={s} size="sm" />
@@ -348,7 +348,7 @@ export function SubscriptionForm({
             <Pressable
               onPress={() => setPickerOpen(true)}
               accessibilityRole="button"
-              className="w-[72px] items-center justify-center gap-[6px] rounded-[18px] bg-sky-soft py-3 active:scale-[0.96]"
+              className="w-[72px] items-center justify-center gap-[6px] rounded-sm bg-sky-soft py-3 active:scale-[0.96]"
             >
               <Icon name="search" color={colors['sky-deep']} />
               <Text weight="semibold" className="text-[11.5px] leading-[15px] text-sky-deep">
@@ -450,7 +450,7 @@ export function SubscriptionForm({
         onPress={() => setOptionsOpen((open) => !open)}
         className="mt-2 min-h-[70px] flex-row items-center gap-3 border-y border-line py-3"
       >
-        <View className="h-10 w-10 items-center justify-center rounded-[13px] bg-brass-soft">
+        <View className="h-10 w-10 items-center justify-center rounded-sm bg-brass-soft">
           <Icon name="settings" size={19} color={colors['ink-brand']} />
         </View>
         <View className="flex-1">
@@ -599,7 +599,7 @@ function ServicePicker({
             key={s.id}
             onPress={() => onPick(s)}
             accessibilityRole="button"
-            className="flex-row items-center gap-3 rounded-[16px] bg-surface p-3 active:opacity-80"
+            className="flex-row items-center gap-3 rounded-sm bg-surface p-3 active:opacity-80"
           >
             <ServiceLogo name={s.name} service={s} size="sm" />
             <Text weight="semibold" className="flex-1">

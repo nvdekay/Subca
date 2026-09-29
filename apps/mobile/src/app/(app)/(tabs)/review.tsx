@@ -121,7 +121,7 @@ function ReviewBody({ data, tab, onTab }: { data: ReviewDto; tab: Tab; onTab: (t
   return (
     <>
       {/* Thẻ "Có thể tiết kiệm" (mockup: .savings) */}
-      <View className="overflow-hidden rounded-[20px] border border-line bg-peach p-[22px]">
+      <View className="overflow-hidden rounded-sm border border-line bg-peach p-[22px]">
         <View className="flex-row items-center justify-between">
           <Text weight="semibold" className="text-on-peach">
             Có thể tiết kiệm
@@ -249,7 +249,7 @@ function ReviewRow({ item, currency }: { item: ReviewItemDto; currency: ReviewDt
               accessibilityRole="button"
               accessibilityState={{ selected: on }}
               className={cn(
-                'h-10 flex-1 flex-row items-center justify-center gap-[5px] rounded-[12px]',
+                'h-10 flex-1 flex-row items-center justify-center gap-[5px] rounded-sm',
                 on ? d.on : 'bg-bg',
               )}
             >

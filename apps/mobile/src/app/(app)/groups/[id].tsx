@@ -128,7 +128,7 @@ function Hero({ data }: { data: GroupDetailDto }) {
   return (
     <View
       className={cn(
-        'items-center rounded-[20px] border border-line px-5 py-6',
+        'items-center rounded-sm border border-line px-5 py-6',
         data.isOwner ? 'bg-mint' : 'bg-sky-soft',
       )}
     >
@@ -238,7 +238,7 @@ function OwnerBody({
         <>
           <View
             className={cn(
-              'mt-3 flex-row items-center gap-[10px] rounded-[16px] p-[14px]',
+              'mt-3 flex-row items-center gap-[10px] rounded-sm p-[14px]',
               diff === 0n ? 'bg-mint' : 'bg-coral',
             )}
           >
@@ -336,7 +336,7 @@ function OwnerBody({
         <Text className="text-[13.5px] leading-[20px] text-ink-2">
           Gửi link để bạn bè vào nhóm và nhận nhắc chuyển tiền mỗi tháng.
         </Text>
-        <View className="flex-row items-center gap-2 rounded-[14px] bg-bg px-3 py-[10px]">
+        <View className="flex-row items-center gap-2 rounded-sm bg-bg px-3 py-[10px]">
           <Text tabular className="flex-1 text-[13px]" numberOfLines={1}>
             {data.inviteUrl.replace('https://', '')}
           </Text>
@@ -528,7 +528,7 @@ function MemberRow({
             onChangeText={(t) => onCustomChange(t.replace(/\D/g, ''))}
             keyboardType="number-pad"
             accessibilityLabel={`Số tiền của ${member.displayName}`}
-            className="h-10 w-[104px] rounded-[12px] bg-bg px-3 text-right text-[14px] text-ink"
+            className="h-10 w-[104px] rounded-sm bg-bg px-3 text-right text-[14px] text-ink"
             style={{ fontFamily: fontFamily.semibold }}
           />
         ) : (
@@ -754,7 +754,7 @@ function OptionsSheet({
 
   return (
     <Sheet visible onClose={onClose} title="Tùy chọn nhóm" subtitle={group.name}>
-      <View className="overflow-hidden rounded-[20px] bg-surface">
+      <View className="overflow-hidden rounded-sm bg-surface">
         {group.isOwner ? (
           <>
             <OptionRow

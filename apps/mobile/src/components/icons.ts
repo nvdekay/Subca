@@ -36,9 +36,12 @@ export type IconName =
   | 'settings'
   | 'users'
   | 'link'
+  | 'mail'
   | 'copy'
   | 'qr'
-  | 'minus';
+  | 'minus'
+  | 'eye'
+  | 'eye-off';
 
 export const ICONS: Record<IconName, IconElement[]> = {
   home: [
@@ -186,6 +189,10 @@ export const ICONS: Record<IconName, IconElement[]> = {
     { t: 'path', p: { d: 'M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7' } },
     { t: 'path', p: { d: 'M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7' } },
   ],
+  mail: [
+    { t: 'rect', p: { x: '3', y: '5', width: '18', height: '14', rx: '2' } },
+    { t: 'path', p: { d: 'm3 7 9 6 9-6' } },
+  ],
   copy: [
     { t: 'rect', p: { x: '9', y: '9', width: '12', height: '12', rx: '2.5' } },
     { t: 'path', p: { d: 'M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1' } },
@@ -197,4 +204,17 @@ export const ICONS: Record<IconName, IconElement[]> = {
     { t: 'path', p: { d: 'M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3' } },
   ],
   minus: [{ t: 'path', p: { d: 'M5 12h14' } }],
+  eye: [
+    { t: 'path', p: { d: 'M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z' } },
+    { t: 'circle', p: { cx: '12', cy: '12', r: '3' } },
+  ],
+  'eye-off': [
+    { t: 'path', p: { d: 'M3 3l18 18' } },
+    { t: 'path', p: { d: 'M10.6 10.6A3 3 0 0 0 13.4 13.4' } },
+    {
+      t: 'path',
+      p: { d: 'M9.5 5.4A10.7 10.7 0 0 1 12 5c6.5 0 10 7 10 7a18.7 18.7 0 0 1-2.3 3.2' },
+    },
+    { t: 'path', p: { d: 'M6.6 6.7C3.6 8.7 2 12 2 12s3.5 7 10 7a10.6 10.6 0 0 0 4.2-.9' } },
+  ],
 };

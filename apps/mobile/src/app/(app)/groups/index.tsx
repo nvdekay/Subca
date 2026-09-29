@@ -126,7 +126,7 @@ function Content({
         accessibilityRole="button"
         className="mt-3 flex-row items-center gap-3 rounded-lg border-[1.5px] border-dashed border-sage bg-surface p-[18px] active:scale-[0.985]"
       >
-        <View className="h-10 w-10 items-center justify-center rounded-[14px] bg-mint">
+        <View className="h-10 w-10 items-center justify-center rounded-sm bg-mint">
           <Icon name="plus" size={20} color={colors['on-mint']} strokeWidth={2.2} />
         </View>
         <View className="flex-1">

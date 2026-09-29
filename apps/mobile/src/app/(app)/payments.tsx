@@ -123,7 +123,7 @@ export default function Payments() {
           </>
         ) : (
           <Card className="items-center gap-3 px-6 py-8">
-            <View className="h-14 w-14 items-center justify-center rounded-[20px] bg-sky-soft">
+            <View className="h-14 w-14 items-center justify-center rounded-sm bg-sky-soft">
               <Icon name="card" size={26} color={colors['sky-deep']} />
             </View>
             <Text weight="bold" className="text-[17px]">

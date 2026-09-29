@@ -2,7 +2,7 @@ import { Pressable, View } from 'react-native';
 import { colors, shadow } from '@/theme';
 import { Icon, type IconName } from './icon';
 
-/** Nút tròn 44×44 nền trắng (topbar). `dot` = chấm đỏ báo có thông báo mới. */
+/** Nút 44×44 dạng khối, viền mực và bóng offset. `dot` báo có thông báo mới. */
 export function IconButton({
   icon,
   label,
@@ -20,7 +20,7 @@ export function IconButton({
       accessibilityRole="button"
       accessibilityLabel={label}
       hitSlop={4}
-      className="h-11 w-11 items-center justify-center rounded-[12px] border border-line bg-surface active:scale-[0.96]"
+      className="h-11 w-11 items-center justify-center rounded-sm border-2 border-ink bg-surface active:translate-y-[3px]"
       style={{ boxShadow: shadow.sm }}
     >
       <Icon name={icon} />

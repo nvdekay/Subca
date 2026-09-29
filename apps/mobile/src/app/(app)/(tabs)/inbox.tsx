@@ -30,7 +30,7 @@ export default function Inbox() {
       {inbox.data ? (
         inbox.data.items.length > 0 ? (
           <>
-            <View className="mb-5 rounded-[20px] border border-line bg-peach p-5">
+            <View className="mb-5 rounded-sm border border-line bg-peach p-5">
               <View className="flex-row items-end justify-between">
                 <View className="flex-1 pr-4">
                   <Text className="text-[12px] uppercase tracking-[1px] text-on-peach">
@@ -63,7 +63,7 @@ export default function Inbox() {
           </>
         ) : (
           <Card className="items-center gap-3 px-6 py-8">
-            <View className="h-14 w-14 items-center justify-center rounded-[20px] bg-mint">
+            <View className="h-14 w-14 items-center justify-center rounded-sm bg-mint">
               <Icon name="check-circle" size={26} color={colors['on-mint']} />
             </View>
             <Text weight="bold" className="text-[17px]">

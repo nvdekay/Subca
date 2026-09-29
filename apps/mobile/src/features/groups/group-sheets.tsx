@@ -125,7 +125,7 @@ export function PayoutSheet({
       }
     >
       {pickingBank ? (
-        <View className="overflow-hidden rounded-[20px] bg-surface">
+        <View className="overflow-hidden rounded-sm bg-surface">
           {VIETQR_BANKS.map((b, i) => (
             <Pressable
               key={b.bin}
@@ -143,7 +143,7 @@ export function PayoutSheet({
               <Text weight={b.bin === bankBin ? 'bold' : 'regular'} className="flex-1">
                 {b.name}
               </Text>
-              {b.bin === bankBin ? <Icon name="check" color={colors['ink-brand']} /> : null}
+              {b.bin === bankBin ? <Icon name="check" color={colors.accent} /> : null}
             </Pressable>
           ))}
         </View>
@@ -155,7 +155,7 @@ export function PayoutSheet({
           <Pressable
             onPress={() => setPickingBank(true)}
             accessibilityRole="button"
-            className="h-[52px] flex-row items-center justify-between rounded-[16px] bg-surface px-4"
+            className="h-[52px] flex-row items-center justify-between rounded-sm bg-surface px-4"
           >
             <Text className={cn('text-[15px]', !bank && 'text-ink-3')}>
               {bank?.name ?? 'Chọn ngân hàng'}

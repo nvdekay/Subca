@@ -75,7 +75,7 @@ function AnalyticsBody({ data }: { data: AnalyticsDto }) {
 
   return (
     <>
-      <View className="rounded-[22px] border border-line bg-mint p-5">
+      <View className="rounded-sm border border-line bg-mint p-5">
         <Text className="text-[12px] uppercase tracking-[1px] text-ink-brand">
           Đang chi mỗi tháng
         </Text>

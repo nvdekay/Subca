@@ -182,7 +182,7 @@ function FeedRow({ item, upcoming = false }: { item: ReminderFeedItemDto; upcomi
       style={{ boxShadow: shadow.sm }}
     >
       <View
-        className="h-[42px] w-[42px] items-center justify-center rounded-[14px]"
+        className="h-[42px] w-[42px] items-center justify-center rounded-sm"
         style={{
           backgroundColor: trial ? colors.peach : upcoming ? colors['sky-soft'] : colors.mint,
         }}

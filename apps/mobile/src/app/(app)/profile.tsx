@@ -191,7 +191,7 @@ export default function Settings() {
               changeSettings({ notificationsEnabled: on });
               if (on) registerForPush({ ask: true });
             }}
-            trackColor={{ true: colors['ink-brand'], false: colors.line }}
+            trackColor={{ true: colors.accent, false: colors.line }}
             thumbColor="#FFFFFF"
             ios_backgroundColor={colors.line}
           />
@@ -332,7 +332,7 @@ function Group({ children }: { children: ReactNode }) {
 function RowIcon({ icon, bg }: { icon: IconName; bg: string }) {
   return (
     <View
-      className="h-[34px] w-[34px] items-center justify-center rounded-[11px]"
+      className="h-[34px] w-[34px] items-center justify-center rounded-sm"
       style={{ backgroundColor: bg }}
     >
       <Icon name={icon} size={18} />

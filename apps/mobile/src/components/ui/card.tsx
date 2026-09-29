@@ -14,7 +14,7 @@ const TONE_CLASS: Record<Tone, string> = {
 
 export type CardProps = ViewProps & { tone?: Tone; className?: string; onPress?: () => void };
 
-/** Thẻ nền giấy có viền mảnh và bóng nâu dịu, thống nhất cho mọi màn. */
+/** Khối nội dung dạng editorial: nền sáng, viền mực dày và bóng offset. */
 export function Card({
   tone = 'surface',
   className,
@@ -23,7 +23,7 @@ export function Card({
   children,
   ...props
 }: CardProps) {
-  const cardClass = cn('rounded-lg border border-line p-[18px]', TONE_CLASS[tone], className);
+  const cardClass = cn('rounded-md border-2 border-ink p-4', TONE_CLASS[tone], className);
   const cardStyle = [{ boxShadow: shadow.sm }, style];
   if (onPress) {
     return (

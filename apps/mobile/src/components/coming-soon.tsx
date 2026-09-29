@@ -30,7 +30,7 @@ export function ComingSoon({
         <TopBar title={title} />
       )}
       <View className="items-center gap-3 px-[10px] py-10">
-        <View className="h-14 w-14 items-center justify-center rounded-[20px] bg-sky-soft">
+        <View className="h-14 w-14 items-center justify-center rounded-sm bg-sky-soft">
           <Icon name={icon} size={24} color={colors['sky-deep']} />
         </View>
         <Text weight="bold" className="text-[17px]">

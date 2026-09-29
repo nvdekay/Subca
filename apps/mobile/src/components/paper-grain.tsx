@@ -19,7 +19,7 @@ export function PaperGrain() {
             cx={speck.x}
             cy={speck.y}
             r={speck.r}
-            fill="#746044"
+            fill="#202B34"
             opacity={speck.opacity}
           />
         ))}

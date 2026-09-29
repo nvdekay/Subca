@@ -1,26 +1,26 @@
 import type { PaymentMethodType } from '@subca/shared';
 
-/** Màu phẳng, tiết chế theo từng loại thanh toán để hợp bảng màu vintage. */
+/** Thẻ thanh toán dùng màu slate chung; tên ngân hàng/thương hiệu vẫn giữ nguyên. */
 const BY_BRAND: Record<string, string> = {
-  VISA: '#796A51',
-  MASTERCARD: '#695B4E',
-  JCB: '#5E6C61',
-  AMEX: '#586B68',
-  NAPAS: '#626348',
-  MOMO: '#8D5B68',
-  ZALOPAY: '#66718A',
-  VNPAY: '#89594D',
-  SHOPEEPAY: '#975C49',
+  VISA: '#393E46',
+  MASTERCARD: '#393E46',
+  JCB: '#393E46',
+  AMEX: '#393E46',
+  NAPAS: '#393E46',
+  MOMO: '#393E46',
+  ZALOPAY: '#393E46',
+  VNPAY: '#393E46',
+  SHOPEEPAY: '#393E46',
 };
 
 const BY_TYPE: Record<PaymentMethodType, string> = {
-  CARD: '#626348',
-  PAYPAL: '#66718A',
-  APP_STORE: '#625D56',
-  GOOGLE_PLAY: '#5E6C61',
-  E_WALLET: '#8D5B68',
-  BANK_TRANSFER: '#626348',
-  OTHER: '#786D5D',
+  CARD: '#393E46',
+  PAYPAL: '#393E46',
+  APP_STORE: '#393E46',
+  GOOGLE_PLAY: '#393E46',
+  E_WALLET: '#393E46',
+  BANK_TRANSFER: '#393E46',
+  OTHER: '#393E46',
 };
 
 export function cardColor(type: PaymentMethodType, brand: string | null): string {

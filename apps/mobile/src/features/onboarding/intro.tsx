@@ -10,9 +10,8 @@ import {
 } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeOut, useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BrandMark } from '@/components/brand-mark';
 import { Button } from '@/components/ui/button';
-import { Icon } from '@/components/ui/icon';
+import { BackButton } from '@/components/ui/back-button';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/theme';
 import { IntroArt } from './intro-art';
@@ -88,7 +87,6 @@ export default function Intro() {
     if (step === stories.length) router.navigate('/sign-in');
     else setStep((value) => Math.min(value + 1, stories.length));
   };
-  const enter = reducedMotion ? undefined : FadeInDown.duration(650);
 
   return (
     <View
@@ -101,19 +99,14 @@ export default function Intro() {
     >
       <View className="mx-6 min-h-[60px] flex-row items-center justify-between">
         {step === 0 ? (
-          <BrandMark />
+          <View className="h-11 w-11" />
         ) : (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Cảnh trước"
+          <BackButton
             onPress={() => {
               setGreetingPlayed(true);
               setStep((value) => Math.max(0, value - 1));
             }}
-            className="h-12 w-12 items-center justify-center rounded-full border border-line active:bg-surface"
-          >
-            <Icon name="back" size={20} />
-          </Pressable>
+          />
         )}
         <Pressable
           accessibilityRole="button"
@@ -144,13 +137,6 @@ export default function Intro() {
           >
             {step === 0 ? (
               <View className="items-center py-10">
-                <Animated.View
-                  entering={enter}
-                  className="mb-8 h-16 w-16 items-center justify-center rounded-full border border-brass/40 bg-peach"
-                  aria-hidden
-                >
-                  <Icon name="sparkle" size={30} color={colors['ink-brand']} />
-                </Animated.View>
                 <Animated.View
                   entering={reducedMotion ? undefined : FadeInDown.delay(180).duration(850)}
                 >
@@ -230,7 +216,7 @@ export default function Intro() {
                 height: 5,
                 width: index === step ? 28 : 7,
                 borderRadius: 4,
-                backgroundColor: index === step ? colors['ink-brand'] : colors.line,
+                backgroundColor: index === step ? colors.accent : colors.line,
               }}
             />
           ))}

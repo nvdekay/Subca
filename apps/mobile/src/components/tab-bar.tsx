@@ -13,7 +13,7 @@ const TABS: Record<string, { label: string; icon: IconName }> = {
   analytics: { label: 'Phân tích', icon: 'chart' },
 };
 
-/** Thanh điều hướng nổi bo 28 với nút "+" ở giữa (mockup: .nav). */
+/** Thanh điều hướng dạng bảng nổi, viền mực và nút thêm màu cam. */
 export function TabBar({ state, navigation, insets }: BottomTabBarProps) {
   const inbox = useInbox();
   // Expo Router's tab state can include routes that are deliberately hidden
@@ -40,9 +40,9 @@ export function TabBar({ state, navigation, insets }: BottomTabBarProps) {
         className="h-[60px] w-full items-center justify-center gap-1"
       >
         <View
-          className={`h-[30px] w-11 items-center justify-center rounded-[10px] ${focused ? 'bg-brass-soft' : ''}`}
+          className={`h-[30px] w-11 items-center justify-center rounded-sm ${focused ? 'bg-brass-soft' : ''}`}
         >
-          <Icon name={tab.icon} color={focused ? colors['ink-brand'] : colors['ink-3']} />
+          <Icon name={tab.icon} color={focused ? colors.accent : colors['ink-3']} />
           {route.name === 'inbox' && (inbox.data?.openCount ?? 0) > 0 ? (
             <View className="absolute right-[2px] top-[1px] h-[8px] w-[8px] rounded-full border border-surface bg-coral-deep" />
           ) : null}
@@ -68,12 +68,12 @@ export function TabBar({ state, navigation, insets }: BottomTabBarProps) {
         style={{ height: bottom + 72 + 24 }}
       />
       <View
-        className="absolute left-[14px] right-[14px] h-[72px] flex-row items-center rounded-[22px] px-2"
+        className="absolute left-[14px] right-[14px] h-[72px] flex-row items-center rounded-md px-2"
         style={{
           bottom,
-          backgroundColor: 'rgba(251,248,240,0.97)',
-          borderWidth: 1,
-          borderColor: colors.line,
+          backgroundColor: 'rgba(255,255,255,0.97)',
+          borderWidth: 2,
+          borderColor: colors.ink,
           boxShadow: shadow.nav,
         }}
       >
@@ -84,10 +84,10 @@ export function TabBar({ state, navigation, insets }: BottomTabBarProps) {
             accessibilityRole="button"
             accessibilityLabel="Thêm subscription"
             onPress={() => router.push('/add')}
-            className="h-[58px] w-[58px] -translate-y-4 items-center justify-center rounded-[17px] bg-ink-brand active:scale-[0.95]"
-            style={{ boxShadow: `0 8px 18px rgba(64,49,30,0.24), 0 0 0 5px ${colors.bg}` }}
+            className="h-[58px] w-[58px] -translate-y-4 items-center justify-center rounded-md border-2 border-ink bg-accent active:translate-y-[-10px]"
+            style={{ boxShadow: `0 4px 0 ${colors.ink}, 0 0 0 5px ${colors.bg}` }}
           >
-            <Icon name="plus" size={26} color={colors.bg} strokeWidth={2.4} />
+            <Icon name="plus" size={26} color={colors.ink} strokeWidth={2.4} />
           </Pressable>
         </View>
         <View className="flex-1">{items[2]}</View>

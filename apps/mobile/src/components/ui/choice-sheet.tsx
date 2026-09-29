@@ -25,7 +25,7 @@ export function ChoiceSheet<T extends string | number>({
 }) {
   return (
     <Sheet visible={visible} onClose={onClose} title={title} subtitle={subtitle}>
-      <View className="overflow-hidden rounded-[16px] border border-line bg-surface">
+      <View className="overflow-hidden rounded-md border-2 border-ink bg-surface">
         {options.map((o, i) => (
           <Pressable
             key={String(o.value)}
@@ -34,14 +34,14 @@ export function ChoiceSheet<T extends string | number>({
             accessibilityState={{ selected: o.value === value }}
             className={cn(
               'flex-row items-center gap-3 px-4 py-[14px] active:bg-bg',
-              i > 0 && 'border-t border-line',
+              i > 0 && 'border-t-2 border-ink',
             )}
           >
             <View className="flex-1">
               <Text weight={o.value === value ? 'bold' : 'regular'}>{o.label}</Text>
               {o.note ? <Text className="text-[12.5px] text-ink-3">{o.note}</Text> : null}
             </View>
-            {o.value === value ? <Icon name="check" color={colors['ink-brand']} /> : null}
+            {o.value === value ? <Icon name="check" color={colors.accent} /> : null}
           </Pressable>
         ))}
       </View>

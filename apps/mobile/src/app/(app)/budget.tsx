@@ -75,7 +75,7 @@ export default function Budget() {
           </>
         ) : (
           <Card className="items-center gap-3 px-6 py-8">
-            <View className="h-14 w-14 items-center justify-center rounded-[20px] bg-mint">
+            <View className="h-14 w-14 items-center justify-center rounded-sm bg-mint">
               <Icon name="target" size={26} color={colors['on-mint']} />
             </View>
             <Text weight="bold" className="text-[17px]">
@@ -276,7 +276,7 @@ function Simulator({
                 </View>
                 <View
                   className={cn(
-                    'h-7 w-7 items-center justify-center rounded-[9px] border-2',
+                    'h-7 w-7 items-center justify-center rounded-sm border-2',
                     on ? 'border-ink bg-ink' : 'border-sage bg-surface',
                   )}
                 >

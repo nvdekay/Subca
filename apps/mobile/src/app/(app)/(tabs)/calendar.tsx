@@ -186,7 +186,7 @@ function MonthGrid({
                 accessibilityRole={has ? 'button' : undefined}
                 accessibilityLabel={has ? `Ngày ${c.day}, ${items.length} khoản` : undefined}
                 className={cn(
-                  'flex-1 items-center rounded-[14px] pt-[7px]',
+                  'flex-1 items-center rounded-sm pt-[7px]',
                   has && (vndSum >= HEAVY_VND ? 'bg-peach' : 'bg-mint'),
                   isSelected && 'bg-ink',
                 )}
@@ -310,7 +310,7 @@ function MonthSummary({
               className="flex-row items-center gap-3 rounded-md bg-surface p-[14px] active:scale-[0.985]"
               style={{ boxShadow: shadow.sm }}
             >
-              <View className="h-[52px] w-12 items-center justify-center rounded-[14px] bg-bg">
+              <View className="h-[52px] w-12 items-center justify-center rounded-sm bg-bg">
                 <Text weight="bold" tabular className="text-[18px] leading-[21px]">
                   {day}
                 </Text>

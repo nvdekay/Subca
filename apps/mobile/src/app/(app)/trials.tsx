@@ -59,7 +59,7 @@ export default function Trials() {
         trials.length > 0 ? (
           <>
             <Card tone="peach" className="flex-row items-center gap-[14px]">
-              <View className="h-10 w-10 items-center justify-center rounded-[13px] bg-surface">
+              <View className="h-10 w-10 items-center justify-center rounded-sm bg-surface">
                 <Icon name="hourglass" color={colors['coral-deep']} />
               </View>
               <View className="flex-1">
@@ -183,14 +183,14 @@ function TrialCard({ sub }: { sub: SubscriptionDto }) {
         </View>
       </View>
       <View className="my-[14px] flex-row gap-2">
-        <View className="flex-1 rounded-[14px] bg-bg px-3 py-[10px]">
+        <View className="flex-1 rounded-sm bg-bg px-3 py-[10px]">
           <Text className="text-[11.5px] leading-[16px] text-ink-3">Phí sau trial</Text>
           <Text weight="bold" tabular className="text-[14.5px]">
             {formatAmount(sub.amountMinor, sub.currency)}
             {perInterval(sub.intervalUnit, sub.intervalCount)}
           </Text>
         </View>
-        <View className="flex-1 rounded-[14px] bg-bg px-3 py-[10px]">
+        <View className="flex-1 rounded-sm bg-bg px-3 py-[10px]">
           <Text className="text-[11.5px] leading-[16px] text-ink-3">Hết hạn</Text>
           <Text weight="bold" tabular className="text-[14.5px]">
             {end ? formatDate(end) : '—'}

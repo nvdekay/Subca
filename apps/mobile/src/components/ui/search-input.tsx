@@ -6,7 +6,7 @@ import { Icon } from './icon';
 export function SearchInput(props: TextInputProps) {
   return (
     <View
-      className="h-[50px] flex-row items-center gap-[10px] rounded-[12px] border border-line bg-surface px-4"
+      className="h-[50px] flex-row items-center gap-[10px] rounded-sm border-2 border-ink bg-surface px-4"
       style={{ boxShadow: shadow.sm }}
     >
       <Icon name="search" color={colors['ink-3']} />

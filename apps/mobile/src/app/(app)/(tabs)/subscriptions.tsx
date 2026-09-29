@@ -116,7 +116,7 @@ export default function SubscriptionList() {
             </View>
           ) : items.length === 0 ? (
             <Card className="items-start gap-3 px-5 py-6">
-              <View className="h-11 w-11 items-center justify-center rounded-[14px] bg-brass-soft">
+              <View className="h-11 w-11 items-center justify-center rounded-sm bg-brass-soft">
                 <Text weight="extrabold" className="text-[22px] text-ink-brand">
                   S
                 </Text>

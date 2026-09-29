@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IconButton } from './ui/icon-button';
+import { BackButton } from './ui/back-button';
 import { Text } from './ui/text';
 
 /**
@@ -89,11 +90,11 @@ export function TopBar({
   return (
     <View className="mb-5 min-h-[52px] flex-row items-center gap-3">
       {router.canGoBack() ? (
-        <IconButton
-          icon={close ? 'x' : 'back'}
-          label={close ? 'Đóng' : 'Quay lại'}
-          onPress={() => router.back()}
-        />
+        close ? (
+          <IconButton icon="x" label="Đóng" onPress={() => router.back()} />
+        ) : (
+          <BackButton onPress={() => router.back()} />
+        )
       ) : (
         <View className="w-1" />
       )}

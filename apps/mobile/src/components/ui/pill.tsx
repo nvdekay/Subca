@@ -30,7 +30,7 @@ export function Pill({
   return (
     <View
       className={cn(
-        'flex-row items-center gap-[5px] self-start rounded-full px-[10px] py-1',
+        'flex-row items-center gap-[5px] self-start rounded-sm border border-ink px-[9px] py-1',
         t.box,
         className,
       )}
