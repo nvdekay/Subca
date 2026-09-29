@@ -55,11 +55,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     <div className="grid min-h-full lg:grid-cols-[248px_1fr]">
       <aside className="sticky top-0 hidden h-screen flex-col overflow-y-auto border-r border-line bg-surface px-3.5 py-4 lg:flex">
         <div className="flex items-center gap-2.5 px-2 pb-4">
-          <span className="grid size-8.5 place-items-center rounded-xl bg-ink text-sky">
+          <span className="grid size-8.5 place-items-center rounded-[10px] border border-brass/40 bg-olive text-brass-soft">
             <Icon name="refresh" className="size-4.5" strokeWidth={2} />
           </span>
           <div>
-            <div className="text-[17px] leading-5 font-extrabold tracking-tight">Subca</div>
+            <div className="font-sans text-[19px] leading-5 font-extrabold tracking-tight">
+              Subca
+            </div>
             <div className="-mt-0.5 text-[10.5px] font-semibold tracking-wider text-ink-3 uppercase">
               Admin Console
             </div>
@@ -79,8 +81,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                     key={item.href}
                     href={item.href}
                     aria-current={active ? 'page' : undefined}
-                    className={`flex items-center gap-2.5 rounded-[10px] px-2.5 py-2 font-medium transition ${
-                      active ? 'bg-line-2 font-semibold text-ink' : 'text-ink-2 hover:bg-line-2'
+                    className={`flex items-center gap-2.5 rounded-[8px] border-l-2 px-2.5 py-2 font-medium transition duration-150 ${
+                      active
+                        ? 'border-brass bg-brass-soft font-semibold text-ink'
+                        : 'border-transparent text-ink-2 hover:bg-line-2'
                     }`}
                   >
                     <Icon name={item.icon} />
@@ -109,7 +113,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
       <div className="flex min-w-0 flex-col">
         <header className="flex items-center justify-between gap-3 border-b border-line bg-surface px-5 py-3 lg:hidden">
-          <span className="font-extrabold">Subca Admin</span>
+          <span className="font-sans text-[17px] font-extrabold">Subca Admin</span>
           <button onClick={() => void signOut()} className="text-[13px] text-ink-2">
             Đăng xuất
           </button>
@@ -119,8 +123,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <Link
               key={item.href}
               href={item.href}
-              className={`rounded-lg px-3 py-1.5 text-[13px] whitespace-nowrap ${
-                pathname.startsWith(item.href) ? 'bg-line-2 font-semibold' : 'text-ink-2'
+              className={`rounded-[8px] px-3 py-1.5 text-[13px] whitespace-nowrap transition ${
+                pathname.startsWith(item.href)
+                  ? 'bg-brass-soft font-semibold text-ink'
+                  : 'text-ink-2'
               }`}
             >
               {item.label}

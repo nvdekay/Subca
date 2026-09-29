@@ -49,10 +49,10 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const BUTTON_VARIANT = {
-  primary: 'bg-ink text-white hover:bg-ink-2',
-  default: 'border border-line bg-surface text-ink hover:bg-line-2',
+  primary: 'border border-olive bg-olive text-bg hover:bg-ink',
+  default: 'border border-line bg-surface text-ink shadow-sm hover:bg-brass-soft',
   danger: 'border border-crit/30 bg-crit-bg text-crit hover:bg-crit/15',
-  ghost: 'text-ink-2 hover:bg-line-2',
+  ghost: 'text-ink-2 hover:bg-brass-soft',
 } as const;
 
 export function Button({
@@ -70,7 +70,7 @@ export function Button({
       {...props}
       disabled={disabled || loading}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition disabled:cursor-not-allowed disabled:opacity-55',
+        'inline-flex items-center justify-center gap-2 rounded-[10px] font-semibold transition duration-150 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brass disabled:cursor-not-allowed disabled:opacity-55',
         size === 'md' ? 'h-10 px-4 text-[13.5px]' : 'h-8 px-3 text-[12.5px]',
         BUTTON_VARIANT[variant],
         className,
@@ -109,7 +109,7 @@ export function Input({
       <input
         {...props}
         className={cn(
-          'h-10 w-full rounded-xl border bg-surface px-3 text-[14px] outline-none transition placeholder:text-ink-3 focus:border-sky-deep',
+          'h-10 w-full rounded-[10px] border bg-surface px-3 text-[14px] outline-none transition placeholder:text-ink-3 focus:border-brass focus:ring-2 focus:ring-brass/20',
           error ? 'border-crit' : 'border-line',
         )}
       />
@@ -140,7 +140,7 @@ export function Pill({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-semibold',
+        'inline-flex items-center gap-1 rounded-md border border-current/10 px-2.5 py-1 text-[12px] font-semibold',
         PILL_TONE[tone],
       )}
     >
@@ -216,7 +216,7 @@ export function Th({
   return (
     <th
       className={cn(
-        'border-b border-line px-4 py-2.5 text-[12px] font-bold tracking-wide text-ink-3 uppercase',
+        'border-b border-line bg-line-2/60 px-4 py-2.5 text-[12px] font-bold tracking-wide text-ink-3 uppercase',
         align === 'right' ? 'text-right' : 'text-left',
         className,
       )}

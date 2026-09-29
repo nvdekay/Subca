@@ -18,7 +18,9 @@ export function PageHead({
             {crumb}
           </div>
         ) : null}
-        <h1 className="text-[24px] leading-8 font-extrabold tracking-tight">{title}</h1>
+        <h1 className="page-head-title text-[26px] leading-8 font-extrabold tracking-tight">
+          {title}
+        </h1>
       </div>
       {children ? <div className="flex flex-wrap items-center gap-2">{children}</div> : null}
     </div>
