@@ -11,14 +11,14 @@ export const shadow = {
 } as const;
 
 /**
- * Be Vietnam Pro nạp theo từng độ đậm: font tùy chỉnh trên Android không tự chọn độ đậm theo
+ * Nunito nạp theo từng độ đậm: font tùy chỉnh trên Android không tự chọn độ đậm theo
  * `fontWeight`, nên đổi độ đậm bằng cách đổi hẳn fontFamily (component Text lo việc này).
  */
 export const fontFamily = {
-  regular: 'BeVietnamPro_400Regular',
-  medium: 'BeVietnamPro_500Medium',
-  semibold: 'BeVietnamPro_600SemiBold',
-  bold: 'BeVietnamPro_700Bold',
-  extrabold: 'BeVietnamPro_800ExtraBold',
+  regular: 'Nunito_400Regular',
+  medium: 'Nunito_500Medium',
+  semibold: 'Nunito_600SemiBold',
+  bold: 'Nunito_700Bold',
+  extrabold: 'Nunito_800ExtraBold',
 } as const;
 export type FontWeight = keyof typeof fontFamily;

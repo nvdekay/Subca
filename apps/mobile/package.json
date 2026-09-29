@@ -3,7 +3,7 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "dependencies": {
-    "@expo-google-fonts/be-vietnam-pro": "^0.4.1",
+    "@expo-google-fonts/nunito": "^0.4.2",
     "@expo/ui": "~57.0.20",
     "@subca/shared": "workspace:*",
     "@supabase/supabase-js": "^2.117.2",

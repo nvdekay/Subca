@@ -9,13 +9,15 @@ export type TextProps = RNTextProps & {
   className?: string;
 };
 
-/** Chữ mặc định của app: Be Vietnam Pro, cỡ 15, màu ink. Dùng `weight` thay cho class font-bold. */
+/** Kiểu chữ duy nhất của app: Nunito; map weight tĩnh để đồng nhất iOS và Android. */
 export function Text({ weight = 'regular', tabular, className, style, ...props }: TextProps) {
   return (
     <RNText
       className={cn('text-[15px] leading-[22px] text-ink', className)}
       style={[
-        { fontFamily: fontFamily[weight] },
+        {
+          fontFamily: fontFamily[weight],
+        },
         tabular && { fontVariant: ['tabular-nums'] },
         style,
       ]}
