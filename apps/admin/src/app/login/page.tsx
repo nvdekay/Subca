@@ -16,7 +16,7 @@ import { supabase } from '@/lib/supabase';
 type Step = 'password' | 'mfa-enroll' | 'mfa-verify';
 
 /**
- * Đăng nhập admin bằng email + mật khẩu (tài khoản do OWNER tạo ở trang Nhân sự).
+ * Đăng nhập admin bằng email + mật khẩu; tên đăng nhập admin là bí danh cho tài khoản riêng.
  * Nếu máy chủ bật `ADMIN_REQUIRE_MFA`, API trả `MFA_REQUIRED` và trang chuyển sang bước TOTP.
  */
 export default function LoginPage() {
@@ -67,7 +67,7 @@ export default function LoginPage() {
     setBusy(true);
     setError(null);
     const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
+      email: email.trim().toLowerCase() === 'admin' ? 'admin-login@subca.app' : email.trim(),
       password,
     });
     setBusy(false);
@@ -99,7 +99,7 @@ export default function LoginPage() {
     <main className="flex min-h-full items-center justify-center p-6">
       <Card className="w-full max-w-[420px] p-6">
         <div className="mb-5 flex items-center gap-3">
-          <span className="grid size-9 place-items-center rounded-xl bg-ink text-sky">
+          <span className="grid size-9 place-items-center rounded-[6px] border-2 border-ink bg-brand text-ink shadow-(--shadow-card)">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -130,8 +130,8 @@ export default function LoginPage() {
         {step === 'password' ? (
           <>
             <p className="mb-4 text-[13.5px] text-ink-2">
-              Đăng nhập bằng tài khoản quản trị. Quên mật khẩu thì nhờ một OWNER đặt lại ở trang
-              Nhân sự.
+              Đăng nhập bằng tên admin hoặc email quản trị. Quên mật khẩu thì nhờ một OWNER đặt lại
+              ở trang Nhân sự.
             </p>
             <form
               onSubmit={(e) => {
@@ -140,12 +140,12 @@ export default function LoginPage() {
               }}
             >
               <Input
-                label="Email"
-                type="email"
+                label="Tên đăng nhập hoặc email"
+                type="text"
                 autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="ban@subca.app"
+                placeholder="admin hoặc ban@subca.app"
               />
               <Input
                 label="Mật khẩu"
@@ -161,7 +161,10 @@ export default function LoginPage() {
                 variant="primary"
                 className="mt-4 w-full"
                 loading={busy}
-                disabled={!email.includes('@') || password.length === 0}
+                disabled={
+                  !(email.trim().toLowerCase() === 'admin' || email.includes('@')) ||
+                  password.length === 0
+                }
               >
                 Đăng nhập
               </Button>

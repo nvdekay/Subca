@@ -35,3 +35,4 @@ apps/api/src/generated/
 
 # Thông tin đăng nhập admin sinh ra khi chạy scripts/create-admin.ts
 .admin-account.local
+.admin-account-*.local

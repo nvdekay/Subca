@@ -6,16 +6,23 @@
  * Sau khi có tài khoản đầu tiên, thêm admin khác ngay trong giao diện.
  *
  * Chạy: pnpm --filter @subca/api admin:create -- <email> ["Tên hiển thị"]
- * Mật khẩu sinh ngẫu nhiên và ghi vào `.admin-account.local` ở gốc repo (đã gitignore).
+ * Mặc định sinh mật khẩu ngẫu nhiên; có thể đặt ADMIN_CREATE_PASSWORD và
+ * ADMIN_CREATE_ROLE=ADMIN cho tài khoản dev riêng. Thông tin đăng nhập ghi vào
+ * `.admin-account*.local` ở gốc repo (đã gitignore).
  */
 import 'dotenv/config';
 import { randomBytes } from 'node:crypto';
-import { writeFileSync } from 'node:fs';
+import { chmodSync, writeFileSync } from 'node:fs';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client.js';
 
-const email = (process.argv[2] ?? 'admin@subca.app').trim().toLowerCase();
-const name = process.argv[3] ?? 'Quản trị viên';
+const args = process.argv.slice(2).filter((arg) => arg !== '--');
+const email = (args[0] ?? 'admin@subca.app').trim().toLowerCase();
+const name = args[1] ?? 'Quản trị viên';
+const role = process.env['ADMIN_CREATE_ROLE'] === 'ADMIN' ? 'ADMIN' : 'OWNER';
+if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  throw new Error('Email admin không hợp lệ');
+}
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({
@@ -33,7 +40,9 @@ function randomPassword(): string {
   return `Sb${body}7`;
 }
 
-const password = randomPassword();
+const password = process.env['ADMIN_CREATE_PASSWORD'] ?? randomPassword();
+if (password.length < 6)
+  throw new Error('Mật khẩu admin phải có ít nhất 6 ký tự');
 
 const existing = await prisma.$queryRaw<{ id: string }[]>`
   select id::text as id from auth.users where email = ${email} limit 1
@@ -69,7 +78,7 @@ if (existing[0]) {
     insert into auth.identities (provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
     values (
       ${userId}, ${userId}::uuid,
-      jsonb_build_object('sub', ${userId}, 'email', ${email}, 'email_verified', true),
+      jsonb_build_object('sub', ${userId}::text, 'email', ${email}::text, 'email_verified', true),
       'email', now(), now(), now()
     )
     on conflict do nothing
@@ -79,8 +88,8 @@ if (existing[0]) {
 
 const admin = await prisma.adminUser.upsert({
   where: { id: userId },
-  create: { id: userId, email, name, role: 'OWNER' },
-  update: { isActive: true, role: 'OWNER', name },
+  create: { id: userId, email, name, role },
+  update: { isActive: true, role, name },
 });
 console.log('admin_users:', {
   email: admin.email,
@@ -88,7 +97,10 @@ console.log('admin_users:', {
   isActive: admin.isActive,
 });
 
-const target = new URL('../../../.admin-account.local', import.meta.url);
+const target = new URL(
+  `../../../.admin-account${email === 'admin@subca.app' ? '' : `-${email.split('@')[0]}`}.local`,
+  import.meta.url,
+);
 writeFileSync(
   target,
   [
@@ -98,10 +110,11 @@ writeFileSync(
     `Vai trò:  ${admin.role}`,
     '',
   ].join('\n'),
-  'utf8',
+  { encoding: 'utf8', mode: 0o600 },
 );
+chmodSync(target, 0o600);
 console.log(
-  'Đã ghi thông tin đăng nhập vào .admin-account.local (gốc repo, đã gitignore).',
+  'Đã ghi thông tin đăng nhập vào file .admin-account*.local ở gốc repo.',
 );
 
 await prisma.$disconnect();

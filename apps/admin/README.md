@@ -12,7 +12,7 @@ pnpm --filter @subca/admin dev -- -p 3100 # http://localhost:3100 (API dùng c�
 
 ## Đăng nhập
 
-Đăng nhập bằng **email + mật khẩu** (tài khoản Supabase Auth). Email phải có trong bảng `admin_users` và đang bật, nếu không API trả `NOT_ADMIN`.
+Đăng nhập bằng **email + mật khẩu** (tài khoản Supabase Auth). Tên đăng nhập `admin` là bí danh phía web cho `admin-login@subca.app`; các tài khoản khác dùng email. Email phải có trong bảng `admin_users` và đang bật, nếu không API trả `NOT_ADMIN`.
 
 Tài khoản đầu tiên tạo bằng script (ghi thẳng vào `auth.users`, dùng được cả khi máy chủ chưa có service role key):
 
@@ -22,6 +22,8 @@ pnpm --filter @subca/api admin:create -- admin@subca.app "Tên hiển thị"
 ```
 
 Các tài khoản sau thêm ngay trong trang **Nhân sự & phân quyền** — cần `SUPABASE_SERVICE_ROLE_KEY` trong `apps/api/.env` (thiếu thì trang báo rõ và chỉ cho đổi vai trò / bật tắt).
+
+Script bootstrap cũng nhận `ADMIN_CREATE_ROLE=ADMIN` và `ADMIN_CREATE_PASSWORD` khi cần tạo tài khoản dev với mật khẩu chỉ định. Không ghi mật khẩu vào repo; file `.admin-account-<tên>.local` được gitignore.
 
 **Xác thực hai bước:** tắt mặc định để đăng nhập bằng mật khẩu. Đặt `ADMIN_REQUIRE_MFA=true` trong `apps/api/.env` (nên bật ở production) thì API trả `MFA_REQUIRED` và trang đăng nhập tự chuyển sang bước quét QR / nhập mã TOTP.
 
