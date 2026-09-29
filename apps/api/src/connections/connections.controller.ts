@@ -83,7 +83,7 @@ export class ConnectionsController {
     @CurrentUser() user: AuthUser,
     @Param('id', uuidParam) id: string,
   ): Promise<SyncRunDto> {
-    return this.connections.sync(user.id, id);
+    return this.connections.enqueueSync(user.id, id);
   }
 
   @Get('summary')

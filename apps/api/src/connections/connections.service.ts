@@ -6,7 +6,9 @@ import {
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bullmq';
 import { randomUUID } from 'node:crypto';
+import type { Queue } from 'bullmq';
 import type {
   ConnectedAccountDto,
   ConnectionsDto,
@@ -26,6 +28,7 @@ import {
   type MailProvider,
 } from '../integrations/mail/mail-provider.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { EMAIL_SYNC_QUEUE, type EmailSyncJob } from './email-sync.constants.js';
 
 /** Quét lần đầu lùi lại bao nhiêu tháng. */
 const INITIAL_WINDOW_MONTHS = 12;
@@ -55,6 +58,8 @@ export class ConnectionsService {
     @Inject(MAIL_PROVIDER) private readonly mail: MailProvider,
     private readonly secrets: SecretBox,
     private readonly detection: DetectionService,
+    @InjectQueue(EMAIL_SYNC_QUEUE)
+    private readonly syncQueue: Queue<EmailSyncJob>,
   ) {}
 
   async list(userId: string): Promise<ConnectionsDto> {
@@ -139,13 +144,68 @@ export class ConnectionsService {
   async sync(userId: string, accountId: string): Promise<SyncRunDto> {
     const account = await this.findOwned(userId, accountId);
     const kind = account.initialSyncDoneAt ? 'INCREMENTAL' : 'INITIAL';
-    const since = account.initialSyncDoneAt
-      ? (account.lastSyncAt ?? monthsAgo(1))
-      : monthsAgo(INITIAL_WINDOW_MONTHS);
+    const run = await this.prisma.emailSyncRun.create({
+      data: { accountId: account.id, kind, since: this.syncSince(account) },
+    });
+    return this.runSync(userId, account, run);
+  }
+
+  /** Tạo run và đưa quét vào BullMQ để API trả ngay, kể cả hộp thư lớn. */
+  async enqueueSync(userId: string, accountId: string): Promise<SyncRunDto> {
+    const account = await this.findOwned(userId, accountId);
+    const current = await this.prisma.emailSyncRun.findFirst({
+      where: { accountId, status: 'RUNNING' },
+      orderBy: { startedAt: 'desc' },
+    });
+    if (current) return toSyncDto(current);
 
     const run = await this.prisma.emailSyncRun.create({
-      data: { accountId: account.id, kind, since },
+      data: {
+        accountId,
+        kind: account.initialSyncDoneAt ? 'INCREMENTAL' : 'INITIAL',
+        since: this.syncSince(account),
+      },
     });
+    try {
+      await this.syncQueue.add(
+        'sync',
+        { userId, accountId, runId: run.id },
+        {
+          jobId: run.id,
+          removeOnComplete: { age: 7 * 24 * 3600, count: 10_000 },
+          removeOnFail: { age: 30 * 24 * 3600 },
+        },
+      );
+    } catch (error) {
+      await this.prisma.emailSyncRun.update({
+        where: { id: run.id },
+        data: {
+          status: 'FAILED',
+          error: message(error).slice(0, 500),
+          finishedAt: new Date(),
+        },
+      });
+      throw error;
+    }
+    return toSyncDto(run);
+  }
+
+  /** Worker BullMQ chạy một lượt đã tạo, ghi tiến độ sau từng trang Gmail. */
+  async processSyncRun(job: EmailSyncJob): Promise<SyncRunDto> {
+    const account = await this.findOwned(job.userId, job.accountId);
+    const run = await this.prisma.emailSyncRun.findFirst({
+      where: { id: job.runId, accountId: account.id, status: 'RUNNING' },
+    });
+    if (!run) throw new BadRequestException('Lượt quét không còn hoạt động');
+    return this.runSync(job.userId, account, run);
+  }
+
+  private async runSync(
+    userId: string,
+    account: ConnectedAccount,
+    run: EmailSyncRun,
+  ): Promise<SyncRunDto> {
+    const since = run.since ?? this.syncSince(account);
 
     try {
       const refreshToken = this.secrets.decrypt(account.encryptedRefreshToken);
@@ -168,6 +228,14 @@ export class ConnectionsService {
         scanned += result.scanned;
         candidates += result.candidates;
         events += result.events;
+        await this.prisma.emailSyncRun.update({
+          where: { id: run.id },
+          data: {
+            scannedCount: scanned,
+            candidateCount: candidates,
+            eventCount: events,
+          },
+        });
         pageToken = page.nextPageToken ?? undefined;
       } while (pageToken && scanned < MAX_MESSAGES_PER_RUN);
 
@@ -210,6 +278,12 @@ export class ConnectionsService {
       });
       return toSyncDto(failed);
     }
+  }
+
+  private syncSince(account: ConnectedAccount): Date {
+    return account.initialSyncDoneAt
+      ? (account.lastSyncAt ?? monthsAgo(1))
+      : monthsAgo(INITIAL_WINDOW_MONTHS);
   }
 
   /** Ngắt kết nối: thu hồi quyền ở Google rồi xóa hẳn token khỏi database. */

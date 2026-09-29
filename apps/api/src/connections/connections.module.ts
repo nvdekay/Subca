@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { BullModule } from '@nestjs/bullmq';
 import { ConfigService } from '@nestjs/config';
 import { SecretBox } from '../common/secret-box.js';
 import type { Env } from '../config/env.js';
@@ -7,14 +8,20 @@ import { GmailProvider } from '../integrations/mail/gmail.provider.js';
 import { MAIL_PROVIDER } from '../integrations/mail/mail-provider.js';
 import { ConnectionsController } from './connections.controller.js';
 import { ConnectionsService } from './connections.service.js';
+import { EMAIL_SYNC_QUEUE } from './email-sync.constants.js';
+import { EmailSyncProcessor } from './email-sync.processor.js';
 import { EmailSyncScheduler } from './email-sync.scheduler.js';
 
 @Module({
-  imports: [DetectionModule],
+  imports: [
+    DetectionModule,
+    BullModule.registerQueue({ name: EMAIL_SYNC_QUEUE }),
+  ],
   controllers: [ConnectionsController],
   providers: [
     ConnectionsService,
     EmailSyncScheduler,
+    EmailSyncProcessor,
     {
       provide: SecretBox,
       inject: [ConfigService],
