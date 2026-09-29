@@ -1,8 +1,8 @@
 # Subca — Project Knowledge Base
 
 > **Nguồn sự thật trung tâm cho Claude, Codex và người phát triển.**  
-> Cập nhật: **29/09/2026** · Snapshot code: `6f8e7fd` + commit tài liệu kế tiếp · Repo: `nvdekay/Subca`
-> Đợt Nunito, vintage mobile/Admin, bố cục mobile và intro đã tách thành 5 commit code. Khi vào session mới, đọc `git status` / `git log` để nhận biết thay đổi sau snapshot.
+> Cập nhật: **29/09/2026** · Snapshot commit: `5445d1d` · Repo: `nvdekay/Subca`
+> Đợt auth mật khẩu, chọn khoảng quét Gmail + bằng chứng email, palette thương hiệu mới và BackButton đã commit/push. Chạy `git status` / `git diff` để nhận biết thay đổi sau snapshot.
 
 ## 1. Cách dùng trong một session mới
 
@@ -35,20 +35,35 @@ Subca là ứng dụng quản lý subscription cá nhân, ưu tiên người tr�
 
 ## 3. Hiện trạng ngắn gọn
 
-### Cập nhật triển khai Mobile V2 và vintage UI (29/09/2026)
+### Cập nhật triển khai Mobile V2 và editorial/bento UI (29/09/2026)
 
 - Tham chiếu UX: `design/Subca V2.html` (24 trạng thái; gồm cả demo controls và màn minh họa). Mobile tabs đang chuyển sang Trang chủ / Gói của tôi / Cần chú ý / Phân tích; Lịch và Review vẫn giữ làm route phụ, các màn nhóm/ngân sách/thanh toán/thông báo/hồ sơ không bị bỏ.
-- Intro trước đăng nhập mới: chữ “Xin chào.” lớn ở giữa → gom gói đăng ký → nhắc gia hạn → tổng quan chi tiêu/chia tiền. Lời chào tự chuyển sau 3 giây một lần; ba cảnh còn lại người dùng tự bấm tiếp/quay lại. Có bỏ qua/đăng nhập ở mọi cảnh. Giữ nguyên OTP → kết nối Gmail → xác nhận đã kết nối → scan → summary; tài khoản đã có phiên không bị buộc xem lại intro, có thể bỏ qua Gmail hoặc tự thêm gói.
-- Intro nằm tại `apps/mobile/src/features/onboarding/intro.tsx` và `intro-art.tsx`, route auth index chỉ re-export. Dùng Reanimated hiện có, minh hoạ code-native, không thêm dependency/API. Tắt tự chuyển và animation khi Reduce Motion; tắt tự chuyển khi screen reader; timer được dọn khi blur/background/unmount. Nội dung cuộn được và CTA nằm ngoài vùng cuộn.
+- Intro trước đăng nhập mới: chữ “Xin chào.” lớn ở giữa → gom gói đăng ký → nhắc gia hạn → tổng quan chi tiêu/chia tiền. Lời chào tự chuyển sau 3 giây một lần; ba cảnh còn lại người dùng tự bấm tiếp/quay lại. Có bỏ qua/đăng nhập ở mọi cảnh. Tiếp sau intro: chọn đăng nhập email+mật khẩu hoặc đăng ký qua email OTP một lần → tạo mật khẩu Subca → kết nối Gmail → xác nhận đã kết nối → scan → summary. Đăng nhập thường không gửi OTP. Đặt lại mật khẩu/di chuyển tài khoản cũ OTP-only dùng OTP recovery; không tự động phân biệt email đã có tài khoản trên màn email để tránh lộ membership. Tài khoản có phiên được đưa tới bước tạo mật khẩu nếu đang hoàn thành đăng ký; nếu có dữ liệu thì vào tabs.
+- Luồng auth code mobile: `(auth)/sign-in.tsx`, `(auth)/verify.tsx`, `set-password.tsx`; password calls và marker pending nằm ở `features/auth/password-flow.ts` + `password.ts`; session gate ở `features/auth/session.tsx`. Chỉ lưu email pending được xác minh trong encrypted MMKV, không lưu password. Password dùng Supabase Auth `signInWithPassword`/`updateUser`; không thêm API/migration/dependency. OTP `shouldCreateUser` chỉ bật signup, recovery không tự tạo user. Thực tế gửi email/reset vẫn cần Supabase Email OTP provider/SMTP cấu hình.
+- Mobile đang chuyển từ vintage mềm sang phong cách editorial/bento theo ảnh tham chiếu: nền giấy sáng, mực navy-charcoal, viền dày, góc vuông gọn, bóng cứng offset; cam, xanh nhạt, mint, peach làm mảng nhấn. Card và control dùng chung nhận diện mới; logo dịch vụ ngoài giữ màu nhận diện. Admin chưa được đổi trong lượt này.
+- Intro nằm tại `apps/mobile/src/features/onboarding/intro.tsx` và `intro-art.tsx`, route auth index chỉ re-export. Dùng Reanimated hiện có, minh hoạ code-native, không thêm dependency/API. Tắt tự chuyển và animation khi Reduce Motion; tắt tự chuyển khi screen reader; timer được dọn khi blur/background/unmount. Nội dung cuộn được và CTA nằm ngoài vùng cuộn. Màn “Xin chào.” không còn logo Subca ở góc trên trái.
+- Tinh chỉnh intro: bỏ biểu tượng sao trên “Xin chào.”; cảnh gom gói dùng `intro-phone.tsx` với nửa trên khung điện thoại, thẻ dịch vụ xuất hiện bên trong màn hình. Cảnh bức tranh chi tiêu dùng biểu đồ nhiều màu hơn trong palette hiện có; cảnh nhắc gia hạn có header tint coral và số ngày/icon chuông màu cam. Đã kiểm tra ảnh lời chào và khung điện thoại trên iOS Simulator; mobile typecheck/lint qua trước tinh chỉnh màu nhắc.
+- Màn đăng nhập email+mật khẩu dùng icon eye/eye-off nằm trong ô mật khẩu qua slot `right` của `components/ui/input.tsx`, không còn nút ghost tách riêng bên dưới.
+- Chuyển giữa đăng nhập/đăng ký/khôi phục mật khẩu có hiệu ứng trượt nhẹ bằng Reanimated; tự tắt khi Reduce Motion bật.
+- Nút quay lại mobile thống nhất qua `components/ui/back-button.tsx`: IconButton 44×44, bo 12, nền giấy, viền mảnh, cùng icon/màu/bóng/pressed state. Áp dụng qua TopBar cho màn con/auth, intro, các bước Gmail và trạng thái lỗi chi tiết gói. Nút đóng modal giữ icon X nhưng cùng style; mũi tên chuyển tháng không phải back navigation nên không đổi.
 - QA intro: mobile typecheck/lint qua; xem ảnh cả bốn cảnh trên iPhone 17 Pro Simulator, xác nhận greeting tự chuyển sang cảnh đầu. Chưa kiểm thử thao tác từng nút, VoiceOver/Reduce Motion và Android trên thiết bị; trạng thái preview tạm đã khôi phục về bước 0.
-- Đang áp dụng vintage style trên mobile và Admin: nền giấy kem có hạt SVG rất nhẹ, olive/dusty red/brass, viền mảnh và bóng nâu dịu, góc bo tiết chế; Nunito đồng nhất tiêu đề/nội dung (weights 400–800), hỗ trợ tiếng Việt. Không gradient, không đổi nghiệp vụ.
+- Mobile giữ nền giấy sáng và Nunito weights 400–800, nhưng chuyển sang viền đậm/góc gọn/bóng offset như ảnh tham chiếu; Admin vẫn giữ vintage style hiện tại. Không gradient, không đổi nghiệp vụ.
 - Font: mobile nạp Nunito từ `@expo-google-fonts/nunito` trước khi ẩn splash; admin dùng `next/font/google` với subset `latin` + `vietnamese`. Font Nunito theo OFL-1.1.
 - Đợt product-architecture redesign mobile: thanh tab có 4 đích chính cân quanh CTA thêm ở giữa; dashboard ưu tiên tổng chi → việc cần xác nhận → mốc tiếp theo → ngân sách → lối tắt; Inbox đưa số việc chờ xử lý lên đầu; analytics đặt tổng chi và xu hướng trước phần phân tích phụ. Header màn con dùng căn trái; form tạo gói gom tuỳ chọn ít dùng vào phần mở rộng (edit để mở sẵn), chi tiết gói đưa thao tác chính lên gần đầu trang.
+- Trang chủ có phân cấp tổng chi → việc cần xác nhận → mốc tiếp theo → ngân sách → lối tắt; phần tổng quan bỏ nền charcoal lớn, dùng số tiền lớn trên nền sáng và ba ô chỉ số màu pastel viền mực/bóng cứng. Không thêm số liệu so sánh tháng trước vì API chưa cung cấp.
 - Mobile tokens tập trung tại `apps/mobile/src/theme/tokens.json`; component dùng chung đã được làm mới gồm `Text`, `Card`, `Button`, `Input`, tab navigation, segmented, pill, sheet, date/search controls. Admin tokens và form states nằm trong `apps/admin/src/app/globals.css` + `src/components/ui.tsx`.
 - Subscription DTO list/detail bổ sung source, detection state, confidence, needsReview, reviewReason, lastDetectedAt và evidenceCount để UI nêu nguồn/bằng chứng. Dữ liệu này lấy từ bảng/event hiện có.
 - `POST /connections/:id/sync` dùng BullMQ; run được lưu trước khi enqueue và tiến độ scanned/candidate/event cập nhật mỗi trang Gmail. Không đổi schema/migration; Redis cần chạy. Scheduler định kỳ vẫn có luồng riêng.
+- Tóm tắt lượt quét trả `runId`; onboarding dùng ID này để tránh nhận nhầm trạng thái cũ, tự khôi phục lượt quét đầu đang chạy sau khi mở lại app và hiển thị retry khi worker thất bại. API/DB/Redis local khỏe. `apps/api/.env` đã có các biến OAuth/`SECRETS_KEY` và `PUBLIC_API_URL` trỏ tới Cloudflare Quick Tunnel tạm; public `/health` trả DB up và callback trả HTTP 200. API đã restart và OAuth tới được Google; hiện Google trả 403 vì tài khoản đăng nhập chưa nằm trong Test users của project Testing.
+- Màn kết nối hộp thư và onboarding dùng chung thẻ tiến độ scan nhiều màu, thanh tiến độ indeterminate, trạng thái theo giai đoạn và số đếm email đọc/email liên quan. Không hiển thị phần trăm vì Gmail không cung cấp trước tổng số email; màn kết nối giữ sẵn chỗ cho thẻ trong lúc tải và kích thước thẻ ổn định khi polling để tránh nội dung bị đẩy xuống.
+- Trước lượt quét Gmail thủ công, người dùng chọn 1/3/6/12 tháng (mặc định 3); API áp phạm vi vào Gmail `after:` query và lưu mốc vào `EmailSyncRun.since`. Scheduled incremental vẫn quét từ `lastSyncAt`; mỗi lượt giới hạn tối đa 400 email và UI nêu rõ điều này. Chưa QA Gmail thật với các lựa chọn thời gian.
+- Thẻ hộp thư thể hiện trạng thái kết nối thành công bằng pill xanh lá; thao tác ngắt kết nối dùng nút danger đỏ nhạt với chữ đỏ để phân biệt hành động phá huỷ quyền truy cập.
+- Thẻ kết quả scan trên màn Kết nối hộp thư tách các số trạng thái (hoạt động/dùng thử/đã hủy) khỏi số cần kiểm tra. `needsReview` có thể trùng với các trạng thái và UI ghi rõ số này đã nằm trong tổng, tránh người dùng cộng nhầm.
+- Màn Kết nối hộp thư tách spinner kéo xuống do người dùng chủ động khỏi refetch polling tiến độ 3 giây; chỉ thao tác kéo tay mới bật `RefreshControl`, tránh màn tự nảy trong lúc quét. Chi tiết subscription có thẻ “Nguồn phát hiện” với domain/ngày nhận email và liên kết mở thread Gmail khi metadata có sẵn. Event mới lưu thêm `threadId` và `receivedAt` trong JSON metadata; không lưu sender email, subject gốc hay body. Event cũ vẫn hiện nguồn/domain nếu có nhưng không bịa ngày nhận hoặc link Gmail.
 - Prototype giả lập OCR ảnh và email forwarding; chưa có backend/API cho các luồng đó nên không giả làm tính năng thật. Prototype có analytics theo category nhưng quyết định sản phẩm hiện tại là bỏ category, không đưa lại.
-- Kiểm tra trước commit/push: Turbo build/typecheck/test/lint toàn repo qua 12/12 tác vụ (không cache); shared 88 test, API 122 unit + 60 e2e; Prisma validate và Prettier trên file được Git theo dõi đều qua. Intro đã xem trên iOS Simulator; còn QA typography/các màn khác trên iOS/Android/Admin và integration DB thật. Prettier toàn thư mục chỉ cảnh báo file cá nhân bị Git ignore `.claude/settings.local.json`, giữ nguyên và không commit file đó.
+- Kiểm tra đợt auth/palette: mobile typecheck/lint qua sau tinh chỉnh intro/sign-in; Admin typecheck/lint/build qua. iOS Simulator đã mở được màn intro sau đổi palette. Chưa kiểm thử đăng ký/OTP/password với tài khoản Supabase thật, chưa QA màn auth/màn khác trên Android và accessibility. Trước khi push đợt này: Turbo build/typecheck/test/lint 12/12, shared 88 test, API 122 unit + 60 e2e, Prisma validate, Prettier và `git diff --check` qua.
+- Kiểm tra sửa scan/source: shared build, API/mobile typecheck, API/mobile lint và `git diff --check` đều qua; chưa chạy test theo quy định của session.
+- Kiểm tra giao diện editorial/bento: mobile typecheck/lint và `git diff --check` qua; chưa xem được ảnh simulator do CoreSimulatorService không kết nối được trong phiên.
 - Kiểm tra local khi mở app: `GET /health` trả `{"status":"ok","db":"up"}`, Redis healthy, Metro báo running trên 8081; app build/cài/mở được trên iPhone 17 Pro Simulator (iOS 26.2). Build đầu với prebuilt React thất bại vì thiếu binary; build thành công sau `pod install` với `RCT_USE_RN_DEP=0 RCT_USE_PREBUILT_RNCORE=0`. Đây là trạng thái máy dev, không phải bảo đảm các thiết bị/CI khác.
 
 ### Đã hoạt động
@@ -63,12 +78,12 @@ Subca là ứng dụng quản lý subscription cá nhân, ưu tiên người tr�
 
 ### Đang ở đâu
 
-Các chức năng lõi subscription, reminder, nhóm và Admin v1 đã có. Mobile V2 chạy trên iOS Simulator; vintage UI đang được áp dụng, build Admin đã qua nhưng chưa QA từng route bằng trình duyệt. Chưa xác nhận Gmail thật, chưa QA Android/push thật, chưa phát hành. Trọng tâm tiếp theo: QA toàn bộ màn vintage trên iOS/Android/Admin, OAuth/Gmail thật + kiểm thử scan/inbox, bảo mật/pháp lý, EAS/store và beta.
+Các chức năng lõi subscription, reminder, nhóm và Admin v1 đã có. Mobile đang áp dụng editorial/bento, scan onboarding đã có retry cho run lỗi; API/Redis local khỏe trong phiên 29/09/2026. Chưa xác nhận Google OAuth/Gmail thật, chưa QA Android/push thật, chưa phát hành. Trọng tâm tiếp theo: cấu hình OAuth Gmail thử nghiệm và QA onboarding → scan → summary → Inbox, sau đó QA editorial mobile trên iOS/Android cùng Admin, bảo mật/pháp lý, EAS/store và beta.
 
 ### Blocker/việc cần chủ dự án xử lý
 
 1. Xác minh/hoàn tất xoay thông tin đăng nhập dev từng bị lộ (database và Gmail SMTP); không ghi secret mới vào repo/chat. Trước production chuyển SMTP sang Resend + domain riêng.
-2. Cấu hình/xác minh Google OAuth Web client, redirect URI, `SECRETS_KEY` và Gmail `gmail.readonly`; xin CASA trước khi mở rộng theo ngưỡng của Google.
+2. Đang chặn QA Gmail thật: thêm tài khoản thử nghiệm hiện tại vào Google Auth Platform → Audience → Test users rồi thử consent/scan; callback Quick Tunnel đã truy cập được. Khi Quick Tunnel đổi host phải cập nhật cả `PUBLIC_API_URL` lẫn redirect URI. Go-live phải thay tunnel bằng hostname HTTPS ổn định, cấu hình redirect URI production riêng, lưu secrets production an toàn và hoàn tất yêu cầu xác minh/CASA của Google.
 3. Thêm/xác minh `SUPABASE_SERVICE_ROLE_KEY` ở API để xóa tài khoản và thao tác admin cần Supabase Admin API.
 4. Đăng ký Apple Developer / Google Play và RevenueCat khi chốt phát hành, sign-in store, push thiết bị thật và thanh toán.
 5. Tạo môi trường production ở Singapore; dev hiện ở Tokyo.
@@ -78,7 +93,7 @@ Các chức năng lõi subscription, reminder, nhóm và Admin v1 đã có. Mobi
 
 1. Test đầy đủ onboarding → OAuth → enqueue scan → progress/summary → Inbox trên tài khoản Gmail thử nghiệm; xử lý retry, queue unavailable, mở app lại khi run còn chạy.
 2. Xác minh/xoay secrets dev, chạy luồng xóa tài khoản thật, rà privacy disclosure/policy và CASA.
-3. QA Android + iOS thật/simulator, push notifications, accessibility và edge states; sửa các lỗi phát hiện được.
+3. QA editorial UI trên Android + iOS thật/simulator, push notifications, accessibility và edge states; sửa các lỗi phát hiện được.
 4. Cấu hình Sentry/PostHog, `eas.json`, development/preview builds; sau khi có tài khoản thì TestFlight / Google Play Internal testing.
 5. Production hosting/DB/Redis Singapore, backup, domain, privacy policy, terms và support.
 6. RevenueCat/Subca Plus, deep link mời nhóm và admin pages còn thiếu là các hạng mục sau MVP.
@@ -86,7 +101,7 @@ Các chức năng lõi subscription, reminder, nhóm và Admin v1 đã có. Mobi
 ## 4. Bản đồ codebase
 
 | Khu vực | Vai trò | Stack/trạng thái |
-| --- | --- | --- |
+| ----------------- | ---------------------- | --------------------------------------------------------------- |
 | `apps/api` | API và background jobs | NestJS 12, Fastify, Prisma 7.10, BullMQ 6, Redis, ESM |
 | `apps/mobile` | App iOS/Android | Expo SDK 57, RN 0.86, Expo Router, NativeWind 4, TanStack Query |
 | `apps/admin` | Admin Console | Next.js 16, React 19, Tailwind 4, TanStack Query |
@@ -104,14 +119,14 @@ Mobile routes hiện có: auth/OTP; `welcome`; 4 tabs (home/subscriptions/inbox/
 Các endpoint dưới đây đều qua API NestJS (không gọi DB trực tiếp từ app):
 
 | Màn/luồng | API chính | Ghi chú |
-| --- | --- | --- |
+| ----------------------------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | Onboarding và trạng thái người dùng | `GET /me`, `GET /subscriptions`, `GET /connections`, `GET /connections/summary` | Bỏ qua onboarding khi đã có gói/kết nối |
 | Kết nối Gmail | `POST /connections/gmail/start`, callback `GET /connections/gmail/callback` | OAuth; token chỉ ở server |
 | Quét email | `POST /connections/:id/sync`, `GET /connections/summary` | POST trả run ngay; summary polling 3 giây khi RUNNING |
 | Trang chủ | `GET /home`, `GET /me`, `GET /inbox` | Tổng tháng, sắp gia hạn, profile và việc cần xác nhận |
 | Danh sách gói | `GET /subscriptions`, `GET /catalog/services` | List có source/confidence/evidence count; catalog phục vụ form |
 | Thêm/sửa/ẩn gói | `POST /subscriptions`, `PATCH /subscriptions/:id`, `DELETE /subscriptions/:id` | CRUD hiện hữu |
-| Chi tiết gói | `GET /subscriptions/:id` | Detail có thông tin thanh toán, cancel guide, charges; event timeline chưa có endpoint riêng |
+| Chi tiết gói | `GET /subscriptions/:id` | Detail có thông tin thanh toán, cancel guide, charges và tối đa 5 email evidence; event timeline chưa có endpoint riêng |
 | Cần chú ý (Inbox) | `GET /inbox`, `POST /inbox/:id/resolve` | Action theo loại item; invalidate home/list/analytics |
 | Phân tích | `GET /analytics` | Không hiển thị breakdown theo category |
 | Lịch/nhắc/đánh giá | `GET /calendar`, `GET /reminders`, `GET /reviews` | Route phụ còn được bảo toàn; quyết định review dùng `PUT /reviews/:subscriptionId` |
@@ -216,16 +231,19 @@ pnpm install
 docker compose up -d
 
 # Kiểm tra giống CI; gọi turbo trực tiếp để tránh pnpm 11 tự kiểm dependency khi chạy song song
+
 ./node_modules/.bin/turbo run build typecheck test lint
 ./node_modules/.bin/prettier --check .
 pnpm --filter @subca/api exec prisma validate
 
 # Chạy ứng dụng
+
 pnpm --filter @subca/api dev
 pnpm --filter @subca/mobile dev
 pnpm --filter @subca/admin dev
 
 # DB và integration
+
 pnpm --filter @subca/api prisma:deploy
 pnpm --filter @subca/api prisma:seed
 pnpm --filter @subca/api test:int

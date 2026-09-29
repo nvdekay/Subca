@@ -6,7 +6,7 @@
 
 ### Hiện trạng (đối chiếu working tree 29/09/2026)
 
-**Đang ở:** Luồng lõi, chia tiền nhóm và Admin Console v1 đã có. Mobile theo flow auto-first `Subca V2`, giao diện mobile/admin dùng vintage giấy–olive–brass với Nunito. Gmail detection code + queue đã có, nhưng kết nối/scan bằng Gmail thật và QA toàn luồng chưa được xác nhận. App đã build/mở trên iPhone 17 Pro Simulator; cần QA lại typography trên iOS/Android/Admin, chưa phát hành store.
+**Đang ở:** Luồng lõi và Admin Console v1 đã có. Mobile theo flow auto-first `Subca V2`, Nunito và style editorial/bento nền sáng với viền mực, bóng offset, điểm nhấn cam/pastel; auth chuyển sang password-first, OTP cho đăng ký/recovery. Gmail detection + queue đã có nhưng Gmail thật và flow auth/password mới chưa được xác nhận. App đã chạy trên iPhone 17 Pro Simulator; QA Android/accessibility và chưa phát hành store.
 
 **Đã có trong repo**
 - Monorepo pnpm/Turborepo; Expo SDK 57 + RN 0.86; NestJS 12/Fastify; Next.js 16; Prisma 7.10; shared package. Database schema có 31 Prisma models và 5 migration files.
@@ -18,7 +18,7 @@
 - Local đã xác minh tại thời điểm cập nhật: API `GET /health` → `status: ok`, `db: up`; Redis healthy; Metro 8081; iPhone 17 Pro Simulator booted với app `app.subca` cài/mở.
 
 **Còn chờ bên ngoài / chưa xác minh**
-1. OAuth Google/Gmail thật: credentials, callback, scan hộp thư thật và quy trình Google/CASA.
+1. OAuth Google/Gmail thật: credentials và callback Quick Tunnel đã cấu hình; API đã restart; thêm tài khoản thử nghiệm vào Audience → Test users để vượt 403, rồi xác nhận scan hộp thư thật và quy trình Google/CASA.
 2. Xác minh trạng thái rotate secrets dev từng bị lộ; service-role key API để test xóa tài khoản và các thao tác quản trị cần Supabase Admin API.
 3. Tài khoản store, EAS build profiles, push trên thiết bị thật và RevenueCat khi bắt đầu làm Plus.
 4. Production Supabase/API/Redis ở Singapore; domain, SMTP Resend, privacy policy/terms và support.
@@ -36,15 +36,25 @@
 ## A. Thiết kế & prototype
 
 - [x] Phân tích prototype `design/Subca V2.html`; đổi mobile primary tabs thành Trang chủ / Gói của tôi / Cần chú ý / Phân tích; giữ Lịch, Review và các tính năng phụ dưới route riêng
-- [x] Chuyển mobile/admin sang vintage style: nền giấy kem, olive, dusty red, brass; Nunito thân thiện cho tiêu đề/nội dung, texture nhẹ, viền/bóng thống nhất; không gradient
+- [x] Chuyển Admin sang vintage style; mobile sau đó chuyển tiếp sang editorial/bento style nền sáng, viền mực dày và bóng offset; Nunito giữ chung
 - [x] Thay typography toàn hệ thống sang Nunito weights 400–800, tải subset tiếng Việt cho mobile và Admin
 - [x] Intro trước đăng nhập: “Xin chào.” lớn, ba cảnh giới thiệu với animation theo lớp, tiến độ, quay lại/bỏ qua/đăng nhập; giữ OTP/Gmail, hỗ trợ Reduce Motion và không tự chuyển khi dùng screen reader
+- [x] Đăng nhập email/mật khẩu; OTP chỉ cho đăng ký và khôi phục/thiết lập mật khẩu; recovery không tự tạo tài khoản và không công khai dò email đã đăng ký
+- [x] Lập bảng màu charcoal/slate/orange dùng trước đây; mobile hiện dùng lại navy-charcoal, cam và pastel ngữ nghĩa theo editorial palette, Admin giữ bảng cũ
+- [ ] QA đăng ký lần đầu → OTP → tạo password → đăng xuất/đăng nhập lại và reset password trên Supabase thật
+- [x] Bỏ sao trên lời chào; đưa minh hoạ gom gói vào nửa khung điện thoại; thống nhất nút back mobile qua BackButton dùng chung
 - [ ] QA intro trên Android, màn hình nhỏ/chữ lớn và VoiceOver/Reduce Motion; kiểm thử thao tác toàn luồng từ intro đến OTP/Gmail
 - [x] Product redesign mobile: ưu tiên dashboard theo việc cần làm, tổng quan analytics, Inbox queue, top-level CTA, trang danh sách/empty state, header trang con và phân nhóm form thêm/sửa
+- [x] Làm mới Trang chủ theo hệ phân cấp thị giác: tổng chi nổi bật, gia hạn gần nhất, việc cần chú ý, ngân sách và lối tắt nhiều màu có thứ bậc
+- [x] Chuyển mobile sang editorial/bento: nền giấy sáng, viền dày, bóng offset, góc gọn; bỏ hero tổng chi nền tối lớn và làm lại card/control dùng chung
 - [x] Thêm metadata nguồn phát hiện/độ tin cậy/số bằng chứng vào DTO subscription để UI có thể giải thích dữ liệu
+- [x] Chống nảy màn Kết nối hộp thư khi polling và dẫn nguồn email từ chi tiết subscription về đúng thread Gmail
 - [x] Chuyển yêu cầu quét Gmail sang BullMQ, trả run ngay và ghi tiến độ theo trang
 - [x] Hoàn thiện onboarding nhiều bước sau đăng nhập theo V2, gồm kết nối Gmail → scan → summary → vào app
-- [ ] Thiết kế trải nghiệm xử lý scan lỗi/Redis không khả dụng và xác nhận run tồn tại khi app mở lại
+- [x] Onboarding khôi phục lượt scan đầu đang chạy sau khi mở lại app, đối chiếu summary theo run ID và cho thử lại khi run thất bại
+- [x] Làm rõ trạng thái scan bằng thanh tiến trình indeterminate, giai đoạn xử lý và bộ đếm email; giữ khung tiến độ ổn định khi polling
+- [x] Cho người dùng chọn phạm vi quét Gmail 1/3/6/12 tháng; API lọc từ mốc đã chọn và giữ giới hạn 400 thư mỗi lượt
+- [ ] QA scan lỗi khi Redis không khả dụng và xác nhận luồng Gmail thật trên tài khoản thử nghiệm
 - [ ] Không đưa OCR ảnh, email forwarding giả lập hoặc analytics category vào app khi API/quyết định sản phẩm chưa hỗ trợ
 
 - [x] Mockup app mobile, 16 màn: Onboarding, Trang chủ, Danh sách, Thêm, Chi tiết, Lịch, Trial, Đánh giá, Phân tích, Ngân sách, Thanh toán, Chia tiền nhóm, Chi tiết nhóm, Subca Plus, Thông báo, Cài đặt
@@ -137,6 +147,7 @@
 > Mốc thời gian (tuần 1–16) tính cho team 2 người: 1 mobile (React Native), 1 backend/admin. Nếu chỉ có 1 người làm toàn bộ thì tính khoảng 5–6 tháng, hoặc dời chia tiền nhóm sang bản 1.1.
 
 ### Tài khoản (làm ngay, có khâu chờ lâu)
+
 - [ ] **Apple Developer** (99 USD/năm), nếu đăng ký dưới tên công ty thì cần số D-U-N-S (1–2 tuần)
 - [ ] Google Play Console (25 USD)
 - [ ] RevenueCat
@@ -148,6 +159,7 @@
 - [ ] Tên miền `subca.app` + email tên miền
 
 ### Codebase
+
 - [x] Tạo monorepo Turborepo + pnpm (`apps/mobile`, `apps/api`, `apps/admin`, `packages/shared`)
 - [x] Khởi tạo app Expo (TypeScript, Expo Router), đặt bundle ID / application ID `app.subca`
 - [ ] Cấu hình `eas.json`: profile `development` / `preview` / `production`, kênh EAS Update tương ứng
@@ -157,6 +169,7 @@
 - [ ] 3 môi trường: dev / staging / prod, quản lý biến môi trường và secrets
 
 ### Dữ liệu & logic lõi
+
 - [x] Kết nối Supabase dev: `apps/api/.env` (DATABASE_URL pooler 6543 + DIRECT_URL 5432), `prisma migrate deploy` đã chạy 2 migration
 - [x] Kiểm tra trên Supabase: 26/26 bảng bật RLS, 2 trigger trên `auth.users`, `anon`/`authenticated` không có quyền đọc, API `/health` → `db: up`
 - [ ] Test trigger đăng ký thật: tạo user ở Authentication → Users, kiểm tra profile + settings + 4 quy tắc nhắc mặc định, xóa user kiểm tra dọn dữ liệu
@@ -178,6 +191,7 @@
 - [x] Schema zod + kiểu dữ liệu dùng chung cho mobile, API và admin (`packages/shared`)
 
 ### Pháp lý
+
 - [ ] Chính sách quyền riêng tư (bắt buộc để lên store)
 - [ ] Điều khoản sử dụng
 - [ ] Rà soát Nghị định 13/2023 và Luật Bảo vệ dữ liệu cá nhân (xác nhận lại ngày hiệu lực với người làm pháp lý)
@@ -260,6 +274,7 @@
 ## G. Giai đoạn 3: Kiếm tiền + chia tiền nhóm → Ra mắt (tuần 13–16)
 
 ### Subca Plus
+
 - [ ] Tạo sản phẩm trên App Store Connect và Google Play: Tháng 29.000đ, Năm 199.000đ, Trọn đời 399.000đ
 - [ ] Dùng thử 7 ngày cho gói Tháng và Năm
 - [ ] RevenueCat (`react-native-purchases`) + webhook → bảng `entitlements`
@@ -270,6 +285,7 @@
 - [ ] Khôi phục giao dịch
 
 ### Chia tiền nhóm
+
 - [x] Tạo nhóm từ subscription, chọn số người (2–6) — API `POST /groups` + sheet trong app (giới hạn 1 nhóm với gói Free)
 - [x] Chia đều / tùy chỉnh, kiểm tra tổng khớp giá gói (`PUT /groups/:id/split`, lệch thì báo còn thiếu / đang dư)
 - [ ] Link mời `subca.app/j/...`: Expo Router + Universal Links (file `apple-app-site-association`) + Android App Links (file `assetlinks.json`) _(API đã sinh mã mời + `POST /groups/join`; app nhập mã bằng tay — deep link chờ tên miền `subca.app`)_
@@ -280,6 +296,7 @@
 - [ ] Chia gói theo năm / quý (hiện chỉ thu theo tháng)
 
 ### Admin v1
+
 - [x] Đăng nhập admin bằng **email + mật khẩu** (Supabase Auth) + phân quyền theo vai trò trong `admin_users` (OWNER / ADMIN / SUPPORT / MARKETING / VIEWER). MFA TOTP giữ nguyên nhưng thành cờ `ADMIN_REQUIRE_MFA` (mặc định tắt) — **bật khi lên production**
 - [x] Người dùng (tìm kiếm, lọc gói và trạng thái, chi tiết, khóa / mở khóa, tặng Plus, xóa dữ liệu)
 - [ ] Doanh thu (lấy từ RevenueCat) — chờ tài khoản RevenueCat + store
@@ -294,6 +311,8 @@
 - [ ] Các trang còn lại của mockup: thông báo & chiến dịch, hỗ trợ, tăng trưởng & giữ chân (cohort cần PostHog), gói & khuyến mãi (mã khuyến mãi cần Subca Plus)
 
 ### Ra mắt
+
+- [ ] Go-live Gmail OAuth: thay Quick Tunnel dev bằng API hostname HTTPS ổn định; đặt `PUBLIC_API_URL` production và thêm chính xác `${PUBLIC_API_URL}/connections/gmail/callback` vào OAuth Web Client production; cấu hình secrets riêng trong secret manager; hoàn tất consent screen, xác minh scope/CASA và chạy thử OAuth → scan → Inbox trước phát hành
 - [ ] Ảnh chụp màn hình + mô tả trên store (ASO: "quản lý subscription", "nhắc gia hạn", "hủy đăng ký")
 - [ ] Nộp duyệt App Store + Google Play (dự trù 1–2 tuần, nhất là phần mua trong app)
 - [ ] Trang hỗ trợ + email hỗ trợ
@@ -313,7 +332,7 @@
 - [ ] Thanh toán web qua MoMo / ZaloPay / thẻ (kiểm tra quy định store trước)
 - [ ] Đọc biến động số dư ngân hàng (chỉ Android)
 - [x] Đọc hóa đơn trong Gmail — **đã dựng xong đường ống** (quét → lọc → parse → sự kiện → đối soát → subscription + Inbox), chạy được với hộp thư mẫu
-- [ ] Nối Gmail thật: tạo OAuth client trong Google Cloud, điền `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `SECRETS_KEY`
+- [ ] Nối Gmail thật: bật Gmail API, tạo OAuth Web client, thêm tài khoản thử nghiệm, khai báo callback `${PUBLIC_API_URL}/connections/gmail/callback`, cấu hình local (không commit secret); hiện cần lưu URI Quick Tunnel và restart API
 - [ ] **Thẩm định bảo mật của Google (CASA)** cho scope `gmail.readonly` — bắt buộc trước khi mở quá 100 người dùng thử; tốn vài tuần và có phí
 - [x] Mở rộng parser: danh mục ~65 merchant (mọi `serviceSlug` có unit test đối chiếu seed) và tách hóa đơn gộp Apple / Google Play / ví điện tử thành nhiều dịch vụ
 - [ ] Lớp LLM cho email lạ (đã chừa chỗ trong `parser.ts`); thêm merchant theo email thật của người dùng thử
