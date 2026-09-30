@@ -23,16 +23,14 @@ const stories = [
     detail: 'Tự tìm từ email hoặc thêm gói theo cách của bạn.',
   },
   {
-    label: 'CHỦ ĐỘNG HƠN',
-    title: 'Đến hẹn,\nđã có lời nhắc.',
-    detail:
-      'Theo dõi ngày gia hạn và hạn dùng thử. Có thêm thời gian để quyết định giữ lại hay dừng một gói.',
+    label: '',
+    title: 'Đến hạn,\nSubca nhắc bạn.',
+    detail: 'Biết trước ngày gia hạn để chủ động giữ hay dừng.',
   },
   {
-    label: 'NHẸ ĐẦU HƠN',
-    title: 'Hiểu khoản chi.\nThảnh thơi tận hưởng.',
-    detail:
-      'Xem chi tiêu, đặt ngân sách và chia tiền gói chung. Những khoản nhỏ cũng trở nên rõ ràng.',
+    label: '',
+    title: 'Chi tiêu rõ,\nnhẹ đầu hơn.',
+    detail: 'Xem tổng chi và chia tiền gói chung trong một nơi.',
   },
 ];
 

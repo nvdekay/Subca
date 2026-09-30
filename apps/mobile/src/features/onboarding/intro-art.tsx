@@ -44,14 +44,16 @@ export function IntroArt({ scene, reducedMotion }: { scene: number; reducedMotio
           >
             <View className="items-center bg-coral py-3">
               <Text weight="bold" className="text-[12px] text-ink-brand">
-                LỜI NHẮC NHỎ
+                SẮP GIA HẠN
               </Text>
             </View>
             <View className="items-center py-3">
               <Text weight="extrabold" className="text-[62px] leading-[74px] text-accent">
                 03
               </Text>
-              <Text className="text-[12px] text-ink-2">ngày trước gia hạn</Text>
+              <Text weight="bold" className="text-[12px] text-ink-2">
+                NGÀY NỮA
+              </Text>
             </View>
           </Animated.View>
           <Animated.View
@@ -64,9 +66,8 @@ export function IntroArt({ scene, reducedMotion }: { scene: number; reducedMotio
             </View>
             <View className="flex-1">
               <Text weight="bold" className="text-[14px]">
-                Sắp đến ngày gia hạn
+                Netflix sắp gia hạn
               </Text>
-              <Text className="text-[12px] text-ink-2">Giữ hay dừng? Bạn chủ động.</Text>
             </View>
           </Animated.View>
         </View>
@@ -78,13 +79,13 @@ export function IntroArt({ scene, reducedMotion }: { scene: number; reducedMotio
         >
           <View className="flex-row items-center justify-between">
             <Text weight="bold" className="text-[14px]">
-              Bức tranh chi tiêu
+              Chi tiêu tháng này
             </Text>
             <Icon name="chart" color={colors['ink-brand']} />
           </View>
           <View
             className="mb-4 mt-6 flex-row items-end justify-between gap-3 border-b border-line px-2 pb-2"
-            style={{ height: 92 }}
+            style={{ height: 108 }}
           >
             {[42, 66, 52, 78, 48, 60].map((height, index) => (
               <Animated.View
@@ -102,12 +103,9 @@ export function IntroArt({ scene, reducedMotion }: { scene: number; reducedMotio
           <View className="flex-row items-center gap-2">
             <Icon name="users" size={18} color={colors['ink-brand']} />
             <Text weight="semibold" className="text-[13px]">
-              Gói chung, phần tiền rõ ràng
+              Chia tiền gói chung
             </Text>
           </View>
-          <Text className="mt-3 text-[10px] text-ink-3">
-            Hình minh hoạ · Không phải dữ liệu tài khoản
-          </Text>
         </Animated.View>
       )}
     </View>
