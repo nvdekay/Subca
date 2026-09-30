@@ -18,10 +18,9 @@ import { IntroArt } from './intro-art';
 
 const stories = [
   {
-    label: 'GỌN GÀNG HƠN',
-    title: 'Mọi gói đăng ký.\nMột nơi để nhớ.',
-    detail:
-      'Kết nối Gmail để Subca tìm các gói từ email thanh toán. Hoặc tự thêm gói theo cách của bạn.',
+    label: '',
+    title: 'Gom gói,\nnhẹ đầu hơn.',
+    detail: 'Tự tìm từ email hoặc thêm gói theo cách của bạn.',
   },
   {
     label: 'CHỦ ĐỘNG HƠN',
@@ -130,7 +129,7 @@ export default function Intro() {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
               flexGrow: 1,
-              justifyContent: 'center',
+              justifyContent: step === 1 ? 'flex-start' : 'center',
               paddingHorizontal: 28,
               paddingVertical: 24,
             }}
@@ -177,13 +176,15 @@ export default function Intro() {
                   entering={reducedMotion ? undefined : FadeInDown.delay(180).duration(600)}
                   className="mt-8"
                 >
-                  <Text
-                    weight="bold"
-                    className="mb-3 text-[11px] text-ink-brand"
-                    style={{ letterSpacing: 2 }}
-                  >
-                    {story.label}
-                  </Text>
+                  {story.label ? (
+                    <Text
+                      weight="bold"
+                      className="mb-3 text-[11px] text-ink-brand"
+                      style={{ letterSpacing: 2 }}
+                    >
+                      {story.label}
+                    </Text>
+                  ) : null}
                   <Text
                     accessibilityRole="header"
                     accessibilityLiveRegion="polite"

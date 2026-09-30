@@ -23,12 +23,16 @@ export function IntroArt({ scene, reducedMotion }: { scene: number; reducedMotio
         entering={reducedMotion ? undefined : ZoomIn.duration(700)}
         className="absolute h-[244px] w-[244px] rounded-full bg-peach"
       />
-      <View className="absolute right-2 top-3">
-        <Icon name="sparkle" size={28} color={colors.accent} />
-      </View>
-      <View className="absolute bottom-5 left-1">
-        <Icon name="sparkle" size={18} color={colors['ink-brand']} />
-      </View>
+      {scene !== 1 ? (
+        <>
+          <View className="absolute right-2 top-3">
+            <Icon name="sparkle" size={28} color={colors.accent} />
+          </View>
+          <View className="absolute bottom-5 left-1">
+            <Icon name="sparkle" size={18} color={colors['ink-brand']} />
+          </View>
+        </>
+      ) : null}
       {scene === 1 ? (
         <IntroPhone reducedMotion={reducedMotion} />
       ) : scene === 2 ? (
