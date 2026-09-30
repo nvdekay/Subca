@@ -45,6 +45,7 @@
 - [x] Bỏ sao trên lời chào; đưa minh hoạ gom gói vào nửa khung điện thoại; thống nhất nút back mobile qua BackButton dùng chung
 - [x] Cảnh gom gói: tách icon trang trí khỏi khung điện thoại, bỏ thẻ giả và rút ngắn phần chữ bên dưới
 - [x] Cảnh lời nhắc onboarding: rút gọn chữ trong minh họa và phần nội dung bên dưới
+- [x] Cảnh bức tranh chi tiêu onboarding: rút gọn chữ và cho biểu đồ nổi bật hơn
 - [ ] QA intro trên Android, màn hình nhỏ/chữ lớn và VoiceOver/Reduce Motion; kiểm thử thao tác toàn luồng từ intro đến OTP/Gmail
 - [x] Product redesign mobile: ưu tiên dashboard theo việc cần làm, tổng quan analytics, Inbox queue, top-level CTA, trang danh sách/empty state, header trang con và phân nhóm form thêm/sửa
 - [x] Làm mới Trang chủ theo hệ phân cấp thị giác: tổng chi nổi bật, gia hạn gần nhất, việc cần chú ý, ngân sách và lối tắt nhiều màu có thứ bậc
