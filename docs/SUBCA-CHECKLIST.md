@@ -1,6 +1,6 @@
 # Subca — Checklist tổng
 
-> Cập nhật: 29/09/2026 · Đánh dấu `[x]` khi code/đầu việc đã hoàn tất; các bước test thực tế, production hoặc phụ thuộc tài khoản ngoài chỉ đánh dấu khi đã xác minh.
+> Cập nhật: 30/09/2026 · Đánh dấu `[x]` khi code/đầu việc đã hoàn tất; các bước test thực tế, production hoặc phụ thuộc tài khoản ngoài chỉ đánh dấu khi đã xác minh.
 > Tham chiếu UI: `design/Subca V2.html` (mobile flow mới), `design/subca-mobile-mockup.html` (màn/tính năng cũ), `design/subca-admin-dashboard.html` (admin).
 > Repo `nvdekay/Subca`; base commit hiện tại `50b870d` cộng vintage redesign chưa commit. Trạng thái và lệnh mới nhất: `docs/PROJECT-KNOWLEDGE.md`; quyết định kỹ thuật: `docs/ARCHITECTURE.md`.
 
@@ -43,6 +43,8 @@
 - [x] Đồng bộ palette navy-charcoal, cam và pastel ngữ nghĩa của mobile vào Admin
 - [ ] QA đăng ký lần đầu → OTP → tạo password → đăng xuất/đăng nhập lại và reset password trên Supabase thật
 - [x] Bỏ sao trên lời chào; đưa minh hoạ gom gói vào nửa khung điện thoại; thống nhất nút back mobile qua BackButton dùng chung
+- [x] Cảnh gom gói: tách icon trang trí khỏi khung điện thoại, bỏ thẻ giả và rút ngắn phần chữ bên dưới
+- [x] Cảnh lời nhắc onboarding: rút gọn chữ trong minh họa và phần nội dung bên dưới
 - [ ] QA intro trên Android, màn hình nhỏ/chữ lớn và VoiceOver/Reduce Motion; kiểm thử thao tác toàn luồng từ intro đến OTP/Gmail
 - [x] Product redesign mobile: ưu tiên dashboard theo việc cần làm, tổng quan analytics, Inbox queue, top-level CTA, trang danh sách/empty state, header trang con và phân nhóm form thêm/sửa
 - [x] Làm mới Trang chủ theo hệ phân cấp thị giác: tổng chi nổi bật, gia hạn gần nhất, việc cần chú ý, ngân sách và lối tắt nhiều màu có thứ bậc

@@ -1,7 +1,7 @@
 # Subca — Project Knowledge Base
 
 > **Nguồn sự thật trung tâm cho Claude, Codex và người phát triển.**  
-> Cập nhật: **29/09/2026** · Snapshot commit: `dbe6de1` · Repo: `nvdekay/Subca`
+> Cập nhật: **30/09/2026** · Snapshot commit: `59aa9b0` · Repo: `nvdekay/Subca`
 > Đợt auth mật khẩu, chọn khoảng quét Gmail + bằng chứng email, palette thương hiệu mới và BackButton đã commit/push. Chạy `git status` / `git diff` để nhận biết thay đổi sau snapshot.
 
 ## 1. Cách dùng trong một session mới
@@ -43,6 +43,8 @@ Subca là ứng dụng quản lý subscription cá nhân, ưu tiên người tr�
 - Mobile đang chuyển từ vintage mềm sang phong cách editorial/bento theo ảnh tham chiếu: nền giấy sáng, mực navy-charcoal, viền dày, góc vuông gọn, bóng cứng offset; cam, xanh nhạt, mint, peach làm mảng nhấn. Card và control dùng chung nhận diện mới; logo dịch vụ ngoài giữ màu nhận diện. Admin chưa được đổi trong lượt này.
 - Intro nằm tại `apps/mobile/src/features/onboarding/intro.tsx` và `intro-art.tsx`, route auth index chỉ re-export. Dùng Reanimated hiện có, minh hoạ code-native, không thêm dependency/API. Tắt tự chuyển và animation khi Reduce Motion; tắt tự chuyển khi screen reader; timer được dọn khi blur/background/unmount. Nội dung cuộn được và CTA nằm ngoài vùng cuộn. Màn “Xin chào.” không còn logo Subca ở góc trên trái.
 - Tinh chỉnh intro: bỏ biểu tượng sao trên “Xin chào.”; cảnh gom gói dùng `intro-phone.tsx` với nửa trên khung điện thoại, thẻ dịch vụ xuất hiện bên trong màn hình. Cảnh bức tranh chi tiêu dùng biểu đồ nhiều màu hơn trong palette hiện có; cảnh nhắc gia hạn có header tint coral và số ngày/icon chuông màu cam. Đã kiểm tra ảnh lời chào và khung điện thoại trên iOS Simulator; mobile typecheck/lint qua trước tinh chỉnh màu nhắc.
+- Tinh chỉnh cảnh gom gói 30/09: khung điện thoại hẹp hơn để hai icon trang trí nằm rõ ở hai bên; bên trong chỉ còn tiêu đề, trạng thái tìm thấy và hai thẻ dịch vụ, bỏ thẻ giả cuối. Phần chữ bên dưới bỏ nhãn, rút ngắn tiêu đề/mô tả và được đưa lên cao hơn. Đã xem ảnh cảnh này trên iPhone 17 Pro Simulator sau sửa; typecheck/lint mobile và `git diff --check` qua. Trạng thái bước intro tạm để chụp ảnh đã được khôi phục.
+- Tinh chỉnh cảnh lời nhắc 30/09: bỏ nhãn trên phần chữ bên dưới, rút tiêu đề/mô tả xuống hai dòng + một câu; minh họa lịch ghi “Sắp gia hạn / 03 ngày nữa” và thẻ thông báo chỉ còn một dòng. Đã xem cảnh trên iPhone 17 Pro Simulator; trạng thái bước intro tạm để chụp ảnh đã được khôi phục.
 - Màn đăng nhập email+mật khẩu dùng icon eye/eye-off nằm trong ô mật khẩu qua slot `right` của `components/ui/input.tsx`, không còn nút ghost tách riêng bên dưới.
 - Chuyển giữa đăng nhập/đăng ký/khôi phục mật khẩu có hiệu ứng trượt nhẹ bằng Reanimated; tự tắt khi Reduce Motion bật.
 - Nút quay lại mobile thống nhất qua `components/ui/back-button.tsx`: IconButton 44×44, bo 12, nền giấy, viền mảnh, cùng icon/màu/bóng/pressed state. Áp dụng qua TopBar cho màn con/auth, intro, các bước Gmail và trạng thái lỗi chi tiết gói. Nút đóng modal giữ icon X nhưng cùng style; mũi tên chuyển tháng không phải back navigation nên không đổi.
