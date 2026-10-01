@@ -3,8 +3,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { View } from 'react-native';
 import { Screen } from '@/components/screen';
 import { Button } from '@/components/ui/button';
-import { BackButton } from '@/components/ui/back-button';
 import { Card } from '@/components/ui/card';
+import { GmailLogo } from '@/components/gmail-logo';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import {
@@ -18,18 +18,15 @@ import { useSubscriptions } from '@/features/subscriptions/queries';
 import { ScanWindowPicker, type ScanWindowMonths } from '@/features/detection/scan-window-picker';
 import { colors } from '@/theme';
 
-type Step = 'welcome' | 'value' | 'connect' | 'connected' | 'scanning' | 'summary';
+type Step = 'connect' | 'connected' | 'scanning' | 'summary';
 
-const STEP_ORDER: Step[] = ['welcome', 'value', 'connect'];
-
-/** Flow onboarding theo 6 trạng thái trong design/Subca V2.html, dùng dữ liệu/API thật. */
+/** Sau intro và đăng nhập, onboarding bắt đầu từ kết nối Gmail. */
 export default function Welcome() {
   const { connected } = useLocalSearchParams<{ connected?: string }>();
   const connections = useConnections();
   const subscriptions = useSubscriptions();
   const connect = useConnectGmail('welcome');
   const sync = useSyncConnection();
-  // Welcome/value được xem trước khi đăng nhập ở (auth)/index; sau xác thực bắt đầu từ Gmail.
   const [step, setStep] = useState<Step>('connect');
   const [scanRequested, setScanRequested] = useState(false);
   const [scanRunId, setScanRunId] = useState<string | null>(null);
@@ -95,94 +92,17 @@ export default function Welcome() {
     if (!account) return;
     setScanRunId(null);
     setScanRequested(true);
-    setStep('scanning');
     sync.mutate(
       { accountId: account.id, windowMonths: scanWindowMonths },
       { onSuccess: (run) => setScanRunId(run.id) },
     );
   };
-  const back = () => {
-    const index = STEP_ORDER.indexOf(currentStep);
-    if (index > 0) setStep(STEP_ORDER[index - 1]!);
-  };
-
-  if (currentStep === 'welcome') {
-    return (
-      <Screen>
-        <View className="flex-1 justify-between pb-7 pt-5">
-          <View className="flex-1 justify-center gap-8">
-            <WelcomeIllustration />
-            <View>
-              <View className="mb-4 h-12 w-12 items-center justify-center rounded-sm bg-butter">
-                <Text weight="extrabold" className="text-[23px] text-ink-2">
-                  S
-                </Text>
-              </View>
-              <Text weight="extrabold" className="text-[42px] leading-[52px] text-ink">
-                Subca
-              </Text>
-              <Text weight="bold" className="mt-1 text-[21px] leading-[29px] text-ink-2">
-                Quản lý subscription gần như tự động.
-              </Text>
-              <Text className="mt-3 text-[15px] leading-[23px] text-ink-3">
-                Kết nối email để Subca tự tìm, theo dõi và cập nhật các khoản đăng ký của bạn.
-              </Text>
-            </View>
-          </View>
-          <View className="gap-2">
-            <Button title="Bắt đầu" onPress={() => setStep('value')} />
-            <Button
-              title="Tìm hiểu cách hoạt động"
-              variant="ghost"
-              onPress={() => setStep('value')}
-            />
-          </View>
-        </View>
-      </Screen>
-    );
-  }
-
-  if (currentStep === 'value') {
-    return (
-      <Screen>
-        <View className="flex-1 pb-7 pt-2">
-          <StepHeader step={0} onBack={back} />
-          <Text weight="extrabold" className="mb-2 mt-7 text-[27px] leading-[35px]">
-            Subca làm phần việc nhàm chán cho bạn
-          </Text>
-          <Text className="mb-6 text-ink-3">Bạn chỉ cần quyết định khi thật sự cần.</Text>
-          <View className="flex-1 gap-3">
-            <Benefit
-              icon="sparkle"
-              title="Tự động phát hiện"
-              detail="Tìm subscription từ email thanh toán và hóa đơn."
-              tone="mint"
-            />
-            <Benefit
-              icon="bell"
-              title="Không bỏ lỡ gia hạn"
-              detail="Nhắc trước trial, renewal và các khoản sắp bị trừ."
-              tone="peach"
-            />
-            <Benefit
-              icon="piggy"
-              title="Giảm chi phí không cần thiết"
-              detail="Phát hiện subscription ít sử dụng hoặc có thể xem lại."
-              tone="sky"
-            />
-          </View>
-          <Button title="Tiếp tục" className="mt-6" onPress={() => setStep('connect')} />
-        </View>
-      </Screen>
-    );
-  }
 
   if (currentStep === 'connect') {
     return (
       <Screen>
         <View className="flex-1 pb-7 pt-2">
-          <StepHeader step={1} onBack={back} />
-          <Text weight="extrabold" className="mb-2 mt-7 text-[27px] leading-[35px]">
+          <Text weight="extrabold" className="mb-2 mt-4 text-[27px] leading-[35px]">
             Kết nối email của bạn
           </Text>
           <Text className="mb-6 leading-[23px] text-ink-3">
@@ -191,9 +111,7 @@ export default function Welcome() {
           <Card tone="mint" className="gap-4 p-4">
             <View className="flex-row items-center gap-3">
               <View className="h-11 w-11 items-center justify-center rounded-sm bg-white">
-                <Text weight="extrabold" className="text-[23px] text-[#4285F4]">
-                  G
-                </Text>
+                <GmailLogo width={32} />
               </View>
               <View className="flex-1">
                 <Text weight="bold" className="text-[16px]">
@@ -234,11 +152,7 @@ export default function Welcome() {
             <Text className="mt-3 text-center text-coral-deep">{connect.error.message}</Text>
           ) : null}
           <View className="flex-1" />
-          <Button
-            title="Bỏ qua và nhập thủ công"
-            variant="ghost"
-            onPress={() => router.push('/add')}
-          />
+          <Button title="Bỏ qua và về trang chủ" variant="ghost" onPress={continueToApp} />
         </View>
       </Screen>
     );
@@ -257,9 +171,7 @@ export default function Welcome() {
             </Text>
             <View className="mb-4 self-start flex-row items-center gap-2 rounded-xl bg-surface px-3 py-2">
               <View className="h-7 w-7 items-center justify-center rounded-full bg-white">
-                <Text weight="extrabold" className="text-[15px] text-[#4285F4]">
-                  G
-                </Text>
+                <GmailLogo width={20} />
               </View>
               <Text weight="semibold" className="text-[14px]">
                 {maskEmail(account?.providerEmail ?? '')}
@@ -368,104 +280,6 @@ export default function Welcome() {
         </View>
       </View>
     </Screen>
-  );
-}
-
-function StepHeader({ step, onBack }: { step: 0 | 1; onBack: () => void }) {
-  return (
-    <View className="h-11 flex-row items-center justify-between">
-      <BackButton onPress={onBack} />
-      <View className="flex-row items-center gap-[7px]">
-        {[0, 1].map((item) => (
-          <View
-            key={item}
-            className={`h-[5px] rounded-full ${item === step ? 'w-7 bg-accent' : 'w-3 bg-line'}`}
-          />
-        ))}
-        <Text className="ml-1 text-[11px] text-ink-3">{step + 1}/2</Text>
-      </View>
-      <View className="h-11 w-11" />
-    </View>
-  );
-}
-
-function WelcomeIllustration() {
-  return (
-    <View className="h-[200px] justify-end">
-      <Card className="absolute left-[34px] right-0 top-0 flex-row items-center gap-3 p-3 opacity-60">
-        <ServiceMark label="N" tone="coral" />
-        <View className="flex-1">
-          <Text weight="semibold" className="text-[14px]">
-            Netflix
-          </Text>
-          <Text className="text-[12px] text-ink-3">260.000₫ / tháng</Text>
-        </View>
-        <Icon name="check" size={18} color={colors['on-mint']} />
-      </Card>
-      <Card
-        tone="sky"
-        className="absolute left-4 right-[18px] top-[56px] z-10 flex-row items-center gap-3 p-3 opacity-90"
-      >
-        <ServiceMark label="S" tone="mint" />
-        <View className="flex-1">
-          <Text weight="semibold" className="text-[14px]">
-            Spotify
-          </Text>
-          <Text className="text-[12px] text-ink-3">Gia hạn ngày mai · 59.000₫</Text>
-        </View>
-        <Icon name="check" size={18} color={colors['on-mint']} />
-      </Card>
-      <View className="absolute bottom-0 left-0 right-9 z-20 rounded-sm bg-mint p-4">
-        <View className="mb-1 flex-row items-center gap-2">
-          <Icon name="sparkle" size={15} color={colors['on-mint']} />
-          <Text weight="bold" className="text-[11px] uppercase tracking-[1px] text-on-mint">
-            Tự động phát hiện
-          </Text>
-        </View>
-        <Text weight="bold" className="text-[18px]">
-          Subscription, gọn trong một chỗ
-        </Text>
-      </View>
-    </View>
-  );
-}
-
-function ServiceMark({ label, tone }: { label: string; tone: 'coral' | 'mint' }) {
-  return (
-    <View
-      className={`h-9 w-9 items-center justify-center rounded-sm ${tone === 'coral' ? 'bg-coral' : 'bg-butter'}`}
-    >
-      <Text weight="extrabold" className="text-[15px] text-ink-2">
-        {label}
-      </Text>
-    </View>
-  );
-}
-
-function Benefit({
-  icon,
-  title,
-  detail,
-  tone,
-}: {
-  icon: 'sparkle' | 'bell' | 'piggy';
-  title: string;
-  detail: string;
-  tone: 'mint' | 'peach' | 'sky';
-}) {
-  const toneClass = { mint: 'bg-mint', peach: 'bg-peach', sky: 'bg-sky' }[tone];
-  return (
-    <Card className="flex-row gap-3 p-4">
-      <View className={`h-11 w-11 flex-none items-center justify-center rounded-sm ${toneClass}`}>
-        <Icon name={icon} size={21} color={colors['ink-2']} />
-      </View>
-      <View className="flex-1">
-        <Text weight="bold" className="mb-1 text-[15px]">
-          {title}
-        </Text>
-        <Text className="text-[13px] leading-[19px] text-ink-3">{detail}</Text>
-      </View>
-    </Card>
   );
 }
 
