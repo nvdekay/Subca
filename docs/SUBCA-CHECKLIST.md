@@ -1,24 +1,24 @@
 # Subca — Checklist tổng
 
-> Cập nhật: 30/09/2026 · Đánh dấu `[x]` khi code/đầu việc đã hoàn tất; các bước test thực tế, production hoặc phụ thuộc tài khoản ngoài chỉ đánh dấu khi đã xác minh.
+> Cập nhật: 01/10/2026 · Đánh dấu `[x]` khi code/đầu việc đã hoàn tất; các bước test thực tế, production hoặc phụ thuộc tài khoản ngoài chỉ đánh dấu khi đã xác minh.
 > Tham chiếu UI: `design/Subca V2.html` (mobile flow mới), `design/subca-mobile-mockup.html` (màn/tính năng cũ), `design/subca-admin-dashboard.html` (admin).
-> Repo `nvdekay/Subca`; base commit hiện tại `50b870d` cộng vintage redesign chưa commit. Trạng thái và lệnh mới nhất: `docs/PROJECT-KNOWLEDGE.md`; quyết định kỹ thuật: `docs/ARCHITECTURE.md`.
+> Repo `nvdekay/Subca`; snapshot commit và trạng thái mới nhất: `docs/PROJECT-KNOWLEDGE.md`; quyết định kỹ thuật: `docs/ARCHITECTURE.md`.
 
-### Hiện trạng (đối chiếu working tree 29/09/2026)
+### Hiện trạng (đối chiếu code và Git 01/10/2026)
 
-**Đang ở:** Luồng lõi và Admin Console v1 đã có. Mobile theo flow auto-first `Subca V2`, Nunito và style editorial/bento nền sáng với viền mực, bóng offset, điểm nhấn cam/pastel; auth chuyển sang password-first, OTP cho đăng ký/recovery. Gmail detection + queue đã có nhưng Gmail thật và flow auth/password mới chưa được xác nhận. App đã chạy trên iPhone 17 Pro Simulator; QA Android/accessibility và chưa phát hành store.
+**Đang ở:** Luồng lõi và Admin Console v1 đã có. Mobile/Admin cùng style editorial/bento; intro ba cảnh và màn tạo mật khẩu đã rút gọn. Auth dùng mật khẩu khi đăng nhập, OTP cho đăng ký/recovery. Gmail detection + queue có code nhưng Gmail thật và flow auth/password chưa QA đầu-cuối. Đã xem một số cảnh intro trên iPhone 17 Pro Simulator; QA Android/accessibility và phát hành store còn chờ.
 
 **Đã có trong repo**
 - Monorepo pnpm/Turborepo; Expo SDK 57 + RN 0.86; NestJS 12/Fastify; Next.js 16; Prisma 7.10; shared package. Database schema có 31 Prisma models và 5 migration files.
-- Supabase Auth email OTP, API JWT guard, subscription CRUD, home, calendar, review, analytics (không category), reminders/Expo push, FX, payment methods, groups/VietQR, admin v1.
-- Mobile routes cho auth, V2 welcome, bốn tabs chính và các màn phụ; Inbox, Gmail connection, group splitting, settings/account.
+- Supabase Auth email/mật khẩu + OTP đăng ký/recovery, API JWT guard, subscription CRUD, home, calendar, review, analytics (không category), reminders/Expo push, FX, payment methods, groups/VietQR, admin v1.
+- Mobile routes cho auth, intro V2 trước đăng nhập, `welcome` sau đăng nhập bắt đầu ở kết nối Gmail, bốn tabs chính và các màn phụ; Inbox, group splitting, settings/account.
 - Detection pipeline có parser ~65 merchant, aggregate receipt handling, reconcile, `subscription_events` và Inbox; Gmail manual scan đưa vào BullMQ, lưu tiến độ từng trang.
 - Admin Console v1: overview, users, catalog, features, system, queues, team, audit; năm vai trò.
-- Base test snapshot trước các thay đổi V2: shared 88, API unit/e2e và 51 integration gần nhất đã qua. **Trong lượt cập nhật tài liệu này không chạy test.** Typecheck/lint V2 và native iOS build đã qua; xem knowledge base để biết giới hạn xác minh.
-- Local đã xác minh tại thời điểm cập nhật: API `GET /health` → `status: ok`, `db: up`; Redis healthy; Metro 8081; iPhone 17 Pro Simulator booted với app `app.subca` cài/mở.
+- Mốc kiểm tra 29/09: shared 88, API unit/e2e và 51 integration gần nhất đã qua; các thay đổi UI sau đó có mobile typecheck/lint. Kết quả cũ không chứng minh code mới; xem knowledge base để biết giới hạn xác minh.
+- Local đã xác minh ngày 29/09: API `GET /health` → `status: ok`, `db: up`; Redis healthy; Metro 8081; iPhone 17 Pro Simulator cài/mở app `app.subca`. Trạng thái runtime hiện tại cần kiểm tra lại khi QA.
 
 **Còn chờ bên ngoài / chưa xác minh**
-1. OAuth Google/Gmail thật: credentials và callback Quick Tunnel đã cấu hình; API đã restart; thêm tài khoản thử nghiệm vào Audience → Test users để vượt 403, rồi xác nhận scan hộp thư thật và quy trình Google/CASA.
+1. OAuth Google/Gmail thật: credentials và callback Quick Tunnel đã cấu hình; thêm tài khoản thử nghiệm vào Audience → Test users để vượt 403, rồi xác nhận scan hộp thư thật và quy trình Google/CASA. Cần khởi động lại API khi QA.
 2. Xác minh trạng thái rotate secrets dev từng bị lộ; service-role key API để test xóa tài khoản và các thao tác quản trị cần Supabase Admin API.
 3. Tài khoản store, EAS build profiles, push trên thiết bị thật và RevenueCat khi bắt đầu làm Plus.
 4. Production Supabase/API/Redis ở Singapore; domain, SMTP Resend, privacy policy/terms và support.
@@ -39,7 +39,12 @@
 - [x] Đồng bộ Admin với editorial/bento style của mobile: nền giấy, palette pastel/cam, viền mực dày, góc gọn và bóng offset; Nunito giữ chung; sidebar desktop đứng yên khi nội dung chính cuộn
 - [x] Thay typography toàn hệ thống sang Nunito weights 400–800, tải subset tiếng Việt cho mobile và Admin
 - [x] Intro trước đăng nhập: “Xin chào.” lớn, ba cảnh giới thiệu với animation theo lớp, tiến độ, quay lại/bỏ qua/đăng nhập; giữ OTP/Gmail, hỗ trợ Reduce Motion và không tự chuyển khi dùng screen reader
+- [x] Xóa hai màn giới thiệu cũ “Subca / Bắt đầu” và “Subca làm phần việc nhàm chán” khỏi route sau đăng nhập; bỏ đường back từ kết nối email về các màn cũ
+- [x] Nút bỏ qua ở màn kết nối Gmail/Outlook dẫn về Trang chủ, không mở form thêm gói
 - [x] Đăng nhập email/mật khẩu; OTP chỉ cho đăng ký và khôi phục/thiết lập mật khẩu; recovery không tự tạo tài khoản và không công khai dò email đã đăng ký
+- [x] Màn tạo mật khẩu rút còn một câu hướng dẫn và một dòng quy tắc; nút hiện/ẩn nằm trong ô nhập
+- [x] Thay chữ “G” giả ở màn kết nối email bằng biểu tượng Gmail đúng hình và năm màu thương hiệu; dùng thống nhất ở trạng thái đã kết nối và thẻ tài khoản
+- [x] Validate hai ô tạo mật khẩu khi blur/submit: bắt buộc nhập, mật khẩu 6–72 ký tự có chữ và số, nhập lại phải khớp; lỗi cập nhật khi sửa
 - [x] Đồng bộ palette navy-charcoal, cam và pastel ngữ nghĩa của mobile vào Admin
 - [ ] QA đăng ký lần đầu → OTP → tạo password → đăng xuất/đăng nhập lại và reset password trên Supabase thật
 - [x] Bỏ sao trên lời chào; đưa minh hoạ gom gói vào nửa khung điện thoại; thống nhất nút back mobile qua BackButton dùng chung
@@ -95,8 +100,8 @@
 - [ ] Danh sách dài: **FlashList**
 - [ ] Biểu đồ: **Victory Native** (vẽ bằng Skia)
 - [x] Ảnh/logo: **expo-image** (có cache); logo dịch vụ dạng SVG (`react-native-svg`), sinh từ Simple Icons bằng `pnpm --filter @subca/mobile logos:generate`
-- [ ] Lưu dữ liệu trên máy: **MMKV** (nhanh) cho cache/cài đặt, **expo-secure-store** cho token _(phiên đăng nhập: MMKV mã hóa AES-256, khóa trong SecureStore — vì SecureStore giới hạn ~2 KB; cache chưa làm)_
-- [ ] Đăng nhập: `@supabase/supabase-js` + `expo-apple-authentication` + `@react-native-google-signin/google-signin` _(supabase-js + email OTP đã làm; Apple/Google chờ tài khoản store)_
+- [x] Lưu phiên và TanStack Query cache trong **MMKV mã hóa**, khóa trong SecureStore; cache giữ tối đa 1 ngày và xóa khi đăng xuất
+- [ ] Đăng nhập: `@supabase/supabase-js` + `expo-apple-authentication` + `@react-native-google-signin/google-signin` _(supabase-js + email/mật khẩu và OTP đăng ký/recovery đã làm; Apple/Google chờ tài khoản store)_
 - [ ] Mua trong app: **RevenueCat** (`react-native-purchases`)
 - [x] Thông báo: **expo-notifications** (push + thông báo cục bộ dự phòng)
 - [ ] Widget / Live Activity (giai đoạn sau): viết Swift/Kotlin qua **Expo Modules** / `expo-apple-targets`
@@ -108,7 +113,7 @@
   - Đã cân nhắc Go: không chọn, vì ở quy mô Subca phần xử lý của backend chỉ tốn vài ms trên tổng 50–100 ms người dùng chờ; giữ TypeScript để mobile, backend và admin dùng chung kiểu dữ liệu, zod và logic
   - Xem lại khi có phần xử lý nặng (ví dụ đọc hàng triệu email hóa đơn): có thể tách riêng service đó sang Go
 - [x] **Tác vụ nền:** BullMQ 6 + Redis (dev: `docker compose`, OrbStack; production: Redis cùng khu vực với API, giá cố định — không dùng Upstash tính theo số lệnh)
-- [ ] **Đăng nhập:** **Supabase Auth** (Apple, Google, email OTP); NestJS xác minh JWT của Supabase ở mọi request
+- [ ] **Đăng nhập:** **Supabase Auth** (email/mật khẩu + OTP đăng ký/recovery đã có; Apple, Google còn chờ); NestJS xác minh JWT của Supabase ở mọi request
 - [x] **Database:** **Supabase** (PostgreSQL 17), gói Pro cho production (gói Free tự tạm dừng khi không hoạt động, không có backup hằng ngày)
   - Project dev hiện ở **Tokyo (`ap-northeast-1`)**; project production phải chọn **Singapore (`ap-southeast-1`)**
 - [x] **Admin:** Next.js 16 + Tailwind 4 _(tự dựng bộ UI nhỏ theo token của mockup thay cho shadcn/ui; chưa deploy Vercel)_
@@ -173,8 +178,8 @@
 
 ### Dữ liệu & logic lõi
 
-- [x] Kết nối Supabase dev: `apps/api/.env` (DATABASE_URL pooler 6543 + DIRECT_URL 5432), `prisma migrate deploy` đã chạy 2 migration
-- [x] Kiểm tra trên Supabase: 26/26 bảng bật RLS, 2 trigger trên `auth.users`, `anon`/`authenticated` không có quyền đọc, API `/health` → `db: up`
+- [x] Kết nối Supabase dev: `apps/api/.env` (DATABASE_URL pooler 6543 + DIRECT_URL 5432), schema hiện có 5 migration
+- [x] Kiểm tra RLS/triggers và API `/health` trên Supabase dev ở mốc trước; sau các migration mới cần xác minh lại số bảng/RLS trước production
 - [ ] Test trigger đăng ký thật: tạo user ở Authentication → Users, kiểm tra profile + settings + 4 quy tắc nhắc mặc định, xóa user kiểm tra dọn dữ liệu
 - [x] Schema Prisma v1 (xem mục I)
 - [x] Cấu hình Prisma cho Supabase: `DATABASE_URL` dùng connection pooler (Supavisor, cổng 6543, `pgbouncer=true`) cho API; `DIRECT_URL` (cổng 5432) cho migration
@@ -209,7 +214,7 @@
   - [ ] Sign in with Apple (bắt buộc trên iOS khi có Google): `expo-apple-authentication` → `signInWithIdToken`
   - [ ] Google: `@react-native-google-signin/google-signin` → `signInWithIdToken`
   - [ ] Android: Sign in with Apple qua luồng OAuth web của Supabase (để người dùng đổi máy vẫn đăng nhập được)
-  - [ ] Email OTP (SMTP riêng qua Resend; SMTP mặc định của Supabase bị giới hạn số email) _(app: màn chào → nhập email → nhập mã đã xong; còn SMTP Resend + template email có `{{ .Token }}`)_
+  - [ ] Email OTP cho đăng ký/recovery (dev đang dùng Gmail SMTP; trước production chuyển Resend + domain riêng) _(app đã có nhập mã và tạo mật khẩu; chưa QA đầu-cuối bằng tài khoản thật)_
   - [x] Lưu phiên (MMKV mã hóa, khóa trong `expo-secure-store`), tự làm mới token khi app mở; API client: `TOKEN_EXPIRED` → làm mới rồi gọi lại 1 lần, `ACCOUNT_BANNED`/token hỏng → đăng xuất
   - [x] NestJS: guard toàn cục xác minh JWT Supabase (JWKS ES256, kiểm issuer/audience/role/hạn), `@Public()`, `@CurrentUser()`, lỗi 401 có `code` (`TOKEN_EXPIRED` / `INVALID_TOKEN` / `UNAUTHENTICATED`)
   - [x] `GET /me`: hồ sơ + cài đặt + gói FREE/PLUS + giới hạn Free; chặn tài khoản bị khóa (403); ghi `last_active_at` tối đa 1 lần/giờ
@@ -217,7 +222,7 @@
   - [x] Chặn tài khoản bị khóa ở mọi endpoint (403 `ACCOUNT_BANNED`), cache 60 giây, có `invalidate()` cho admin
 - [ ] **Subscription:** thêm / sửa / xóa + thư viện khoảng 200 dịch vụ phổ biến ở Việt Nam
   - [x] API: `GET/POST/PATCH/DELETE /subscriptions`, tự tính kỳ gia hạn theo múi giờ người dùng, trial, hủy/mở lại, lưu trữ (xóa mềm), kiểm tra quyền sở hữu và ID tham chiếu, giới hạn 8 subscription gói Free (403 `PLAN_LIMIT_REACHED`)
-  - [x] API thư viện: `GET /catalog/categories`, `GET /catalog/services`
+- [x] API thư viện: `GET /catalog/services` (đã bỏ endpoint category)
   - [x] Schema đầu vào dùng chung (`packages/shared/src/api`) cho API và form trong app
   - [x] Test tích hợp trên Supabase thật (`test:int`, 11 test, tự dọn dữ liệu)
   - [x] Màn Thêm (chọn nhanh, giá, tiền tệ, chu kỳ, ngày, phương thức, mốc nhắc, tự gia hạn, ghi chú) + màn Sửa dùng chung form (chỉ gửi trường đã đổi) _(form dùng state + schema zod chung, chưa dùng react-hook-form)_
@@ -225,7 +230,7 @@
   - [x] Màn Chi tiết (lịch sử, mức độ sử dụng, hướng dẫn hủy, lưu trữ, đánh dấu cần xem lại, dùng lại gói đã hủy); API `GET /subscriptions/:id` trả thêm thanh toán, hướng dẫn hủy, lịch sử trừ tiền
 - [ ] **Trang chủ:** tổng tiền theo tháng, số đang hoạt động, sắp gia hạn, trial, cảnh báo
   - [x] API `GET /home` (1 request cho cả màn): tổng tháng/năm quy đổi tiền tệ, trial, sắp gia hạn 7 ngày, có thể tiết kiệm, ngân sách, 5 khoản sắp tới, `missingRates`
-  - [x] Màn Trang chủ trong app (thẻ tổng, 4 ô thống kê, ngân sách, sắp gia hạn, trial, kéo để làm mới, ghi nguồn tỷ giá) _(chưa có: % so với tháng trước, chia tiền nhóm, lối tắt, banner Plus)_
+  - [x] Màn Trang chủ trong app (tổng chi, việc cần xác nhận, mốc tiếp theo, ngân sách, lối tắt, kéo để làm mới, ghi nguồn tỷ giá) _(chưa có: % so với tháng trước vì API chưa cung cấp; banner Plus để sau)_
 - [ ] **Nhắc nhở:**
   - [x] Đăng ký push token (`POST/DELETE /push-tokens`, token chuyển sang tài khoản mới khi máy đổi tài khoản)
   - [x] Lượt chạy mỗi 5 phút: đẩy kỳ gia hạn đã qua (ghi lịch sử trừ tiền, trial → ACTIVE/CANCELLED), sinh lượt nhắc 26 giờ tới theo múi giờ + giờ nhắc từng người, đưa vào hàng đợi
@@ -336,7 +341,7 @@
 - [ ] Thanh toán web qua MoMo / ZaloPay / thẻ (kiểm tra quy định store trước)
 - [ ] Đọc biến động số dư ngân hàng (chỉ Android)
 - [x] Đọc hóa đơn trong Gmail — **đã dựng xong đường ống** (quét → lọc → parse → sự kiện → đối soát → subscription + Inbox), chạy được với hộp thư mẫu
-- [ ] Nối Gmail thật: bật Gmail API, tạo OAuth Web client, thêm tài khoản thử nghiệm, khai báo callback `${PUBLIC_API_URL}/connections/gmail/callback`, cấu hình local (không commit secret); hiện cần lưu URI Quick Tunnel và restart API
+- [ ] Nối Gmail thật: OAuth Web client và callback Quick Tunnel đã cấu hình ở dev, API đã tới Google; thêm tài khoản vào Test users để vượt 403 rồi QA consent → scan → Inbox. Khi tunnel đổi host, cập nhật `PUBLIC_API_URL` và redirect URI, restart API
 - [ ] **Thẩm định bảo mật của Google (CASA)** cho scope `gmail.readonly` — bắt buộc trước khi mở quá 100 người dùng thử; tốn vài tuần và có phí
 - [x] Mở rộng parser: danh mục ~65 merchant (mọi `serviceSlug` có unit test đối chiếu seed) và tách hóa đơn gộp Apple / Google Play / ví điện tử thành nhiều dịch vụ
 - [ ] Lớp LLM cho email lạ (đã chừa chỗ trong `parser.ts`); thêm merchant theo email thật của người dùng thử

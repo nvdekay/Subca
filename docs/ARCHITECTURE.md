@@ -1,6 +1,6 @@
 # Subca — Kiến trúc & quyết định kỹ thuật
 
-> Cập nhật: 29/09/2026. Ghi lại **vì sao** chọn như hiện tại để không phải bàn lại. Đổi quyết định nào thì sửa file này. Snapshot vận hành ngắn gọn nằm ở `docs/PROJECT-KNOWLEDGE.md`.
+> Cập nhật: 01/10/2026. Ghi lại **vì sao** chọn như hiện tại để không phải bàn lại. Đổi quyết định nào thì sửa file này. Snapshot vận hành ngắn gọn nằm ở `docs/PROJECT-KNOWLEDGE.md`.
 
 ## Tổng quan
 
@@ -10,7 +10,7 @@
         │ đăng nhập                         │   └── cron: tỷ giá (07:30 VN), nhắc nhở (5 phút), push receipt (15 phút)
         ▼                                   ▼
   Supabase Auth                        Redis ◀── BullMQ (reminders + Gmail scan) ──▶ Expo Push ──▶ APNs / FCM
-  (email OTP đang dùng; Apple/Google sign-in chưa làm)
+  (email/password; OTP cho đăng ký/recovery; Apple/Google sign-in chưa làm)
  Admin (Next.js) ──JWT──▶ API
 ```
 
@@ -23,18 +23,18 @@
 |---|---|---|
 | Mobile | **React Native + Expo** | 1 codebase, 1 dev mobile, chung TypeScript với API/admin, sửa lỗi qua EAS Update. Đã so với Native (Swift+Kotlin: gấp đôi công, lệch 2 nền tảng) và Flutter (không chung ngôn ngữ). Widget / Live Activity viết native qua Expo Modules khi cần |
 | Backend | **NestJS 12 trên Fastify** | Đã cân nhắc Go: ở quy mô Subca phần xử lý backend chỉ vài ms trên 50–100 ms người dùng chờ; giữ TypeScript để dùng chung schema và logic. Tách service nặng sang Go nếu sau này cần (VD đọc email hóa đơn) |
-| DB + Auth | **Supabase** (Postgres 17 + Auth) | Đăng nhập Apple/Google/email OTP sẵn có; Postgres đầy đủ. Không dùng Edge Functions / truy cập DB từ client |
-| ORM | **Prisma 7.10** + `@prisma/adapter-pg` | Không dùng 8.0 (đang RC) |
+| DB + Auth | **Supabase** (Postgres 17 + Auth) | App hiện dùng email/mật khẩu và OTP đăng ký/recovery; Apple/Google sign-in chưa làm. Không dùng Edge Functions / truy cập DB từ client |
+| ORM | **Prisma 7.10** + `@prisma/adapter-pg` | Giữ phiên bản đang triển khai; việc nâng cấp cần kiểm tra riêng migration và generated client |
 | Hàng đợi | **BullMQ 6 + Redis** | Dùng cho reminder/push và Gmail scan theo yêu cầu (run trả ngay, worker lưu tiến độ từng trang). Dev: `docker compose`; production: Redis cùng khu vực với API. Không dùng Upstash tính theo lệnh. Phương án thay thế đã cân nhắc: pg-boss trên Postgres |
 | Push | **Expo Push Service** | 1 API cho iOS + Android; có thể chuyển FCM/APNs trực tiếp sau |
 | Tỷ giá | **ExchangeRate-API (Open Access)**, dự phòng fawazahmed0/currency-api | ECB không có VND. Điều khoản: dùng thương mại được, **bắt buộc ghi nguồn**, không phân phối lại, gọi ≤ 1 lần/ngày |
 | Mua trong app | **RevenueCat** (chưa làm) | Lo App Store + Google Play, webhook → bảng `entitlements` |
 | Admin | **Next.js 16 + Tailwind 4**, bộ UI nhỏ theo token sản phẩm | Admin Console v1 đã chạy; không dùng shadcn/ui để giữ giao diện gọn và nhất quán với app |
-| Visual system | **Mobile editorial/bento**: nền sáng, navy-charcoal, cam và pastel ngữ nghĩa; viền mực dày, góc gọn, bóng offset cứng; Nunito hỗ trợ tiếng Việt | Tokens và primitive mobile dùng chung; Admin chưa chuyển style và giữ vintage hiện tại; không gradient |
+| Visual system | **Mobile và Admin editorial/bento**: nền giấy sáng, navy-charcoal, cam và pastel ngữ nghĩa; viền mực dày, góc gọn, bóng offset cứng; Nunito hỗ trợ tiếng Việt | Mobile dùng tokens/primitive chung; Admin dùng token CSS và UI components cùng palette. Không gradient |
 | Mobile information architecture | **4 đích chính + CTA thêm trung tâm**; dashboard theo thứ tự tổng quan → quyết định → mốc gần nhất → ngân sách → lối tắt; phân tích theo tổng → xu hướng → chi tiết | Giữ nguyên route nghiệp vụ/API; các màn phụ dùng cùng header trái biên, nội dung/CTA ưu tiên theo nhiệm vụ của màn |
 | Mobile back navigation | **BackButton dùng chung** cho mọi nút quay lại trang/bước; IconButton 44×44 bo 12, nền giấy và viền mảnh | TopBar, auth, onboarding và error state cùng một style; callback giữ nguyên hành vi. Đóng modal dùng X cùng kiểu nút; chuyển tháng là thao tác lịch riêng |
-| Mobile authentication | **Email + password** cho lần đăng nhập thường; email OTP một lần để xác minh đăng ký hoặc recovery tài khoản OTP-only | Chọn riêng Đăng nhập/Đăng ký, không dò email tồn tại công khai. Password được lưu/quản lý bởi Supabase Auth; marker email hoàn tất xác minh lưu trong encrypted MMKV để gate bắt buộc set password trước app. Recovery OTP không tự tạo user |
-| Palette mobile/Admin | **Charcoal `#222831`, slate `#393E46`, orange `#FD7014`, light grey `#EEEEEE`** | Tint xám nhạt/cam nhạt dùng cho bề mặt và trạng thái; chữ trên cam dùng charcoal để đủ tương phản; logo bên thứ ba giữ nhận diện |
+| Mobile authentication | **Email + password** cho lần đăng nhập thường; email OTP một lần để xác minh đăng ký hoặc recovery tài khoản OTP-only | Chọn riêng Đăng nhập/Đăng ký, không dò email tồn tại công khai. Màn tạo mật khẩu yêu cầu 6–72 ký tự có chữ và số, nhập lại khớp; kiểm tra từng ô khi blur/submit trước `updateUser`. Password được lưu/quản lý bởi Supabase Auth; marker email hoàn tất xác minh lưu trong encrypted MMKV để gate bắt buộc set password trước app. Recovery OTP không tự tạo user |
+| Palette mobile/Admin | **Ink `#202B34`, nền giấy `#F2EFE7`, surface `#FFFEFA`, cam `#FD7014`**, cùng mint/sky/peach/coral ngữ nghĩa | Mobile lấy từ `tokens.json`, Admin đồng bộ trong `globals.css`; logo bên thứ ba giữ nhận diện |
 | Hosting | Railway / Render / Fly.io, **Singapore** (chưa chọn) | Cùng khu vực với Supabase production |
 | Danh mục | **Bỏ khỏi sản phẩm** (27/09/2026) | Chủ dự án thấy thừa: không chọn danh mục khi thêm subscription, Phân tích không chia theo danh mục, API không còn `/catalog/categories` và `categoryId`. Bảng `categories` và cột `category_id` vẫn còn trong DB (không dùng) để khỏi migration xóa dữ liệu |
 
@@ -100,7 +100,8 @@ Mỗi 5 phút:
 
 ## Email đăng nhập (Supabase Auth)
 
-- App đăng nhập bằng **mã OTP 6 số** qua email (`signInWithOtp` → `verifyOtp`), không dùng link. Supabase chỉ cho OTP dài 6–10 số.
+- App đăng nhập thường bằng **email + mật khẩu** (`signInWithPassword`). Đăng ký và recovery xác minh email bằng OTP 6 số (`signInWithOtp` → `verifyOtp`), không dùng link; sau đó tạo/đặt lại mật khẩu bằng `updateUser`. Pending email xác minh lưu trong MMKV mã hóa, không lưu mật khẩu. Recovery không tự tạo tài khoản.
+- Giới thiệu sản phẩm chạy trước đăng nhập ở `(auth)/index`; sau xác thực, route `(app)/welcome` bắt đầu tại kết nối Gmail rồi đến quét và tổng kết. Nút bỏ qua kết nối dùng `replace` về Trang chủ để không quay lại onboarding bằng back; người dùng có thể thêm gói thủ công từ Trang chủ. Không đặt lại hai màn giới thiệu cũ sau đăng nhập hoặc cho nút back dẫn tới chúng.
 - Template "Confirm sign up" và "Magic Link" dùng chung `design/email/otp-code.html` (bảng + style inline, màu theo mockup). Sửa file rồi áp lại bằng Management API (cần `supabase login`):
   ```bash
   TOKEN=$(security find-generic-password -s "Supabase CLI" -w); TOKEN=$(echo "${TOKEN#go-keyring-base64:}" | base64 -d)
