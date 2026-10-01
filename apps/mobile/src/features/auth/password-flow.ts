@@ -7,12 +7,22 @@ type Storage = {
   removeItem(key: string): void;
 };
 
-export function passwordError(password: string, confirmation: string): string | null {
-  if (password.length < 8) return 'Mật khẩu cần ít nhất 8 ký tự.';
+export function passwordFieldError(password: string): string | null {
+  if (!password) return 'Nhập mật khẩu.';
+  if (password.length < 6) return 'Mật khẩu cần ít nhất 6 ký tự.';
   if (password.length > 72) return 'Mật khẩu không được dài quá 72 ký tự.';
   if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) return 'Mật khẩu cần có cả chữ và số.';
+  return null;
+}
+
+export function confirmationFieldError(password: string, confirmation: string): string | null {
+  if (!confirmation) return 'Nhập lại mật khẩu.';
   if (password !== confirmation) return 'Hai mật khẩu chưa khớp nhau.';
   return null;
+}
+
+export function passwordError(password: string, confirmation: string): string | null {
+  return passwordFieldError(password) ?? confirmationFieldError(password, confirmation);
 }
 
 /** Chỉ lưu ý định tạo mật khẩu, tuyệt đối không lưu mật khẩu. Đây là cổng UX, không phải quyền API. */
