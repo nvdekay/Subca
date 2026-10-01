@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, RefreshControl, View } from 'react-native';
 import { Screen, TopBar } from '@/components/screen';
+import { GmailLogo } from '@/components/gmail-logo';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
@@ -280,8 +281,8 @@ function AccountCard({ account }: { account: ConnectedAccountDto }) {
   return (
     <Card className="gap-3">
       <View className="flex-row items-center gap-3">
-        <View className="h-10 w-10 items-center justify-center rounded-sm bg-sky-soft">
-          <Icon name="user" size={20} color={colors['sky-deep']} />
+        <View className="h-10 w-10 items-center justify-center rounded-sm bg-white">
+          <GmailLogo width={28} />
         </View>
         <View className="flex-1">
           <Text weight="bold" numberOfLines={1}>
