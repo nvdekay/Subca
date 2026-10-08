@@ -1,8 +1,8 @@
 # Subca — Project Knowledge Base
 
 > **Nguồn sự thật trung tâm cho Claude, Codex và người phát triển.**  
-> Cập nhật: **01/10/2026** · Snapshot commit: `fa11acf` + đợt onboarding/auth 01/10 · Repo: `nvdekay/Subca`
-> Snapshot theo code và Git ngày 01/10; xem `git status` / `git diff` để nhận biết thay đổi sau snapshot. Không coi kết quả runtime/QA cũ là trạng thái hiện tại.
+> Cập nhật: **04/10/2026** · Snapshot commit: `62aa35e` + thay đổi chưa commit về logo dịch vụ · Repo: `nvdekay/Subca`
+> Snapshot theo code và Git ngày 04/10; xem `git status` / `git diff` để nhận biết thay đổi sau snapshot. Không coi kết quả runtime/QA cũ là trạng thái hiện tại.
 
 ## 1. Cách dùng trong một session mới
 
@@ -35,11 +35,11 @@ Subca là ứng dụng quản lý subscription cá nhân, ưu tiên người tr�
 
 ## 3. Hiện trạng ngắn gọn
 
-### Snapshot hiện tại (01/10/2026)
+### Snapshot hiện tại (04/10/2026)
 
 - **Sản phẩm:** các luồng lõi subscription, nhắc gia hạn, trial, review, phân tích, ngân sách, phương thức thanh toán và chia tiền nhóm đã có app + API. Admin Console v1 có overview, users, catalog, features, system, queues, team và audit. Chưa phát hành hoặc có môi trường production.
 - **Mobile V2:** intro trước đăng nhập gồm “Xin chào.” và ba cảnh gom gói, nhắc gia hạn, chi tiêu/chia tiền. Ba cảnh đã rút gọn chữ; “Xin chào.” tự chuyển sau 3 giây khi phù hợp accessibility, các cảnh sau do người dùng điều khiển. Sau đăng nhập, route `welcome` bắt đầu thẳng ở kết nối email; hai màn giới thiệu cũ “Subca / Bắt đầu” và “Subca làm phần việc nhàm chán” đã bị xóa khỏi code. Nút bỏ qua kết nối email thay route hiện tại bằng Trang chủ, không mở form thêm thủ công. Tabs chính là Trang chủ / Gói của tôi / Cần chú ý / Phân tích với CTA thêm ở giữa; Lịch và Review là route phụ. Các màn nhóm, ngân sách, thanh toán, thông báo, hồ sơ và Gmail vẫn giữ. Prototype `design/Subca V2.html` chỉ là tham chiếu, không phải nghiệp vụ đã triển khai.
-- **Giao diện:** Mobile và Admin dùng Nunito, nền giấy sáng, mực navy-charcoal, cam và pastel, viền đậm, góc gọn, bóng offset. Tokens mobile ở `apps/mobile/src/theme/tokens.json`; Admin ở `apps/admin/src/app/globals.css` và `src/components/ui.tsx`. Sidebar Admin đứng yên trên desktop, nội dung chính cuộn riêng. Không dùng gradient; logo dịch vụ giữ màu thương hiệu. Màn kết nối Gmail trên mobile dùng biểu tượng Gmail năm màu ở bước onboarding, trạng thái đã kết nối và thẻ tài khoản.
+- **Giao diện:** Mobile và Admin dùng Nunito, nền giấy sáng, mực navy-charcoal, cam và pastel, viền đậm, góc gọn, bóng offset. Tokens mobile ở `apps/mobile/src/theme/tokens.json`; Admin ở `apps/admin/src/app/globals.css` và `src/components/ui.tsx`. Sidebar Admin đứng yên trên desktop, nội dung chính cuộn riêng. Không dùng gradient; logo dịch vụ giữ màu thương hiệu, riêng Claude hiển thị chữ viết tắt và không đóng gói vector logo. Màn kết nối Gmail trên mobile dùng biểu tượng Gmail năm màu ở bước onboarding, trạng thái đã kết nối và thẻ tài khoản.
 - **Auth mobile:** đăng nhập thường bằng email + mật khẩu Supabase. Đăng ký và recovery dùng email OTP một lần rồi tạo/đặt lại mật khẩu; recovery không tự tạo user và UI không dò lộ email đã đăng ký. Pending email được xác minh lưu trong MMKV mã hóa để gate vào `set-password`; không lưu mật khẩu. Màn tạo mật khẩu đã rút gọn chữ, nút hiện/ẩn nằm trong ô nhập; từng ô báo lỗi sau blur và khi submit. Mật khẩu cần 6–72 ký tự, có chữ và số; ô nhập lại bắt buộc khớp. Mã liên quan: `(auth)/sign-in.tsx`, `(auth)/verify.tsx`, `set-password.tsx`, `features/auth/password-flow.ts`, `password.ts`, `session.tsx`. SMTP/OTP và đăng nhập lại với tài khoản thật chưa QA đầu-cuối.
 - **Intro/accessibility:** minh họa code-native trong `features/onboarding/intro.tsx`, `intro-art.tsx`, `intro-phone.tsx`, dùng Reanimated sẵn có. Giảm/tắt animation theo Reduce Motion; tắt tự chuyển khi screen reader bật; timer dọn khi blur/background/unmount. Nội dung có thể cuộn, CTA ở ngoài vùng cuộn. Các cảnh gom gói và lời nhắc đã xem trên iPhone 17 Pro Simulator; cảnh chi tiêu đã rút gọn nhưng chưa xem lại vì CoreSimulatorService ngắt kết nối trong phiên 30/09. Chưa QA Android, màn nhỏ, chữ lớn và thao tác với screen reader.
 - **Email detection:** đường ống Gmail adapter → parser → reconcile → subscription/Inbox đã chạy bằng hộp thư mẫu; parser nhận khoảng 65 merchant và hóa đơn gộp. Sync thủ công qua BullMQ trả `runId`, cập nhật scanned/candidate/event theo từng trang; UI polling 3 giây, có resume/retry theo run. Người dùng chọn phạm vi 1/3/6/12 tháng (mặc định 3), tối đa 400 email/lượt; scheduler incremental giữ luồng riêng. Màn scan và chi tiết gói hiển thị tiến độ, trạng thái và email evidence/thread link khi có metadata. Chưa QA Gmail thật hoặc OAuth/CASA production.
@@ -169,6 +169,7 @@ Trigger `auth.users`: tạo user → profile/settings/reminder rules; xóa user 
 - **Idempotency email:** chống trùng ở processed message và `(source_ref, event_type, merchant_key)`.
 - **Free plan:** 8 subscription đang theo dõi, 1 mốc nhắc, 1 nhóm. Plus dựa trên entitlement còn hiệu lực.
 - **Tỷ giá:** ExchangeRate-API là nguồn chính, phải ghi attribution ở UI có số quy đổi.
+- **Logo dịch vụ:** Giữ Claude trong catalog nhưng không đặt `logoKey` trong seed và không sinh vector Claude vào bundle mobile; dùng chữ viết tắt của dịch vụ. Script sinh logo loại trừ key này để lần sinh sau không đưa logo trở lại.
 - **Giao tiếp/code:** trao đổi với chủ dự án bằng tiếng Việt; tên code theo phong cách hiện có; comment giải thích “tại sao”.
 
 Lý do chi tiết nằm trong `docs/ARCHITECTURE.md`; không mở lại tranh luận nếu task không yêu cầu.
@@ -265,6 +266,7 @@ Integration test cần Supabase dev + Redis thật và tự tạo/dọn dữ li�
 - Lượt 01/10/2026 tiếp theo: thay chữ “G” giả bằng biểu tượng Gmail 2020 năm màu tại màn kết nối trong onboarding, trạng thái đã kết nối và danh sách tài khoản Gmail. Mobile lint/typecheck, Prettier và `git diff --check` qua; chưa QA trực quan trên thiết bị.
 - Lượt 01/10/2026 tiếp theo: xóa hai nhánh giới thiệu cũ và điều hướng quay lại chúng khỏi route `welcome` sau đăng nhập; giữ kết nối Gmail → scan → summary. Ảnh người dùng cho thấy màn “Subca / Bắt đầu” vẫn có thể truy cập qua back từ kết nối email dù trạng thái khởi tạo đã là `connect`. Mobile lint/typecheck, Prettier và `git diff --check` qua; chưa QA trực quan trên thiết bị.
 - Lượt 01/10/2026 tiếp theo: nút bỏ qua ở màn Gmail/Outlook đổi thành “Bỏ qua và về trang chủ”, dùng `router.replace('/(app)/(tabs)')` thay cho mở form `/add`. Mobile lint/typecheck và Prettier qua; chưa QA thao tác trên thiết bị.
+- Lượt 04/10/2026: bỏ `logoKey` của Claude khỏi seed, bỏ vector khỏi file logo mobile đã sinh và chặn script sinh lại. Mobile lint/typecheck, API typecheck, Prisma validate, Prettier và `git diff --check` qua; không chạy test hoặc QA giao diện. Chưa commit/push được trong môi trường hiện tại: `.git` không cho tạo `index.lock` và DNS không phân giải được `github.com`. Vector từng được commit trong lịch sử (`f264ff0`); các commit mới chỉ có thể bỏ nó khỏi cây file hiện tại, muốn xóa khỏi lịch sử cần xử lý Git riêng.
 
 ## 14. Quy trình cập nhật knowledge base
 

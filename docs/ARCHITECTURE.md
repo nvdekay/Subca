@@ -1,6 +1,6 @@
 # Subca — Kiến trúc & quyết định kỹ thuật
 
-> Cập nhật: 01/10/2026. Ghi lại **vì sao** chọn như hiện tại để không phải bàn lại. Đổi quyết định nào thì sửa file này. Snapshot vận hành ngắn gọn nằm ở `docs/PROJECT-KNOWLEDGE.md`.
+> Cập nhật: 04/10/2026. Ghi lại **vì sao** chọn như hiện tại để không phải bàn lại. Đổi quyết định nào thì sửa file này. Snapshot vận hành ngắn gọn nằm ở `docs/PROJECT-KNOWLEDGE.md`.
 
 ## Tổng quan
 
@@ -35,6 +35,7 @@
 | Mobile back navigation | **BackButton dùng chung** cho mọi nút quay lại trang/bước; IconButton 44×44 bo 12, nền giấy và viền mảnh | TopBar, auth, onboarding và error state cùng một style; callback giữ nguyên hành vi. Đóng modal dùng X cùng kiểu nút; chuyển tháng là thao tác lịch riêng |
 | Mobile authentication | **Email + password** cho lần đăng nhập thường; email OTP một lần để xác minh đăng ký hoặc recovery tài khoản OTP-only | Chọn riêng Đăng nhập/Đăng ký, không dò email tồn tại công khai. Màn tạo mật khẩu yêu cầu 6–72 ký tự có chữ và số, nhập lại khớp; kiểm tra từng ô khi blur/submit trước `updateUser`. Password được lưu/quản lý bởi Supabase Auth; marker email hoàn tất xác minh lưu trong encrypted MMKV để gate bắt buộc set password trước app. Recovery OTP không tự tạo user |
 | Palette mobile/Admin | **Ink `#202B34`, nền giấy `#F2EFE7`, surface `#FFFEFA`, cam `#FD7014`**, cùng mint/sky/peach/coral ngữ nghĩa | Mobile lấy từ `tokens.json`, Admin đồng bộ trong `globals.css`; logo bên thứ ba giữ nhận diện |
+| Logo dịch vụ Claude | **Giữ dịch vụ trong catalog, hiển thị chữ viết tắt; không đóng gói vector logo Claude** | Seed không gắn `logoKey`; script sinh logo loại trừ key này để lần chạy sau không đưa vector trở lại |
 | Hosting | Railway / Render / Fly.io, **Singapore** (chưa chọn) | Cùng khu vực với Supabase production |
 | Danh mục | **Bỏ khỏi sản phẩm** (27/09/2026) | Chủ dự án thấy thừa: không chọn danh mục khi thêm subscription, Phân tích không chia theo danh mục, API không còn `/catalog/categories` và `categoryId`. Bảng `categories` và cột `category_id` vẫn còn trong DB (không dùng) để khỏi migration xóa dữ liệu |
 

@@ -275,7 +275,6 @@ const SERVICES: ServiceSeed[] = [
     slug: 'claude',
     name: 'Claude',
     category: 'ai-cong-viec',
-    logoKey: 'claude',
     brandColor: '#D97757',
     website: 'https://claude.ai',
     plans: [{ name: 'Pro', amountMinor: 2_000, currency: 'USD' }],

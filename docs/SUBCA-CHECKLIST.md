@@ -1,10 +1,10 @@
 # Subca — Checklist tổng
 
-> Cập nhật: 01/10/2026 · Đánh dấu `[x]` khi code/đầu việc đã hoàn tất; các bước test thực tế, production hoặc phụ thuộc tài khoản ngoài chỉ đánh dấu khi đã xác minh.
+> Cập nhật: 04/10/2026 · Đánh dấu `[x]` khi code/đầu việc đã hoàn tất; các bước test thực tế, production hoặc phụ thuộc tài khoản ngoài chỉ đánh dấu khi đã xác minh.
 > Tham chiếu UI: `design/Subca V2.html` (mobile flow mới), `design/subca-mobile-mockup.html` (màn/tính năng cũ), `design/subca-admin-dashboard.html` (admin).
 > Repo `nvdekay/Subca`; snapshot commit và trạng thái mới nhất: `docs/PROJECT-KNOWLEDGE.md`; quyết định kỹ thuật: `docs/ARCHITECTURE.md`.
 
-### Hiện trạng (đối chiếu code và Git 01/10/2026)
+### Hiện trạng (đối chiếu code và Git 04/10/2026)
 
 **Đang ở:** Luồng lõi và Admin Console v1 đã có. Mobile/Admin cùng style editorial/bento; intro ba cảnh và màn tạo mật khẩu đã rút gọn. Auth dùng mật khẩu khi đăng nhập, OTP cho đăng ký/recovery. Gmail detection + queue có code nhưng Gmail thật và flow auth/password chưa QA đầu-cuối. Đã xem một số cảnh intro trên iPhone 17 Pro Simulator; QA Android/accessibility và phát hành store còn chờ.
 
@@ -67,6 +67,7 @@
 
 - [x] Mockup app mobile, 16 màn: Onboarding, Trang chủ, Danh sách, Thêm, Chi tiết, Lịch, Trial, Đánh giá, Phân tích, Ngân sách, Thanh toán, Chia tiền nhóm, Chi tiết nhóm, Subca Plus, Thông báo, Cài đặt
 - [x] Logo thật của các hãng (Simple Icons, nhúng inline, chỉ logo, không khung)
+- [x] Loại vector logo Claude khỏi bundle mobile và script sinh logo; dịch vụ trong catalog dùng chữ viết tắt
 - [x] Màn chia tiền gói gia đình (chia đều / tùy chỉnh, QR, nhắc, link mời)
 - [x] Paywall Subca Plus (so sánh Free/Plus, 3 gói, timeline dùng thử, FAQ, luồng mua)
 - [x] Mockup admin, 12 trang: Tổng quan, Người dùng, Tăng trưởng, Doanh thu, Gói & khuyến mãi, Thư viện dịch vụ, Sử dụng tính năng, Thông báo, Hỗ trợ, Hệ thống, Nhân sự, Nhật ký

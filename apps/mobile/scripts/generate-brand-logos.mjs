@@ -10,7 +10,11 @@ import * as icons from 'simple-icons';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const seed = readFileSync(join(root, '../api/prisma/seed.ts'), 'utf8');
-const keys = [...new Set([...seed.matchAll(/logoKey: '([^']+)'/g)].map((m) => m[1]))].sort();
+// Claude vẫn ở catalog nhưng không đóng gói vector logo của hãng vào Git.
+const excluded = new Set(['claude']);
+const keys = [...new Set([...seed.matchAll(/logoKey: '([^']+)'/g)].map((m) => m[1]))]
+  .filter((key) => !excluded.has(key))
+  .sort();
 
 const bySlug = new Map(Object.values(icons).map((icon) => [icon.slug, icon]));
 const found = [];
